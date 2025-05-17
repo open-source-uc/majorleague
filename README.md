@@ -168,6 +168,7 @@ A continuación se muestra un ejemplo usando las interfaces de `lib/types.ts` y 
 
 #### Listar equipos (GET) con useEffect y useState
 ```tsx
+'use client';
 import { useEffect, useState } from 'react';
 import type { Team } from '@/lib/types';
 
