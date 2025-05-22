@@ -13,7 +13,13 @@ No te preocupes si no eres programador. Sigue estos pasos sencillos:
 1. Asegúrate de tener instalado [Node.js](https://nodejs.org/) en tu computadora
 2. Abre una ventana de terminal o símbolo del sistema
 3. Navega hasta la carpeta del proyecto
-4. Ejecuta uno de estos comandos para iniciar el servidor:
+4. Instala las dependencias necesarias para iniciar el servidor:
+
+```bash
+npm install # o puedes usar npm i
+```
+
+5. Ejecuta uno de estos comandos para iniciar el servidor:
 
 ```bash
 npm run dev
