@@ -53,6 +53,90 @@ Si te interesa aprender sobre la tecnología detrás de esta página web:
 - [Documentación de Next.js](https://nextjs.org/docs) - aprende sobre las características y API de Next.js
 - [Aprende Next.js](https://nextjs.org/learn) - un tutorial interactivo para principiantes
 
+## Arquitectura del Backend
+
+### 🔐 Flujo de Autenticación con Supabase
+
+El proyecto implementa un sistema de autenticación utilizando Supabase Auth:
+
+**1. Configuración de Middleware (`middleware.ts`)**
+
+- Intercepta todas las rutas y gestiona las sesiones automáticamente
+- Utiliza `@supabase/ssr` para mantener las sesiones sincronizadas entre servidor y cliente
+- Excluye archivos estáticos y optimiza el rendimiento
+
+**2. Cliente de Supabase Server-Side (`lib/supabase/server.ts`)**
+
+- Crea instancias del cliente de Supabase usando cookies del servidor
+- Maneja la persistencia de sesiones con Next.js cookies API
+- Utiliza la directiva `"use server"` para operaciones del servidor
+
+**3. Verificación de Roles (`app/actions/auth.ts`)**
+
+```typescript
+// Verificación de usuario administrador
+export async function isAdmin();
+// Verificación de usuario autenticado
+export async function isAuthUser();
+```
+
+**4. Protección de Rutas**
+
+- Rutas con prefijo `(auth-users)/` requieren autenticación (login)
+- Rutas con prefijo `(admin)/` requieren permisos de administrador (rol de profile)
+- Cada layout verifica los permisos antes de renderizar el contenido
+
+### ⚡ Server Components y Server Actions
+
+**Server Components:**
+
+- Todos los componentes en `/app/components/dashboard/` son Server Components
+- Se ejecutan en el servidor y pueden acceder directamente a la base de datos
+- Ejemplo: `CompetitionsGrid.tsx` obtiene datos sin API routes
+
+**Server Actions:**
+
+- Ubicadas en `/app/actions/` con la directiva `"use server"`
+- Permiten mutaciones de datos directamente desde client components
+- Utilizan `useActionState` hook para manejo de estado y formularios.
+  > (Basandose en codigo de [Ramos UC Frontend](https://github.com/open-source-uc/ramos-uc-frontend))
+- Ejemplo de flujo:
+
+```typescript
+// En el componente (client)
+const [state, action] = useActionState(ActionLogin, initialState);
+
+// La action se ejecuta en el servidor
+("use server");
+export async function ActionLogin(prevState, formData) {
+  // Lógica de autenticación en el servidor
+}
+```
+
+### ⏳ Suspense para Carga Asíncrona
+
+**1. Suspense en Layouts:**
+
+```typescript
+<Suspense fallback={<p>Checking admin access...</p>}>
+  <AdminChecker>{children}</AdminChecker>
+</Suspense>
+```
+
+**2. Suspense en Componentes de Datos:**
+
+```typescript
+<Suspense fallback={<div>Loading teams...</div>}>
+  <TeamsGrid />
+</Suspense>
+```
+
+**3. Patrones de Loading:**
+
+- **Boundaries por sección**: Cada componente que solicite datos tiene su propio Suspense
+- **Loading UI descriptivo**: Mensajes específicos para cada tipo de contenido
+- **Fallbacks no bloqueantes**: Los usuarios ven contenido parcial mientras carga el resto
+
 ## Contacto y soporte
 
 Si tienes preguntas o encuentras algún problema con la página, no dudes en contactarnos a través de [información de contacto].
