@@ -36,3 +36,24 @@ export async function isAdmin() {
     return false;
   }
 }
+
+export async function isAuthUser() {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return false;
+    }
+
+    return {
+      ...user,
+    };
+  } catch (error) {
+    return false;
+  }
+}

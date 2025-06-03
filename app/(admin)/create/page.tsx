@@ -8,7 +8,7 @@ import ButtonSubmit from "@/app/components/ui/ButtonSubmit";
 import Form from "@/app/components/ui/Form";
 import Input from "@/app/components/ui/Input";
 
-export default function TestPage() {
+export default function Create() {
   const [createTeamState, createTeamAction] = useActionState(createTeam, {
     errors: 0,
     success: 0,
