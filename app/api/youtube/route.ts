@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const CHANNEL_ID = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
+    const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
 
     if (!CHANNEL_ID) {
         return NextResponse.json({ error: "Missing channel ID" }, { status: 500 });

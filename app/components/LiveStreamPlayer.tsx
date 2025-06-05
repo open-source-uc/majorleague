@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const CHANNEL_ID = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
+const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
 
 export default function LiveStreamPlayer() {
     const [isLive, setIsLive] = useState<boolean | null>(null);

@@ -1,9 +1,21 @@
 export async function getYoutubeVideos() {
     const API_KEY = process.env.YOUTUBE_API_KEY;
-    const CHANNEL_ID = process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID;
+    if (!API_KEY) {
+        throw new Error("YOUTUBE_API_KEY isn't defined in environment variables.");
+    }
 
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&maxResults=50&type=video&q=major league`;
+    const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
+    const params = new URLSearchParams({
+        key: API_KEY,
+        channelId: CHANNEL_ID,
+        part: "snippet",
+        order: "date",
+        maxResults: "50",
+        type: "video",
+        q: "major league",
+    });
 
+    const url = `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
     const res = await fetch(url, {
         next: { revalidate: 3600 },
     });
@@ -17,8 +29,9 @@ export async function getYoutubeVideos() {
 
     const filtered = data.items.filter(
         (item: any) =>
-        item.snippet.description?.toLowerCase().includes("major league")
+            item.snippet.description?.toLowerCase().includes("major league") &&
+            item.snippet.liveBroadcastContent === "none"
     );
 
-    return filtered;
+    return filtered.slice(0, 4);
 }
