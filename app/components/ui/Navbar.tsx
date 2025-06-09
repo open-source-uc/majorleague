@@ -1,0 +1,34 @@
+import Image from "next/image";
+import Link from "next/link";
+
+import logo from "@/public/assets/logo-horizontal.svg";
+
+export default function Navbar() {
+  return (
+    <div className="border-border-header flex w-full items-center justify-between border-b p-10">
+      <div className="flex items-center gap-8">
+        <div className="border-foreground h-14 w-44 border-r">
+          <Link href="/">
+            <Image src={logo} alt="logo" />
+          </Link>
+        </div>
+        <div className="flex gap-8">
+          <Link href="/equipos" className="text-md px-3 py-2 font-bold tracking-normal">
+            EQUIPOS
+          </Link>
+          <Link href="/posiciones" className="text-md px-3 py-2 font-bold tracking-normal">
+            TABLA DE POSICIONES
+          </Link>
+          <Link href="/acerca" className="text-md px-3 py-2 font-bold tracking-normal">
+            ACERCA
+          </Link>
+        </div>
+      </div>
+      <div className="bg-primary rounded-md px-4 py-2">
+        <Link href="/participa" className="text-md text-background-header font-bold tracking-normal">
+          PARTICIPA EN LA LIGA
+        </Link>
+      </div>
+    </div>
+  );
+}
