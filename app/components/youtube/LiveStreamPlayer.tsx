@@ -22,8 +22,8 @@ export default function LiveStreamPlayer() {
     checkLiveStatus();
   }, []);
 
-  if (isLive === null) return;
-  if (!isLive) return;
+  if (isLive === null) return null;
+  if (!isLive) return null;
 
   return (
     <iframe
