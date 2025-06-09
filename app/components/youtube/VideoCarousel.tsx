@@ -62,6 +62,7 @@ export default function VideoCarousel({ videos }: { videos: IVideo[] }) {
   return (
     <div className="flex items-center justify-center space-x-4 max-w-2xl mx-auto relative">
       <button
+        aria-label="Previous video"
         onMouseUp={(e) => {
           if (e.button !== 0) return;
           changeVideo("prev");
@@ -81,6 +82,7 @@ export default function VideoCarousel({ videos }: { videos: IVideo[] }) {
         }}
       >
         <iframe
+          title="YouTube Video"
           key={currentVideo.id.videoId}
           width="100%"
           height="100%"
@@ -98,6 +100,7 @@ export default function VideoCarousel({ videos }: { videos: IVideo[] }) {
         </div>
       </div>
       <button
+        aria-label="Next video"
         onMouseUp={(e) => {
           if (e.button !== 0) return;
           changeVideo("next");

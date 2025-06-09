@@ -27,6 +27,7 @@ export default function LiveStreamPlayer() {
 
   return (
     <iframe
+      title="YouTube LiveStream"
       width="50%"
       height="50%"
       src={`https://www.youtube.com/embed/live_stream?channel=${CHANNEL_ID}`}
