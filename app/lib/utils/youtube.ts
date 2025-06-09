@@ -1,4 +1,5 @@
 import { IVideo } from "@/app/lib/types/video";
+import { CHANNEL_ID } from "@/app/lib/constants";
 
 export async function getYoutubeVideos() {
   const API_KEY = process.env.YOUTUBE_API_KEY;
@@ -6,7 +7,6 @@ export async function getYoutubeVideos() {
     throw new Error("YOUTUBE_API_KEY isn't defined in environment variables.");
   }
 
-  const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
   const params = new URLSearchParams({
     key: API_KEY,
     channelId: CHANNEL_ID,

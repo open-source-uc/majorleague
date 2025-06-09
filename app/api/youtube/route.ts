@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
+import { CHANNEL_ID } from "@/app/lib/constants";
 
 export async function GET() {
-  const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
-
   if (!CHANNEL_ID) {
     return NextResponse.json({ error: "Missing channel ID" }, { status: 500 });
   }

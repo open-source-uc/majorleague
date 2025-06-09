@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const CHANNEL_ID = "UCyTQCtnLOKhhN_vQmOZseDg";
+import { CHANNEL_ID } from "@/app/lib/constants";
 
 export default function LiveStreamPlayer() {
   const [isLive, setIsLive] = useState<boolean | null>(null);
