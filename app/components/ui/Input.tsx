@@ -17,7 +17,7 @@ export default function Input({ label, name, type = "text", className, ...props 
         name={name}
         type={type}
         className={cn(
-          "w-full rounded-lg border-2 border-gray-600 bg-gray-700 p-4 text-white focus:border-gray-500 focus:ring-2 focus:ring-gray-500 focus:outline-hidden",
+          "border-border-header bg-background-header w-full rounded-lg border-2 p-4 text-white focus:border-gray-500 focus:ring-2 focus:ring-gray-500 focus:outline-hidden",
           className,
         )}
         {...props}

@@ -37,7 +37,7 @@ export async function ActionLogin(
     return {
       errors: 1,
       success: 0,
-      message: "Invalid form data",
+      message: "Datos inválidos",
       body,
     };
   }
@@ -47,7 +47,7 @@ export async function ActionLogin(
     return {
       errors: 1,
       success: 0,
-      message: "Invalid credentials",
+      message: "Credenciales inválidas",
       body,
     };
   } else {
@@ -55,7 +55,7 @@ export async function ActionLogin(
     return {
       errors: 0,
       success: 1,
-      message: "Login successful",
+      message: "Inicio de sesión exitoso",
       body,
     };
   }

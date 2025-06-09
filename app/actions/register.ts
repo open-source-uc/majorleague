@@ -43,7 +43,7 @@ export async function ActionRegister(
     return {
       errors: 1,
       success: 0,
-      message: "Invalid form data",
+      message: "Datos inválidos",
       body,
     };
   }
@@ -64,7 +64,7 @@ export async function ActionRegister(
     return {
       errors: 1,
       success: 0,
-      message: "Registration failed: " + error.message,
+      message: "Registro fallido: " + error.message,
       body,
     };
   } else {
@@ -72,7 +72,7 @@ export async function ActionRegister(
     return {
       errors: 0,
       success: 1,
-      message: "Registration successful, please check your email for verification.",
+      message: "Registro exitoso, por favor revisa tu correo electrónico para verificar tu cuenta.",
       body,
     };
   }
