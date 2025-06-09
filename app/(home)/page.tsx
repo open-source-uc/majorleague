@@ -1,7 +1,17 @@
+import { Suspense } from "react";
+
+import Hero from "../components/home/Hero";
+import TextBar from "../components/home/TextBar";
+
 export default async function HomePage() {
   return (
     <div>
-      <h1 className="text-2xl">Home here</h1>
+      <div className="flex flex-col">
+        <TextBar />
+        <Suspense fallback={<div className="h-32 animate-pulse bg-gray-200">...</div>}>
+          <Hero />
+        </Suspense>
+      </div>
     </div>
   );
 }

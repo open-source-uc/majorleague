@@ -23,7 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={albert_sans.variable} suppressHydrationWarning={true}>
-      <body>
+      <head>
+        <link rel="preload" href="/assets/hero.png" as="image" />
+        <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
+      </head>
+      <body className="mx-auto max-w-screen-lg">
         <Navbar />
         {children}
       </body>
