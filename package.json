@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "next": "15.3.2",
     "@radix-ui/react-navigation-menu": "^1.2.13",
     "@supabase/ssr": "^0.6.1",
     "class-variance-authority": "^0.7.1",
