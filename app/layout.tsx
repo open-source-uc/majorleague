@@ -3,6 +3,7 @@ import { Albert_Sans } from "next/font/google";
 import { Metadata } from "next";
 
 import Navbar from "./components/ui/Navbar";
+import Footer from "./components/home/Footer";
 import "./globals.css";
 
 const albert_sans = Albert_Sans({
@@ -27,9 +28,14 @@ export default function RootLayout({
         <link rel="preload" href="/assets/hero.png" as="image" />
         <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
       </head>
-      <body className="mx-auto max-w-screen-lg">
-        <Navbar />
-        {children}
+      <body className="grid min-h-screen grid-rows-[auto_1fr_auto]">
+        <header>
+          <Navbar />
+        </header>
+        <main>{children}</main>
+        <footer>
+          <Footer />
+        </footer>
       </body>
     </html>
   );

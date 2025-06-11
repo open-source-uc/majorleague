@@ -28,7 +28,7 @@ export default function NextMatches() {
     ],
   };
   return (
-    <div className="bg-background-header flex flex-col gap-6 rounded-lg px-6 py-4">
+    <div className="bg-background-header flex flex-col gap-6 rounded-lg px-12 py-4">
       <p className="border-foreground w-full border-b-2 py-2 text-xl font-bold">FUTUROS PARTIDOS</p>
       {nextMatches.matches.map((match, index) => (
         <div key={index} className="border-foreground flex w-full items-center justify-between gap-2.5 border-b-2 pb-4">

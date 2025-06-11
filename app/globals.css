@@ -21,6 +21,8 @@
   --breakpoint-sm: 375px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1154px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
   --text-xl: 24px;
   --text-xl-line-height: 24px;
   --text-lg: 20px;
