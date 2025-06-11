@@ -7,7 +7,7 @@ import logo from "@/public/assets/logo-horizontal.svg";
 
 function Navbar() {
   return (
-    <div className="border-border-header flex w-full items-center justify-between border-b p-10">
+    <div className="border-border-header flex items-center justify-between border-t border-b p-10">
       <div className="flex items-center gap-8">
         <div className="border-foreground h-14 w-44 border-r">
           <Link href="/">
@@ -22,13 +22,13 @@ function Navbar() {
           </Link>
         </div>
         <div className="flex gap-8">
-          <Link href="/equipos" className="text-md px-3 py-2 font-bold tracking-normal">
+          <Link href="/" className="text-md px-3 py-2 font-bold tracking-normal">
             EQUIPOS
           </Link>
-          <Link href="/posiciones" className="text-md px-3 py-2 font-bold tracking-normal">
+          <Link href="/" className="text-md px-3 py-2 font-bold tracking-normal">
             TABLA DE POSICIONES
           </Link>
-          <Link href="/acerca" className="text-md px-3 py-2 font-bold tracking-normal">
+          <Link href="/" className="text-md px-3 py-2 font-bold tracking-normal">
             ACERCA
           </Link>
         </div>
