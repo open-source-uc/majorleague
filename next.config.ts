@@ -5,6 +5,16 @@ const nextConfig: NextConfig = {
     ppr: true,
     dynamicIO: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        port: "",
+        pathname: "/vi/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
