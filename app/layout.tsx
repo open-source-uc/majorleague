@@ -29,9 +29,7 @@ export default function RootLayout({
         <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
       </head>
       <body className="grid min-h-screen grid-rows-[auto_1fr_auto]">
-        <header>
-          <Navbar />
-        </header>
+        <Navbar />
         <main>{children}</main>
         <footer>
           <Footer />
