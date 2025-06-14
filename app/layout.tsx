@@ -23,12 +23,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={albert_sans.variable} suppressHydrationWarning={true}>
+    <html lang="es" suppressHydrationWarning={true}>
       <head>
         <link rel="preload" href="/assets/hero.png" as="image" />
         <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
       </head>
-      <body className="grid min-h-screen grid-rows-[auto_1fr_auto]">
+      <body className="relative grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Navbar />
         <main>{children}</main>
         <footer>
