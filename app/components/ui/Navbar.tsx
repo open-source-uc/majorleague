@@ -32,12 +32,12 @@ function Navbar() {
             </NavLink>
           </li>
           <li>
-            <NavLink href="/about" type="desktop">
+            <NavLink href="/" type="desktop">
               TABLA DE POSICIONES
             </NavLink>
           </li>
           <li>
-            <NavLink href="/teams" type="desktop">
+            <NavLink href="/" type="desktop">
               ACERCA
             </NavLink>
           </li>
