@@ -15,7 +15,7 @@ function Footer() {
   const linkStyleHover = "hover:text-primary-darken transition-colors";
 
   return (
-    <footer className="border-border-header flex w-full justify-between border-t px-0 py-10 md:px-15">
+    <footer className="border-border-header flex w-full justify-between border-t px-5 py-10 md:px-15">
       <Link href="/" className="hidden md:block">
         <Image src={logo} alt="logo" priority />
       </Link>
