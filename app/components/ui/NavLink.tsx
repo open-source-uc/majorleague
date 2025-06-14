@@ -14,7 +14,7 @@ export default function NavLink({ href, children, className = "", type, onClick 
   return (
     <Link
       href={href}
-      className={`text-md font-bold tracking-normal ${className} hover:text-primary-darken transition-colors duration-100`}
+      className={`text-md z-50 font-bold tracking-normal ${className} hover:text-primary-darken transition-colors duration-100`}
       onClick={() => {
         if (type === "mobile" && onClick) {
           onClick();

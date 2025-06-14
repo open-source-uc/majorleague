@@ -2,8 +2,8 @@ import { Albert_Sans } from "next/font/google";
 
 import { Metadata } from "next";
 
+import Footer from "./components/ui/Footer";
 import Navbar from "./components/ui/Navbar";
-import Footer from "./components/home/Footer";
 import "./globals.css";
 
 const albert_sans = Albert_Sans({
@@ -31,9 +31,7 @@ export default function RootLayout({
       <body className="relative grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Navbar />
         <main>{children}</main>
-        <footer>
-          <Footer />
-        </footer>
+        <Footer />
       </body>
     </html>
   );
