@@ -5,6 +5,22 @@ const nextConfig: NextConfig = {
     ppr: true,
     dynamicIO: true,
   },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  output: "standalone",
+  images: {
+    formats: ["image/webp", "image/avif"],
+    minimumCacheTTL: 60,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        port: "",
+        pathname: "/vi/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

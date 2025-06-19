@@ -13,7 +13,7 @@ export default function Form({
     <form
       action={action}
       className={cn(
-        "flex w-full max-w-2xl flex-col gap-3 rounded-2xl border-4 border-gray-500 bg-gray-800 p-8 shadow-xl",
+        "lg:border-border-header lg:bg-background-header flex w-full max-w-2xl flex-col gap-3 p-8 md:rounded-2xl lg:border-4 lg:shadow-xl",
         className,
       )}
     >

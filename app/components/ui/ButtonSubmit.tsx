@@ -18,7 +18,7 @@ export default function ButtonSubmit({ children, processing, className }: Button
       type="submit"
       disabled={status.pending}
       className={cn(
-        `w-full rounded-lg p-4 font-semibold text-white ${status.pending ? "bg-gray-600" : "bg-gray-500 hover:bg-gray-600"} focus:ring-2 focus:ring-gray-500 focus:outline-hidden`,
+        `border-border-header text-background-header w-full rounded-lg p-4 text-lg font-bold ${status.pending ? "bg-primary-darken" : "bg-primary hover:bg-primary-darken"} focus:ring-2 focus:ring-gray-500 focus:outline-hidden`,
         className,
       )}
     >
