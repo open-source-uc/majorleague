@@ -15,7 +15,7 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-background border-border-header sticky top-0 z-50 flex h-32 w-dvw items-center justify-between border-t border-b p-10">
+    <header className="bg-background border-border-header top-0 z-50 flex h-32 w-dvw items-center justify-between border-b p-10">
       <Link className="border-foreground lg:border-r" href="/">
         <Image
           src={logoMajor}
@@ -32,7 +32,7 @@ function Navbar() {
             </NavLink>
           </li>
           <li>
-            <NavLink href="/" type="desktop">
+            <NavLink href="/posiciones/2025/1" type="desktop">
               TABLA DE POSICIONES
             </NavLink>
           </li>

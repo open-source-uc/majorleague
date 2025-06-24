@@ -1,5 +1,5 @@
-import NextMatches from "@/app/components/home/NextMatches";
 import PositionsTable from "@/app/components/data/PositionsTable";
+import NextMatches from "@/app/components/home/NextMatches";
 
 export default async function PosicionesPage({ params }: { params: Promise<{ year: string; semester: string }> }) {
   const { year, semester } = await params;

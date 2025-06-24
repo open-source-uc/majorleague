@@ -1,5 +1,6 @@
 // import { getPositions } from "@/app/actions/positions";
 import Image from "next/image";
+
 import placeholderLogo from "@/public/assets/oldBoysLogo.png";
 
 interface TeamData {

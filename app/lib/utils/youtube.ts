@@ -1,5 +1,5 @@
-import { IVideo } from "@/app/lib/types/video";
 import { CHANNEL_ID } from "@/app/lib/constants";
+import { IVideo } from "@/app/lib/types/video";
 
 export async function getYoutubeVideos() {
   const API_KEY = process.env.YOUTUBE_API_KEY;
@@ -31,8 +31,7 @@ export async function getYoutubeVideos() {
 
   const filtered = data.items.filter(
     (item: IVideo) =>
-      item.snippet.description?.toLowerCase().includes("major league") &&
-      item.snippet.liveBroadcastContent === "none"
+      item.snippet.description?.toLowerCase().includes("major league") && item.snippet.liveBroadcastContent === "none",
   );
 
   return filtered.slice(0, 4);

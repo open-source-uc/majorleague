@@ -15,7 +15,6 @@ type TeamUpdate = TablesUpdate<"teams">;
 const uuidSchema = z.string().uuid("Invalid UUID format");
 
 export async function getTeams() {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("teams")

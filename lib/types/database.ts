@@ -122,43 +122,43 @@ export type Database = {
       };
       join_team_requests: {
         Row: {
-          age: number | null;
+          birthdate: string | null;
           created_at: string | null;
           date: string | null;
-          first_name: string;
+          gen: string | null;
           id: number;
-          last_name: string;
+          major: string | null;
           notes: string | null;
           preferred_position: string | null;
-          profile_id: string | null;
+          profile_id: string;
           status: string | null;
           team_id: string | null;
           updated_at: string | null;
         };
         Insert: {
-          age?: number | null;
+          birthdate?: string | null;
           created_at?: string | null;
           date?: string | null;
-          first_name: string;
+          gen?: string | null;
           id?: never;
-          last_name: string;
+          major?: string | null;
           notes?: string | null;
           preferred_position?: string | null;
-          profile_id?: string | null;
+          profile_id: string;
           status?: string | null;
           team_id?: string | null;
           updated_at?: string | null;
         };
         Update: {
-          age?: number | null;
+          birthdate?: string | null;
           created_at?: string | null;
           date?: string | null;
-          first_name?: string;
+          gen?: string | null;
           id?: never;
-          last_name?: string;
+          major?: string | null;
           notes?: string | null;
           preferred_position?: string | null;
-          profile_id?: string | null;
+          profile_id?: string;
           status?: string | null;
           team_id?: string | null;
           updated_at?: string | null;
@@ -365,7 +365,7 @@ export type Database = {
       };
       players: {
         Row: {
-          age: number | null;
+          birthdate: string | null;
           created_at: string | null;
           first_name: string;
           id: number;
@@ -377,7 +377,7 @@ export type Database = {
           updated_at: string | null;
         };
         Insert: {
-          age?: number | null;
+          birthdate?: string | null;
           created_at?: string | null;
           first_name: string;
           id?: never;
@@ -389,7 +389,7 @@ export type Database = {
           updated_at?: string | null;
         };
         Update: {
-          age?: number | null;
+          birthdate?: string | null;
           created_at?: string | null;
           first_name?: string;
           id?: never;
@@ -678,7 +678,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

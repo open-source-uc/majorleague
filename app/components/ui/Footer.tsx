@@ -47,13 +47,13 @@ function Footer() {
           <p className="text-md font-bold">SIGUENOS EN</p>
           <div className="flex items-start gap-5">
             <a href="https://www.linkedin.com/company/" className="size-10">
-              <Image src={linkedin} alt="LinkedIn" className="size-10 hover:!text-[#0077B5]" />
+              <Image src={linkedin} alt="LinkedIn" className="size-10 hover:!text-[#0077B5]" priority />
             </a>
             <a href="https://www.youtube.com/">
-              <Image src={youtube} alt="YouTube" className="size-10 fill-red-700" />
+              <Image src={youtube} alt="YouTube" className="size-10 fill-red-700" priority />
             </a>
             <a href="https://www.instagram.com/">
-              <Image src={instagram} alt="instagram" className="size-10" />
+              <Image src={instagram} alt="instagram" className="size-10" priority />
             </a>
           </div>
         </div>

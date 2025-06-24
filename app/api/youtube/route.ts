@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { CHANNEL_ID } from "@/app/lib/constants";
 
 export async function GET() {
@@ -13,7 +14,7 @@ export async function GET() {
 
     let isLive = !text.includes('\\"previewPlayabilityStatus\\":{\\"status\\":\\"ERROR\\"');
     if (isLive) {
-      isLive = text.toLowerCase().includes("major league")
+      isLive = text.toLowerCase().includes("major league");
     }
 
     return NextResponse.json({ isLive });
