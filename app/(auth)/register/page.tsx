@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { Suspense } from "react";
 
 import FormRegister from "@/app/components/forms/FormRegister";

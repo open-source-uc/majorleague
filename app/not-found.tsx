@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const runtime = "edge";
+
 export default function NotFound() {
   return (
     <div className="mt-20 flex flex-col items-center justify-center">
