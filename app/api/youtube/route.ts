@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { CHANNEL_ID } from "@/app/lib/constants";
 
+export const runtime = "edge";
+
 export async function GET() {
   if (!CHANNEL_ID) {
     return NextResponse.json({ error: "Missing channel ID" }, { status: 500 });
@@ -13,7 +15,7 @@ export async function GET() {
 
     let isLive = !text.includes('\\"previewPlayabilityStatus\\":{\\"status\\":\\"ERROR\\"');
     if (isLive) {
-      isLive = text.toLowerCase().includes("major league")
+      isLive = text.toLowerCase().includes("major league");
     }
 
     return NextResponse.json({ isLive });

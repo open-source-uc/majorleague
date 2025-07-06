@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
 
