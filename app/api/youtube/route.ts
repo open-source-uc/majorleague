@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { CHANNEL_ID } from "@/app/lib/constants";
+import { CHANNEL_ID } from "@/lib/constants";
 
 export const runtime = "edge";
 

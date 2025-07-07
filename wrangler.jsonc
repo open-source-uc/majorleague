@@ -1,8 +1,19 @@
 {
-    "name": "majorleague",
-    "compatibility_date": "2025-07-05",
-    "compatibility_flags": [
-      "nodejs_compat"
-    ],
-    "pages_build_output_dir": ".vercel/output/static"
-  }
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "majorleague",
+  "compatibility_date": "2025-07-05",
+  "observability": {
+    "enabled": true
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "majorleague",
+      "database_id": "7ce99cae-481b-4883-8df6-67b9d95a1b3c"
+    }
+  ],
+  "pages_build_output_dir": ".vercel/output/static"
+}

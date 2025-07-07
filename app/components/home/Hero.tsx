@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import hero from "@/public/assets/hero.png";
+import hero from "@/../public/assets/hero.png";
 
 import NextMatches from "../home/NextMatches";
 

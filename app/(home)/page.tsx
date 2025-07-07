@@ -4,8 +4,8 @@ import Image from "next/image";
 
 import { Suspense } from "react";
 
-import image1 from "@/public/assets/image1.png";
-import image2 from "@/public/assets/image2.png";
+import image1 from "@/../public/assets/image1.png";
+import image2 from "@/../public/assets/image2.png";
 
 import Hero from "../components/home/Hero";
 import Sponsors from "../components/home/Sponsors";

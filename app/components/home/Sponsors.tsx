@@ -1,8 +1,8 @@
 import Image from "next/image";
 
-import caiLogo from "@/public/assets/caiLogo.png";
-import osucLogo from "@/public/assets/osucLogo.png";
-import ucLogo from "@/public/assets/ucLogo.svg";
+import caiLogo from "@/../public/assets/caiLogo.png";
+import osucLogo from "@/../public/assets/osucLogo.png";
+import ucLogo from "@/../public/assets/ucLogo.svg";
 
 export default function Sponsors() {
   return (

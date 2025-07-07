@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-import { IVideo } from "@/app/lib/types/video";
+import { IVideo } from "@/lib/types/video";
 
 export default function VideoCarousel({ videos }: { videos: IVideo[] }) {
   const [index, setIndex] = useState(0);

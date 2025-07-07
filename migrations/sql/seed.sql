@@ -1,0 +1,1 @@
+INSERT INTO profiles (id, username, email) VALUES (1, 'admin', 'admin@osuc.dev');
