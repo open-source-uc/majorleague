@@ -29,7 +29,7 @@ export default async function Login() {
       </h2>
       <Link
         href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
-        className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden max-w-36 rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
+        className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary max-w-36 rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
       >
         Cuenta OSUC
       </Link>

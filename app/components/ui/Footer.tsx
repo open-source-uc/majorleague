@@ -12,49 +12,100 @@ import FooterCol from "./FooterCol";
 
 function Footer() {
   const linkStyle = "text-sm md:text-md tracking-normal";
-  const linkStyleHover = "hover:text-primary-darken transition-colors";
+  const linkStyleHover = "hover:text-primary-darken transition-colors duration-100";
 
   return (
-    <footer className="border-border-header flex w-full justify-between border-t px-5 py-10 md:px-15">
-      <Link href="/" className="hidden md:block">
-        <Image src={logo} alt="logo" priority />
-      </Link>
+    <footer className="bg-background border-border-header w-full border-t">
+      <div className="mx-auto max-w-7xl px-5 py-15 md:px-10 lg:px-15">
+        {/* Mobile Logo - Show at top on mobile and tablet */}
+        <div className="mb-8 flex justify-center lg:hidden">
+          <Link href="/">
+            <Image src={logo} alt="Major League Logo" className="h-20 w-auto" priority />
+          </Link>
+        </div>
 
-      <div className="grid flex-1 grid-cols-2 gap-10 sm:px-5 md:grid-cols-3 md:px-40 lg:grid-cols-4">
-        <FooterCol title="INICIATIVA">
-          <Link href="/" className={`${linkStyle} ${linkStyleHover}`}>
-            Equipos
-          </Link>
-          <Link href="/" className={`${linkStyle} ${linkStyleHover}`}>
-            Tabla de posiciones
-          </Link>
-          <Link href="/" className={`${linkStyle} ${linkStyleHover}`}>
-            Acerca de la Major League
-          </Link>
-        </FooterCol>
-        <FooterCol title="CONTACTO">
-          <Link href="/" className={`${linkStyle} ${linkStyleHover} break-words`}>
-            Únete al equipo de la Major League
-          </Link>
-          <Link href="/" className={`${linkStyle} ${linkStyleHover} break-words`}>
-            Se sponsor de la Major League
-          </Link>
-        </FooterCol>
-        <FooterCol title="INFORMACIÓN">
-          <p className={`${linkStyle}`}>major@uc.cl</p>
-        </FooterCol>
-        <div className="border-foreground flex flex-col items-start justify-center gap-5 border-l px-8 py-0">
-          <p className="text-md font-bold">SIGUENOS EN</p>
-          <div className="flex items-start gap-5">
-            <a href="https://www.linkedin.com/company/" className="size-10">
-              <Image src={linkedin} alt="LinkedIn" className="size-10 hover:!text-[#0077B5]" priority />
-            </a>
-            <a href="https://www.youtube.com/">
-              <Image src={youtube} alt="YouTube" className="size-10 fill-red-700" priority />
-            </a>
-            <a href="https://www.instagram.com/">
-              <Image src={instagram} alt="instagram" className="size-10" priority />
-            </a>
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
+          {/* Desktop Logo - Show on left side on desktop */}
+          <div className="hidden lg:flex lg:flex-shrink-0">
+            <Link href="/">
+              <Image src={logo} alt="Major League Logo" className="h-20 w-auto" priority />
+            </Link>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="flex-1 lg:px-10">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+              <FooterCol title="INICIATIVA">
+                <Link href="/equipos" className={`${linkStyle} ${linkStyleHover}`}>
+                  Equipos
+                </Link>
+                <Link href="/posiciones/2025/1" className={`${linkStyle} ${linkStyleHover}`}>
+                  Tabla de posiciones
+                </Link>
+                <Link href="/acerca" className={`${linkStyle} ${linkStyleHover}`}>
+                  Acerca de la Major League
+                </Link>
+              </FooterCol>
+
+              <FooterCol title="CONTACTO">
+                <Link href="/participa" className={`${linkStyle} ${linkStyleHover}`}>
+                  Únete al equipo de la Major League
+                </Link>
+                <Link href="/participa" className={`${linkStyle} ${linkStyleHover}`}>
+                  Sé sponsor de la Major League
+                </Link>
+              </FooterCol>
+
+              <FooterCol title="INFORMACIÓN">
+                <a href="mailto:major@uc.cl" className={`${linkStyle} ${linkStyleHover}`}>
+                  major@uc.cl
+                </a>
+              </FooterCol>
+
+              {/* Social Media Section */}
+              <div className="sm:col-span-2 lg:col-span-1">
+                <FooterCol title="SÍGUENOS EN">
+                  <div className="flex gap-4">
+                    <a
+                      href="https://www.linkedin.com/company/"
+                      className="group transition-transform duration-100 hover:scale-110"
+                      aria-label="LinkedIn"
+                    >
+                      <Image
+                        src={linkedin}
+                        alt="LinkedIn"
+                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
+                        priority
+                      />
+                    </a>
+                    <a
+                      href="https://www.youtube.com/"
+                      className="group transition-transform duration-100 hover:scale-110"
+                      aria-label="YouTube"
+                    >
+                      <Image
+                        src={youtube}
+                        alt="YouTube"
+                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
+                        priority
+                      />
+                    </a>
+                    <a
+                      href="https://www.instagram.com/"
+                      className="group transition-transform duration-100 hover:scale-110"
+                      aria-label="Instagram"
+                    >
+                      <Image
+                        src={instagram}
+                        alt="Instagram"
+                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
+                        priority
+                      />
+                    </a>
+                  </div>
+                </FooterCol>
+              </div>
+            </div>
           </div>
         </div>
       </div>

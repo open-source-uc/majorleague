@@ -74,11 +74,11 @@ function Navbar() {
             </li>
             <li>
               <Link
-                href="/register?from=participa"
+                href="/login"
                 className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary rounded-md border-2 border-solid px-10 py-2 font-bold tracking-normal transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                PARTICIPA EN LA LIGA
+                INGRESAR
               </Link>
             </li>
           </ul>
