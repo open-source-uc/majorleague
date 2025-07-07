@@ -27,7 +27,7 @@ export async function getYoutubeVideos() {
     throw new Error("Failed to fetch YouTube videos");
   }
 
-  const data = await res.json();
+  const data: { items: IVideo[] } = await res.json();
 
   const filtered = data.items.filter(
     (item: IVideo) =>

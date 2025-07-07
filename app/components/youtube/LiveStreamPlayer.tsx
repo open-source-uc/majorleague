@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { CHANNEL_ID } from "@/app/lib/constants";
+import { CHANNEL_ID } from "@/lib/constants";
 
 export default function LiveStreamPlayer() {
   const [isLive, setIsLive] = useState<boolean | null>(null);
@@ -10,7 +10,7 @@ export default function LiveStreamPlayer() {
     const checkLiveStatus = async () => {
       try {
         const res = await fetch("/api/youtube");
-        const data = await res.json();
+        const data = (await res.json()) as { isLive: boolean };
         setIsLive(data.isLive);
       } catch (err) {
         console.error("Error fetching live status:", err);
