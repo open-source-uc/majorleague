@@ -2,8 +2,6 @@ export const runtime = "edge";
 
 import Image from "next/image";
 
-import { Suspense } from "react";
-
 import image1 from "@/../public/assets/image1.png";
 import image2 from "@/../public/assets/image2.png";
 
@@ -11,13 +9,11 @@ import Hero from "../components/home/Hero";
 import Sponsors from "../components/home/Sponsors";
 import TextBar from "../components/home/TextBar";
 
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <>
       <TextBar />
-      <Suspense fallback={<div className="h-32 animate-pulse rounded-lg bg-gray-200">Cargando...</div>}>
-        <Hero />
-      </Suspense>
+      <Hero />
       <Sponsors />
       <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row">
         <div className="w-full max-w-[399px]">

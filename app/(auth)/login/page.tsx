@@ -14,7 +14,8 @@ export default async function Login() {
     const userProfile = await getProfile(userData);
     if (!userProfile) {
       return (
-        <div className="flex h-screen items-center justify-center">
+        <div className="my-20 flex flex-col items-center justify-center px-6">
+          <h2 className="text-primary-darken text-xl font-bold">Crea tu perfil</h2>
           <FormProfile userId={userData.id} />
         </div>
       );

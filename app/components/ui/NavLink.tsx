@@ -11,6 +11,19 @@ interface NavLinkProps {
 }
 
 export default function NavLink({ href, children, className = "", type, onClick }: NavLinkProps) {
+  // For desktop links (Server Component), no onClick handler
+  if (type === "desktop") {
+    return (
+      <Link
+        href={href}
+        className={`text-md z-50 font-bold tracking-normal ${className} hover:text-primary-darken transition-colors duration-100`}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  // For mobile links (Client Component), include onClick handler
   return (
     <Link
       href={href}

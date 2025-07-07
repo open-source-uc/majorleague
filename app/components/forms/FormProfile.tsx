@@ -29,6 +29,13 @@ export default function FormProfile({ userId }: { userId: string }) {
       {state.message ? (
         <p className={`text-sm ${state.success ? "text-green-500" : "text-red-500"}`}>{state.message}</p>
       ) : null}
+      {state.success ? (
+        <p className="text-sm">
+          <a href="/profile" className="text-blue-500 hover:underline">
+            Tu perfil
+          </a>
+        </p>
+      ) : null}
 
       <ButtonSubmit processing={<span>Cargando…</span>}>Crear Perfil</ButtonSubmit>
     </Form>

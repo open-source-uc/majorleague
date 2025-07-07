@@ -34,11 +34,35 @@ export async function getUserDataByToken(): Promise<{
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    cache: "no-store", // never cache auth responses
+    // Cache for 5 minutes, revalidate in background
+    next: { revalidate: 300 },
   });
 
   if (!res.ok) return null;
 
   const data: RawAuth = await res.json();
   return { message: data.message, permissions: data.permissions, id: data.userId };
+}
+
+// New optimized function that combines both checks
+export async function getAuthStatus(): Promise<{
+  isAuthenticated: boolean;
+  userData: { message: string; permissions: string[]; id: string } | null;
+  userProfile: any | null;
+}> {
+  const userData = await getUserDataByToken();
+
+  if (!userData) {
+    return { isAuthenticated: false, userData: null, userProfile: null };
+  }
+
+  // Only import and call getProfile if userData exists
+  const { getProfile } = await import("@/actions/auth");
+  const userProfile = await getProfile(userData);
+
+  return {
+    isAuthenticated: !!(userData && userProfile),
+    userData,
+    userProfile,
+  };
 }

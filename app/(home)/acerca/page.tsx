@@ -3,7 +3,9 @@ import Image from "next/image";
 import image1 from "@/../public/assets/image1.png";
 import image2 from "@/../public/assets/image2.png";
 
-export default async function AcercaDePage() {
+export const runtime = "edge";
+
+export default function AcercaDePage() {
   return (
     <>
       <h1 className="text-primary-darken mt-10 text-center text-4xl font-bold">Acerca De</h1>
