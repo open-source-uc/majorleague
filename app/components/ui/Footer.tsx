@@ -3,10 +3,10 @@ import Link from "next/link";
 
 import { memo } from "react";
 
-import instagram from "@/public/assets/instagram.svg";
-import linkedin from "@/public/assets/linkedin.svg";
-import logo from "@/public/assets/logo-vertical.svg";
-import youtube from "@/public/assets/youtube.svg";
+import instagram from "@/../public/assets/instagram.svg";
+import linkedin from "@/../public/assets/linkedin.svg";
+import logo from "@/../public/assets/logo-vertical.svg";
+import youtube from "@/../public/assets/youtube.svg";
 
 import FooterCol from "./FooterCol";
 

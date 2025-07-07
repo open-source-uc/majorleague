@@ -1,9 +1,16 @@
+import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 import type { NextConfig } from "next";
+
+(async () => {
+  if (process.env.NODE_ENV === "development") {
+    await setupDevPlatform();
+  }
+})();
 
 const nextConfig: NextConfig = {
   experimental: {
     ppr: true,
-    dynamicIO: true,
+    // dynamicIO: true,
   },
   // Performance optimizations
   compress: true,

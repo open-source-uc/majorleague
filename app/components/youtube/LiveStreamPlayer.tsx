@@ -6,7 +6,6 @@ import { CHANNEL_ID } from "@/app/lib/constants";
 
 export default function LiveStreamPlayer() {
   const [isLive, setIsLive] = useState<boolean | null>(null);
-
   useEffect(() => {
     const checkLiveStatus = async () => {
       try {
@@ -18,13 +17,10 @@ export default function LiveStreamPlayer() {
         setIsLive(false);
       }
     };
-
     checkLiveStatus();
   }, []);
-
   if (isLive === null) return null;
   if (!isLive) return null;
-
   return (
     <iframe
       title="YouTube LiveStream"

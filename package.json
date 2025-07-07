@@ -7,14 +7,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix"
+    "lint:fix": "next lint --fix",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "preview": "npm run pages:build && wrangler pages dev",
+    "deploy": "npm run pages:build && wrangler pages deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@prisma/adapter-d1": "^6.11.1",
     "@radix-ui/react-navigation-menu": "^1.2.13",
     "@supabase/ssr": "^0.6.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.0.1",
+    "drizzle-orm": "^0.44.2",
     "lucide-react": "^0.468.0",
     "next": "^15.4.0-canary.56",
     "react": "^19.0.0",
@@ -24,6 +31,7 @@
     "zod": "^3.25.34"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/node": "^20",
     "@types/react": "19.0.7",
@@ -31,6 +39,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.1.5",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-next-on-pages": "^1.13.12",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.1",
     "eslint-plugin-unused-imports": "^4.1.4",

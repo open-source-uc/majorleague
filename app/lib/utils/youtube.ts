@@ -1,5 +1,5 @@
-import { CHANNEL_ID } from "@/app/lib/constants";
-import { IVideo } from "@/app/lib/types/video";
+import { CHANNEL_ID } from "@/lib/constants";
+import { IVideo } from "@/lib/types/video";
 
 export async function getYoutubeVideos() {
   const API_KEY = process.env.YOUTUBE_API_KEY;

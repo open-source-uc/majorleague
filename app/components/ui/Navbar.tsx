@@ -5,9 +5,9 @@ import Link from "next/link";
 
 import { memo, useState } from "react";
 
-import logoMajor from "@/public/assets/logo-horizontal.svg";
+import logoMajor from "@/../public/assets/logo-horizontal.svg";
 // Si se usa este icono, hay que añadir enlace en el footer https://iconos8.es/license
-import menuIcon from "@/public/assets/menu-iconos8.svg";
+import menuIcon from "@/../public/assets/menu-iconos8.svg";
 
 import NavLink from "./NavLink";
 
@@ -44,10 +44,10 @@ function Navbar() {
         </ul>
       </nav>
       <Link
-        href="/register?from=participa"
+        href="/login"
         className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
       >
-        PARTICIPA EN LA LIGA
+        INGRESAR
       </Link>
       <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="hover:cursor-pointer lg:hidden">
         <Image src={menuIcon} alt="Abrir menú" className="size-8" />
