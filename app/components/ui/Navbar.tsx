@@ -15,7 +15,7 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-background border-border-header top-0 z-50 flex h-32 w-dvw items-center justify-between border-b p-10">
+    <header className="bg-background border-border-header flex h-32 items-center justify-between border-b p-10">
       <Link className="border-foreground lg:border-r" href="/">
         <Image
           src={logoMajor}
