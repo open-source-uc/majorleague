@@ -12,6 +12,7 @@ export default async function Login() {
   if (userData) {
     // Check if profile is created
     const userProfile = await getProfile(userData);
+    console.log(userProfile);
     if (!userProfile) {
       return (
         <div className="my-20 flex flex-col items-center justify-center px-6">

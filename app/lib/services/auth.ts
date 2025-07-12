@@ -2,6 +2,8 @@
 
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
+import { getProfile } from "@/actions/auth";
+import { OsucPermissions } from "@/lib/types/permissions";
 
 interface RawAuth {
   message: string;
@@ -44,24 +46,24 @@ export async function getUserDataByToken(): Promise<{
   return { message: data.message, permissions: data.permissions, id: data.userId };
 }
 
-// New optimized function that combines both checks
 export async function getAuthStatus(): Promise<{
   isAuthenticated: boolean;
   userData: { message: string; permissions: string[]; id: string } | null;
   userProfile: any | null;
+  isAdmin: boolean;
 }> {
   const userData = await getUserDataByToken();
 
   if (!userData) {
-    return { isAuthenticated: false, userData: null, userProfile: null };
+    return { isAuthenticated: false, userData: null, userProfile: null, isAdmin: false };
   }
 
-  // Only import and call getProfile if userData exists
-  const { getProfile } = await import("@/actions/auth");
   const userProfile = await getProfile(userData);
+  const isAdmin = userData.permissions.includes(OsucPermissions.userIsRoot) || process.env.ADMIN_USER == "true";
 
   return {
     isAuthenticated: !!(userData && userProfile),
+    isAdmin,
     userData,
     userProfile,
   };

@@ -4,6 +4,7 @@ import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
 
 import type { Profile, UserData } from "@/lib/types";
+import { getAuthStatus } from "@/lib/services/auth";
 
 const profileSchema = z.object({
   id: z.string().min(1, "El id es requerido"),
@@ -18,7 +19,7 @@ export async function getProfile(userData: UserData): Promise<Profile | null> {
   const { env } = getRequestContext();
   return (
     (await env.DB.prepare("SELECT id, username, email FROM profiles WHERE id = ?")
-      .bind(userData.id)
+      .bind(`${userData.id}`)
       .first<Profile>()) ?? null
   );
 }

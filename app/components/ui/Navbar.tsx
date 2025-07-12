@@ -54,12 +54,12 @@ async function Navbar() {
           TU PERFIL
         </Link>
       ) : (
-        <Link
-          href="/login"
-          className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
-        >
-          INGRESAR
-        </Link>
+      <Link
+        href="/login"
+        className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
+      >
+        INGRESAR
+      </Link>
       )}
 
       {/* Mobile Menu - Client Component */}

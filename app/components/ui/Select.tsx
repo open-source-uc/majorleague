@@ -1,35 +1,36 @@
 import { cn } from "@/lib/utils/cn";
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectProps {
   label: string;
   name: string;
   options: { value: string; label: string }[];
+  defaultValue?: string;
+  required?: boolean;
   className?: string;
-  placeholder?: string;
 }
 
-export default function Select({ label, name, options, className, placeholder, ...props }: SelectProps) {
+export default function Select({
+  label,
+  name,
+  options,
+  defaultValue = "",
+  required = false,
+  className = "",
+}: SelectProps) {
   return (
-    <div className="flex w-full flex-col space-y-2">
-      <label htmlFor={name} className="text-foreground text-lg">
+    <div className={`flex w-full flex-col space-y-2 ${className}`}>
+      <label htmlFor={name} className="text-foreground text-md">
         {label}
+        {required && <span className="ml-1 text-primary">*</span>}
       </label>
       <select
         id={name}
         name={name}
-        className={cn(
-          "border-border-header bg-background-header text-foreground disabled:text-foreground/50 w-full rounded-lg border-2 p-4 focus:border-gray-500 focus:ring-2 focus:ring-gray-500 focus:outline-hidden",
-          className,
-        )}
-        defaultValue={placeholder}
-        {...props}
+        defaultValue={defaultValue}
+        required={required}
+        className="border-border-header bg-background-header text-foreground w-full rounded-lg border-2 p-4 focus:border-primary focus:ring-2 focus:ring-primary focus:outline-hidden"
       >
-        {/* TODO: Disabled color does not work */}
-        {placeholder ? (
-          <option value={placeholder} disabled>
-            {placeholder}
-          </option>
-        ) : null}
+        <option value="">Seleccionar...</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
