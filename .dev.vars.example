@@ -1,0 +1,5 @@
+YOUTUBE_API_KEY="<tu-youtube-api-key>"
+# Puedes obtener un token en el panel de Auth Osuc (https://auth.osuc.dev/home/sessions).
+USER_TOKEN="<tu-token-auth-osuc>"
+# Temporal hasta tener rol en osuc auth, esto determina acceso a /dashboard
+ADMIN_USER="true/false"

@@ -1,19 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getTeams, createTeam, updateTeam, deleteTeam } from "@/actions/teams";
+import { getPreferences, createPreference, updatePreference, deletePreference } from "@/actions/preferences";
 import ObjectManager from "@/components/admin/ObjectManager";
 import { getAuthStatus } from "@/lib/services/auth";
+import { getProfileOptions } from "@/lib/utils/admin-options";
 
 export const runtime = "edge";
 
-export default async function TeamsPage() {
+export default async function PreferencesPage() {
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     redirect("/");
   }
 
-  const teams = await getTeams();
+  const [preferences, profileOptions] = await Promise.all([getPreferences(), getProfileOptions()]);
 
   return (
     <section className="mx-10 mt-8">
@@ -24,11 +25,14 @@ export default async function TeamsPage() {
         ← Volver al Dashboard
       </Link>
       <ObjectManager
-        objType="teams"
-        data={teams}
-        createAction={createTeam}
-        updateAction={updateTeam}
-        deleteAction={deleteTeam}
+        objType="preferences"
+        data={preferences}
+        createAction={createPreference}
+        updateAction={updatePreference}
+        deleteAction={deletePreference}
+        dynamicOptions={{
+          profiles: profileOptions,
+        }}
       />
     </section>
   );

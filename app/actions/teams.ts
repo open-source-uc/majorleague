@@ -1,11 +1,12 @@
 "use server";
 
-import { getRequestContext } from "@cloudflare/next-on-pages";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-import type { Team } from "@/lib/types";
+import { getRequestContext } from "@cloudflare/next-on-pages";
+import { z } from "zod";
+
 import { getAuthStatus } from "@/lib/services/auth";
+import type { Team } from "@/lib/types";
 
 // Validation schemas
 const teamCreateSchema = z.object({
@@ -81,7 +82,6 @@ export async function createTeam(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -116,7 +116,6 @@ export async function createTeam(
   const { env } = getRequestContext();
 
   try {
-    // Check if team name already exists
     const existingTeam = await env.DB.prepare(
       `
       SELECT id FROM teams WHERE name = ?
@@ -134,7 +133,6 @@ export async function createTeam(
       };
     }
 
-    // Find captain by username
     const captainUser = await env.DB.prepare(
       `
       SELECT id FROM profiles WHERE username = ?
@@ -161,7 +159,6 @@ export async function createTeam(
       .bind(parsed.data.name, captainUser.id, parsed.data.major || null)
       .run();
 
-    // Revalidate the teams page
     revalidatePath("/admin/dashboard/teams");
 
     return {
@@ -195,7 +192,6 @@ export async function updateTeam(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -247,7 +243,6 @@ export async function updateTeam(
   const { env } = getRequestContext();
 
   try {
-    // Check if team exists
     const existingTeam = await env.DB.prepare(
       `
       SELECT id FROM teams WHERE id = ?
@@ -265,7 +260,6 @@ export async function updateTeam(
       };
     }
 
-    // Check if new name conflicts with another team
     const nameConflict = await env.DB.prepare(
       `
       SELECT id FROM teams WHERE name = ? AND id != ?
@@ -283,7 +277,6 @@ export async function updateTeam(
       };
     }
 
-    // Determine captain_id if captain_username is provided
     let captainId = null;
     if (parsed.data.captain_username) {
       const captainUser = await env.DB.prepare(
@@ -305,7 +298,6 @@ export async function updateTeam(
       captainId = captainUser.id;
     }
 
-    // Update team
     if (captainId) {
       await env.DB.prepare(
         `
@@ -328,7 +320,6 @@ export async function updateTeam(
         .run();
     }
 
-    // Revalidate the teams page
     revalidatePath("/admin/dashboard/teams");
 
     return {
@@ -359,7 +350,6 @@ export async function deleteTeam(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -402,7 +392,6 @@ export async function deleteTeam(
   const { env } = getRequestContext();
 
   try {
-    // Check if team exists
     const existingTeam = await env.DB.prepare(
       `
       SELECT id, name FROM teams WHERE id = ?
@@ -420,7 +409,6 @@ export async function deleteTeam(
       };
     }
 
-    // Check if team has related records (players, matches, etc.)
     const hasPlayers = await env.DB.prepare(
       `
       SELECT COUNT(*) as count FROM players WHERE team_id = ?
@@ -447,7 +435,6 @@ export async function deleteTeam(
       };
     }
 
-    // Delete team
     await env.DB.prepare(
       `
       DELETE FROM teams WHERE id = ?
@@ -456,7 +443,6 @@ export async function deleteTeam(
       .bind(parsed.data.id)
       .run();
 
-    // Revalidate the teams page
     revalidatePath("/admin/dashboard/teams");
 
     return {

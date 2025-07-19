@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils/cn";
-
 interface SelectProps {
   label: string;
   name: string;
@@ -21,14 +19,14 @@ export default function Select({
     <div className={`flex w-full flex-col space-y-2 ${className}`}>
       <label htmlFor={name} className="text-foreground text-md">
         {label}
-        {required && <span className="ml-1 text-primary">*</span>}
+        {required ? <span className="text-primary ml-1">*</span> : null}
       </label>
       <select
         id={name}
         name={name}
         defaultValue={defaultValue}
         required={required}
-        className="border-border-header bg-background-header text-foreground w-full rounded-lg border-2 p-4 focus:border-primary focus:ring-2 focus:ring-primary focus:outline-hidden"
+        className="border-border-header bg-background-header text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border-2 p-4 focus:ring-2 focus:outline-hidden"
       >
         <option value="">Seleccionar...</option>
         {options.map((option) => (

@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS profiles;
 
 -- Profiles (Users from auth.osuc.dev)
 CREATE TABLE profiles (
-    id TEXT PRIMARY KEY, -- Changed to TEXT for auth.osuc.dev compatibility
+    id TEXT PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     email TEXT UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -93,7 +93,7 @@ CREATE TABLE matches (
     location TEXT,
     local_score INTEGER DEFAULT 0,
     visitor_score INTEGER DEFAULT 0,
-    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'finished', 'cancelled')),
+    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'finished', 'cancelled', 'in review')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (local_team_id) REFERENCES teams(id) ON DELETE RESTRICT,

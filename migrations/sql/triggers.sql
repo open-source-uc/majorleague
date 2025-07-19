@@ -1,6 +1,3 @@
--- Triggers for Major League Database
--- Maintains data integrity and automates business logic
-
 -- 1. Update timestamps on profile changes
 CREATE TRIGGER update_profiles_timestamp
     AFTER UPDATE ON profiles
@@ -72,15 +69,58 @@ CREATE TRIGGER create_player_on_approval
             profile_id, 
             first_name, 
             last_name, 
+            nickname,
             age, 
-            position
+            position,
+            created_at,
+            updated_at
         ) VALUES (
             NEW.team_id,
             NEW.profile_id,
             NEW.first_name,
             NEW.last_name,
+            CASE 
+                WHEN LENGTH(TRIM(COALESCE(NEW.first_name, ''))) > 0 
+                THEN SUBSTR(NEW.first_name, 1, 1) || LOWER(SUBSTR(NEW.first_name, 2)) || 'ito'
+                ELSE NULL 
+            END,
             NEW.age,
-            NEW.preferred_position
+            NEW.preferred_position,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        );
+    END;
+
+-- 7b. Auto-create player record when join request is created as approved (instant approval)
+CREATE TRIGGER create_player_on_instant_approval
+    AFTER INSERT ON join_team_requests
+    FOR EACH ROW
+    WHEN NEW.status = 'approved'
+    BEGIN
+        INSERT INTO players (
+            team_id, 
+            profile_id, 
+            first_name, 
+            last_name, 
+            nickname,
+            age, 
+            position,
+            created_at,
+            updated_at
+        ) VALUES (
+            NEW.team_id,
+            NEW.profile_id,
+            NEW.first_name,
+            NEW.last_name,
+            CASE 
+                WHEN LENGTH(TRIM(COALESCE(NEW.first_name, ''))) > 0 
+                THEN SUBSTR(NEW.first_name, 1, 1) || LOWER(SUBSTR(NEW.first_name, 2)) || 'ito'
+                ELSE NULL 
+            END,
+            NEW.age,
+            NEW.preferred_position,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
         );
     END;
 
@@ -106,33 +146,70 @@ CREATE TRIGGER prevent_captain_removal
         SELECT RAISE(ABORT, 'Cannot remove team captain from team. Transfer captaincy first.');
     END;
 
--- 10. Auto-update team competition points when match finishes
-CREATE TRIGGER update_competition_points
+-- 10. Auto-update match scores and competition points when match finishes
+CREATE TRIGGER update_scores_and_competition_points
     AFTER UPDATE ON matches
     FOR EACH ROW
     WHEN NEW.status = 'finished' AND OLD.status != 'finished'
     BEGIN
-        -- Update local team points
-        UPDATE team_competitions 
-        SET points = points + 
-            CASE 
-                WHEN NEW.local_score > NEW.visitor_score THEN 3  -- Win
-                WHEN NEW.local_score = NEW.visitor_score THEN 1  -- Draw
-                ELSE 0  -- Loss
-            END
-        WHERE team_id = NEW.local_team_id 
-          AND competition_id = NEW.competition_id;
+        -- First, recalculate match scores from goal events
+        UPDATE matches 
+        SET local_score = (
+                SELECT COALESCE(COUNT(*), 0)
+                FROM events 
+                WHERE match_id = NEW.id 
+                  AND type = 'goal' 
+                  AND team_id = NEW.local_team_id
+            ),
+            visitor_score = (
+                SELECT COALESCE(COUNT(*), 0)
+                FROM events 
+                WHERE match_id = NEW.id 
+                  AND type = 'goal' 
+                  AND team_id = NEW.visitor_team_id
+            ),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = NEW.id;
         
-        -- Update visitor team points
+        -- Then, recalculate points for all teams in this competition from scratch
+        -- This prevents race conditions by not accumulating points
         UPDATE team_competitions 
-        SET points = points + 
-            CASE 
-                WHEN NEW.visitor_score > NEW.local_score THEN 3  -- Win
-                WHEN NEW.visitor_score = NEW.local_score THEN 1  -- Draw
-                ELSE 0  -- Loss
-            END
-        WHERE team_id = NEW.visitor_team_id 
-          AND competition_id = NEW.competition_id;
+        SET points = (
+            SELECT COALESCE(SUM(
+                CASE 
+                    -- When team is local team
+                    WHEN m.local_team_id = team_competitions.team_id THEN
+                        CASE 
+                            WHEN m.local_score > m.visitor_score THEN 3  -- Win
+                            WHEN m.local_score = m.visitor_score THEN 1  -- Draw
+                            ELSE 0  -- Loss
+                        END
+                    -- When team is visitor team
+                    WHEN m.visitor_team_id = team_competitions.team_id THEN
+                        CASE 
+                            WHEN m.visitor_score > m.local_score THEN 3  -- Win
+                            WHEN m.visitor_score = m.local_score THEN 1  -- Draw
+                            ELSE 0  -- Loss
+                        END
+                    ELSE 0
+                END
+            ), 0)
+            FROM matches m
+            WHERE m.competition_id = NEW.competition_id
+              AND m.status = 'finished'
+              AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+        )
+        WHERE competition_id = NEW.competition_id;
+        
+        -- Recalculate positions for this competition
+        UPDATE team_competitions 
+        SET position = (
+            SELECT COUNT(*) + 1 
+            FROM team_competitions tc2 
+            WHERE tc2.competition_id = NEW.competition_id 
+              AND tc2.points > team_competitions.points
+        )
+        WHERE competition_id = NEW.competition_id;
     END;
 
 -- 11. Prevent overlapping matches for same team
@@ -165,32 +242,14 @@ CREATE TRIGGER create_team_competition_record
             NEW.id,
             c.id,
             0
-        FROM competitions c
-        WHERE c.end_date >= DATE('now');  -- Only active competitions
+        FROM competitions c;
     END;
 
--- 13. Validate event minute is within match duration
+-- 13. Validate event minute is within reasonable match duration
 CREATE TRIGGER validate_event_minute
     BEFORE INSERT ON events
     FOR EACH ROW
-    WHEN NEW.minute > 90 AND NOT EXISTS (
-        SELECT 1 FROM events 
-        WHERE match_id = NEW.match_id 
-          AND type = 'other' 
-          AND description LIKE '%extra time%'
-    )
+    WHEN NEW.minute > 120  -- Allow up to 120 minutes (90 + 30 extra time)
     BEGIN
-        SELECT RAISE(ABORT, 'Event minute cannot exceed 90 without extra time being recorded.');
-    END;
-
--- 14. Auto-update match status when events are added
-CREATE TRIGGER update_match_status_on_events
-    AFTER INSERT ON events
-    FOR EACH ROW
-    WHEN NEW.type IN ('goal', 'yellow_card', 'red_card', 'substitution')
-    BEGIN
-        UPDATE matches 
-        SET status = 'live',
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = NEW.match_id AND status = 'scheduled';
+        SELECT RAISE(ABORT, 'Event minute cannot exceed 120 minutes.');
     END;

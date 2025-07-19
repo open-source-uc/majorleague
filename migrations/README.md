@@ -29,6 +29,8 @@ chmod +x *.sh
 
 ### `backup_daily.sh` - Backups automáticos
 
+> En el futuro revisar y utilizar la funcion de [time travel](https://developers.cloudflare.com/d1/reference/time-travel/)
+
 **Qué hace:** Crea backups de la base de datos con limpieza de backups antiguos (7 días)
 **Cuándo usar:**
 

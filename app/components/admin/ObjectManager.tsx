@@ -2,7 +2,7 @@
 
 import { useState, useActionState } from "react";
 
-import { OBJECT_CONFIGS, type ObjectConfig, type FieldConfig, type DisplayColumn } from "@/lib/types";
+import { OBJECT_CONFIGS, type FieldConfig, type DisplayColumn } from "@/lib/types";
 
 import ButtonSubmit from "../ui/ButtonSubmit";
 import Form from "../ui/Form";
@@ -15,11 +15,19 @@ interface ObjectManagerProps {
   createAction: any;
   updateAction: any;
   deleteAction: any;
+  dynamicOptions?: Record<string, { value: string; label: string }[]>;
 }
 
 type ModalType = "create" | "edit" | "delete" | null;
 
-export default function ObjectManager({ objType, data, createAction, updateAction, deleteAction }: ObjectManagerProps) {
+export default function ObjectManager({
+  objType,
+  data,
+  createAction,
+  updateAction,
+  deleteAction,
+  dynamicOptions,
+}: ObjectManagerProps) {
   const config = OBJECT_CONFIGS[objType];
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -65,34 +73,47 @@ export default function ObjectManager({ objType, data, createAction, updateActio
   };
 
   const renderField = (field: FieldConfig, defaultValue = "") => {
+    // Convert datetime format for datetime-local inputs
+    let processedDefaultValue = defaultValue;
+    if (field.type === "datetime-local" && defaultValue) {
+      // Convert from "YYYY-MM-DD HH:MM:SS" to "YYYY-MM-DDTHH:MM" format
+      processedDefaultValue = defaultValue.replace(" ", "T").substring(0, 16);
+    }
+
     const commonProps = {
       name: field.name,
       label: field.label,
       required: field.required || false,
-      defaultValue: defaultValue,
+      defaultValue: processedDefaultValue,
     };
 
     switch (field.type) {
       case "select":
-        return <Select key={field.name} {...commonProps} options={field.options || []} />;
+        const options =
+          field.dataSource && dynamicOptions?.[field.dataSource]
+            ? dynamicOptions[field.dataSource]
+            : field.options || [];
+        return <Select key={field.name} {...commonProps} options={options} />;
       case "textarea":
         return (
           <div key={field.name} className="flex w-full flex-col space-y-2">
             <label htmlFor={field.name} className="text-foreground text-md">
               {field.label}
-              {field.required && <span className="text-primary ml-1">*</span>}
+              {field.required ? <span className="text-primary ml-1">*</span> : null}
             </label>
             <textarea
               id={field.name}
               name={field.name}
               placeholder={field.placeholder}
               required={field.required}
-              defaultValue={defaultValue}
+              defaultValue={processedDefaultValue}
               rows={3}
               className="border-border-header bg-background-header placeholder-foreground/50 text-foreground invalid:text-foreground/50 focus:border-primary focus:ring-primary w-full rounded-lg border-2 p-4 focus:ring-2 focus:outline-hidden"
             />
           </div>
         );
+      case "datetime-local":
+        return <Input key={field.name} {...commonProps} type="datetime-local" placeholder={field.placeholder || ""} />;
       default:
         return <Input key={field.name} {...commonProps} type={field.type} placeholder={field.placeholder || ""} />;
     }
@@ -105,7 +126,16 @@ export default function ObjectManager({ objType, data, createAction, updateActio
 
     switch (column.type) {
       case "date":
-        return new Date(value).toLocaleDateString("es-ES");
+        if (value.includes("T")) {
+          // If it's a datetime string, just take the date part
+          return value.split("T")[0];
+        } else if (value.includes("-")) {
+          // If it's already a date string (YYYY-MM-DD), return as is
+          return value;
+        } else {
+          // Otherwise format as date
+          return new Date(value).toLocaleDateString("es-ES");
+        }
       case "badge":
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
@@ -158,7 +188,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
       <div className="bg-background-header border-border-header overflow-hidden rounded-lg border-2 shadow-sm">
         {data.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-ml-grey">No hay {config.title.toLowerCase()}s registrados</p>
+            <p className="text-ml-grey">No hay {config.title.toLowerCase()} registrados</p>
             <button
               onClick={() => openModal("create")}
               className="text-primary hover:text-primary-darken mt-4 font-medium"
@@ -217,7 +247,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
       </div>
 
       {/* Modal */}
-      {modalType && (
+      {modalType ? (
         <div className="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-black">
           <div className="bg-background-header border-border-header relative top-20 mx-auto w-full max-w-2xl rounded-lg border-2 p-5 shadow-lg">
             <div className="mt-3">
@@ -240,16 +270,16 @@ export default function ObjectManager({ objType, data, createAction, updateActio
                     ¿Estás seguro de que quieres eliminar este {config.title.toLowerCase()}? Esta acción no se puede
                     deshacer.
                   </p>
-                  {selectedItem && (
+                  {selectedItem ? (
                     <div className="bg-background border-border-header mb-4 rounded-lg border p-3">
                       <p className="text-foreground font-medium">{selectedItem[config.displayField] || "Item"}</p>
                     </div>
-                  )}
-                  {currentAction && (
+                  ) : null}
+                  {currentAction ? (
                     <Form action={currentAction} className="space-y-4">
                       <input type="hidden" name="id" value={selectedItem?.id} />
 
-                      {currentState?.message && (
+                      {currentState?.message ? (
                         <div
                           className={`rounded-lg p-4 ${
                             currentState.success
@@ -261,7 +291,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
                             {currentState.message}
                           </p>
                         </div>
-                      )}
+                      ) : null}
 
                       <div className="flex gap-4 pt-4">
                         <ButtonSubmit
@@ -279,7 +309,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
                         </button>
                       </div>
                     </Form>
-                  )}
+                  ) : null}
                 </div>
               ) : (
                 currentAction && (
@@ -288,7 +318,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
 
                     {config.fields.map((field) => renderField(field, selectedItem?.[field.name] || ""))}
 
-                    {currentState?.message && (
+                    {currentState?.message ? (
                       <div
                         className={`rounded-lg p-4 ${
                           currentState.success
@@ -300,7 +330,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
                           {currentState.message}
                         </p>
                       </div>
-                    )}
+                    ) : null}
 
                     <div className="flex gap-4 pt-4">
                       <ButtonSubmit
@@ -323,7 +353,7 @@ export default function ObjectManager({ objType, data, createAction, updateActio
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

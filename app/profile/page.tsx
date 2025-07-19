@@ -24,11 +24,11 @@ export default async function Profile() {
         >
           Cuenta OSUC
         </Link>
-        {isAdmin && (
+        {isAdmin ? (
           <Link href="/dashboard" className="border-primary-darken max-w-30 border-1 p-2">
             Admin Dashboard
           </Link>
-        )}
+        ) : null}
       </div>
     </section>
   );

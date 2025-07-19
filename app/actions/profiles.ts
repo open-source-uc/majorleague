@@ -1,11 +1,12 @@
 "use server";
 
-import { getRequestContext } from "@cloudflare/next-on-pages";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-import type { Profile } from "@/lib/types";
+import { getRequestContext } from "@cloudflare/next-on-pages";
+import { z } from "zod";
+
 import { getAuthStatus } from "@/lib/services/auth";
+import type { Profile } from "@/lib/types";
 
 // Validation schemas
 const profileCreateSchema = z.object({
@@ -70,7 +71,6 @@ export async function createProfile(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -105,7 +105,6 @@ export async function createProfile(
   const { env } = getRequestContext();
 
   try {
-    // Check if profile ID already exists
     const existingProfile = await env.DB.prepare(
       `
       SELECT id FROM profiles WHERE id = ?
@@ -123,7 +122,6 @@ export async function createProfile(
       };
     }
 
-    // Check if username already exists
     const existingUsername = await env.DB.prepare(
       `
       SELECT id FROM profiles WHERE username = ?
@@ -141,7 +139,6 @@ export async function createProfile(
       };
     }
 
-    // Check if email already exists (if provided)
     if (parsed.data.email) {
       const existingEmail = await env.DB.prepare(
         `
@@ -161,7 +158,6 @@ export async function createProfile(
       }
     }
 
-    // Insert new profile
     await env.DB.prepare(
       `
       INSERT INTO profiles (id, username, email, created_at, updated_at)
@@ -171,7 +167,6 @@ export async function createProfile(
       .bind(parsed.data.id, parsed.data.username, parsed.data.email || null)
       .run();
 
-    // Revalidate the profiles page
     revalidatePath("/admin/dashboard/profiles");
 
     return {
@@ -204,7 +199,6 @@ export async function updateProfile(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -239,7 +233,6 @@ export async function updateProfile(
   const { env } = getRequestContext();
 
   try {
-    // Check if profile exists
     const existingProfile = await env.DB.prepare(
       `
       SELECT id FROM profiles WHERE id = ?
@@ -257,7 +250,6 @@ export async function updateProfile(
       };
     }
 
-    // Check if new username conflicts with another profile
     const usernameConflict = await env.DB.prepare(
       `
       SELECT id FROM profiles WHERE username = ? AND id != ?
@@ -275,7 +267,6 @@ export async function updateProfile(
       };
     }
 
-    // Check if new email conflicts with another profile (if provided)
     if (parsed.data.email) {
       const emailConflict = await env.DB.prepare(
         `
@@ -295,7 +286,6 @@ export async function updateProfile(
       }
     }
 
-    // Update profile
     await env.DB.prepare(
       `
       UPDATE profiles 
@@ -306,7 +296,6 @@ export async function updateProfile(
       .bind(parsed.data.username, parsed.data.email || null, parsed.data.id)
       .run();
 
-    // Revalidate the profiles page
     revalidatePath("/admin/dashboard/profiles");
 
     return {
@@ -337,7 +326,6 @@ export async function deleteProfile(
   },
   formData: FormData,
 ) {
-  // Check authentication and admin privileges
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     return {
@@ -368,7 +356,6 @@ export async function deleteProfile(
   const { env } = getRequestContext();
 
   try {
-    // Check if profile exists
     const existingProfile = await env.DB.prepare(
       `
       SELECT id, username FROM profiles WHERE id = ?
@@ -386,7 +373,6 @@ export async function deleteProfile(
       };
     }
 
-    // Check if profile has related records (teams as captain, players, etc.)
     const isTeamCaptain = await env.DB.prepare(
       `
       SELECT COUNT(*) as count FROM teams WHERE captain_id = ?
@@ -438,7 +424,6 @@ export async function deleteProfile(
       };
     }
 
-    // Delete profile
     await env.DB.prepare(
       `
       DELETE FROM profiles WHERE id = ?
@@ -447,7 +432,6 @@ export async function deleteProfile(
       .bind(parsed.data.id)
       .run();
 
-    // Revalidate the profiles page
     revalidatePath("/admin/dashboard/profiles");
 
     return {

@@ -61,3 +61,5 @@ Thumbs.db
 # Sql logs
 /migrations/logs/*
 /migrations/logs/
+
+.dev.vars

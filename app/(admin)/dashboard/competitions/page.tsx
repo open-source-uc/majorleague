@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getTeams, createTeam, updateTeam, deleteTeam } from "@/actions/teams";
+import { getCompetitions, createCompetition, updateCompetition, deleteCompetition } from "@/actions/competitions";
 import ObjectManager from "@/components/admin/ObjectManager";
 import { getAuthStatus } from "@/lib/services/auth";
 
 export const runtime = "edge";
 
-export default async function TeamsPage() {
+export default async function CompetitionsPage() {
   const { isAdmin } = await getAuthStatus();
   if (!isAdmin) {
     redirect("/");
   }
 
-  const teams = await getTeams();
+  const competitions = await getCompetitions();
 
   return (
     <section className="mx-10 mt-8">
@@ -24,11 +24,11 @@ export default async function TeamsPage() {
         ← Volver al Dashboard
       </Link>
       <ObjectManager
-        objType="teams"
-        data={teams}
-        createAction={createTeam}
-        updateAction={updateTeam}
-        deleteAction={deleteTeam}
+        objType="competitions"
+        data={competitions}
+        createAction={createCompetition}
+        updateAction={updateCompetition}
+        deleteAction={deleteCompetition}
       />
     </section>
   );
