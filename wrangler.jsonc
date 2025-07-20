@@ -3,17 +3,15 @@
   "name": "majorleague",
   "compatibility_date": "2025-07-05",
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "majorleague",
-      "database_id": "7ce99cae-481b-4883-8df6-67b9d95a1b3c"
-    }
+      "database_id": "642e90dc-2e0e-4349-ada2-1ab84c94745c",
+    },
   ],
-  "pages_build_output_dir": ".vercel/output/static"
+  "pages_build_output_dir": ".vercel/output/static",
 }
