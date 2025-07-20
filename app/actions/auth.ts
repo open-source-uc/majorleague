@@ -17,10 +17,12 @@ const profileSchema = z.object({
 export async function getProfile(userData: UserData): Promise<Profile | null> {
   try {
     const context = getRequestContext();
+    const userId = String(userData.id);
     const profile = await context.env.DB.prepare("SELECT id, username, email FROM profiles WHERE id = ?")
-      .bind(userData.id)
+      .bind(userId)
       .first<Profile>();
-    return profile ?? null;
+    const result = profile ?? null;
+    return result;
   } catch (error) {
     console.error("Error fetching profile:", error);
     return null;
@@ -71,8 +73,9 @@ export async function CreateProfile(
       };
     }
 
+    const userId = String(parsed.data.id);
     await context.env.DB.prepare("INSERT INTO profiles (id, username, email) VALUES (?, ?, ?)")
-      .bind(parsed.data.id, parsed.data.username, parsed.data.email ?? null)
+      .bind(userId, parsed.data.username, parsed.data.email ?? null)
       .run();
 
     return {

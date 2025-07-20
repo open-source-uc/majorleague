@@ -38,7 +38,9 @@ export async function getUserDataByToken(): Promise<{
     if (!res.ok) return null;
 
     const data: RawAuth = await res.json();
-    return { message: data.message, permissions: data.permissions, id: data.userId };
+    const result = { message: data.message, permissions: data.permissions, id: data.userId };
+
+    return result;
   } catch (error) {
     console.error("Error fetching user data:", error);
     return null;
@@ -54,9 +56,18 @@ export async function getAuthStatus(): Promise<{
   try {
     const context = getRequestContext();
     const userData = await getUserDataByToken();
-    const userProfile = userData ? await getProfile(userData) : null;
-    const isAdmin = userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true";
 
+    let userProfile = null;
+    if (userData) {
+      try {
+        userProfile = await getProfile(userData);
+      } catch (profileError) {
+        console.error("Error fetching user profile (database may not be initialized):", profileError);
+        userProfile = null;
+      }
+    }
+
+    const isAdmin = userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true";
     const isAuthenticated = !!(userData || context.env.ADMIN_USER === "true");
 
     return {

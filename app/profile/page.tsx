@@ -7,7 +7,8 @@ export const runtime = "edge";
 
 export default async function Profile() {
   const { isAdmin, isAuthenticated, userProfile } = await getAuthStatus();
-  if (!isAuthenticated) {
+
+  if (!isAuthenticated || !userProfile) {
     return redirect("/login");
   }
 
@@ -15,7 +16,7 @@ export default async function Profile() {
     <section className="mx-10 my-10 flex flex-col gap-2">
       <p>Tu informacion:</p>
       <p>Username: {userProfile.username}</p>
-      <p>Email: {userProfile.email}</p>
+      <p>Email: {userProfile.email || "No especificado"}</p>
       <div className="flex flex-col gap-1">
         <p>Cerrar Sesion:</p>
         <Link
