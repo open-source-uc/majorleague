@@ -38,3 +38,28 @@ yarn-error.log*
 next-env.d.ts
 .open-next
 .wrangler
+/generated/prisma
+
+# Backup files - NEVER commit real backups to public repositories
+backups/
+*.sql
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# OS files
+.DS_Store
+Thumbs.db 
+
+# If sh is executed on /migrations
+/migrations/node_modules
+
+
+# Sql logs
+/migrations/logs/*
+/migrations/logs/
+
+.dev.vars

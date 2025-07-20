@@ -1,176 +1,463 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
+import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
 
-import { createClient } from "@/lib/supabase/server";
-import { Tables, TablesInsert, TablesUpdate } from "@/lib/types/database";
+import { getAuthStatus } from "@/lib/services/auth";
+import type { Team } from "@/lib/types";
 
-import { ActionResponse, createErrorResponse, createSuccessResponse } from "./types";
+// Validation schemas
+const teamCreateSchema = z.object({
+  name: z
+    .string()
+    .min(2, "El nombre del equipo debe tener al menos 2 caracteres")
+    .max(50, "El nombre del equipo no puede exceder los 50 caracteres"),
+  major: z.string().max(50, "La carrera no puede exceder los 50 caracteres").optional(),
+  captain_username: z
+    .string()
+    .min(1, "El username del capitán es requerido")
+    .max(25, "El username del capitán no puede exceder los 25 caracteres"),
+});
 
-type Team = Tables<"teams">;
-type TeamInsert = TablesInsert<"teams">;
-type TeamUpdate = TablesUpdate<"teams">;
+const teamUpdateSchema = z.object({
+  id: z.number().min(1, "El ID del equipo es requerido"),
+  name: z
+    .string()
+    .min(2, "El nombre del equipo debe tener al menos 2 caracteres")
+    .max(50, "El nombre del equipo no puede exceder los 50 caracteres"),
+  major: z.string().max(50, "La carrera no puede exceder los 50 caracteres").optional(),
+  captain_username: z.string().max(25, "El username del capitán no puede exceder los 25 caracteres").optional(),
+});
 
-// UUID validation schema
-const uuidSchema = z.string().uuid("Invalid UUID format");
+const teamDeleteSchema = z.object({
+  id: z.number().min(1, "El ID del equipo es requerido"),
+});
 
-export async function getTeams() {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("teams")
-    .select("id, name, major, captain_id, created_at")
-    .order("name", { ascending: true });
+// Database operations
+export async function getTeams(): Promise<Team[]> {
+  const { env } = getRequestContext();
+  const teams = await env.DB.prepare(
+    `
+    SELECT t.id, t.name, t.captain_id, t.major, t.created_at, t.updated_at,
+           p.username as captain_username
+    FROM teams t
+    LEFT JOIN profiles p ON t.captain_id = p.id
+    ORDER BY t.created_at DESC
+  `,
+  ).all<Team>();
 
-  if (error) return null;
-
-  return data as Team[];
+  return teams.results || [];
 }
 
+export async function getTeamById(id: number): Promise<Team | null> {
+  const { env } = getRequestContext();
+  const team = await env.DB.prepare(
+    `
+    SELECT t.id, t.name, t.captain_id, t.major, t.created_at, t.updated_at,
+           p.username as captain_username
+    FROM teams t
+    LEFT JOIN profiles p ON t.captain_id = p.id
+    WHERE t.id = ?
+  `,
+  )
+    .bind(id)
+    .first<Team>();
+
+  return team || null;
+}
+
+// Server actions
 export async function createTeam(
-  prev: ActionResponse<TeamInsert>,
-  formData: FormData,
-): Promise<ActionResponse<TeamInsert>> {
-  try {
-    const supabase = await createClient();
-
-    const schema = z.object({
-      name: z.string().min(1, "Team name is required"),
-      major: z.string().min(1, "Major is required").optional(),
-      captain_id: z.string().uuid().nullable().optional(),
-    });
-
-    const body: TeamInsert = {
-      name: formData.get("name") as string,
-      major: (formData.get("major") as string) || null,
-      captain_id: null,
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      name: string;
+      major?: string;
+      captain_username: string;
     };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para crear equipos",
+      body: {
+        name: formData.get("name") as string,
+        major: formData.get("major") as string,
+        captain_username: formData.get("captain_username") as string,
+      },
+    };
+  }
 
-    const { success, data, error: validationError } = schema.safeParse(body);
+  const body = {
+    name: formData.get("name") as string,
+    major: (formData.get("major") as string) || undefined,
+    captain_username: formData.get("captain_username") as string,
+  };
 
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
+  const parsed = teamCreateSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "Revisa los campos e inténtalo de nuevo.",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingTeam = await env.DB.prepare(
+      `
+      SELECT id FROM teams WHERE name = ?
+    `,
+    )
+      .bind(parsed.data.name)
+      .first();
+
+    if (existingTeam) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "Ya existe un equipo con ese nombre",
+        body,
+      };
     }
 
-    const { error } = await supabase.from("teams").insert(data);
+    const captainUser = await env.DB.prepare(
+      `
+      SELECT id FROM profiles WHERE username = ?
+    `,
+    )
+      .bind(parsed.data.captain_username)
+      .first<{ id: string }>();
 
-    if (error) {
-      return createErrorResponse(error.message || "Error creating team", body);
+    if (!captainUser) {
+      return {
+        success: 0,
+        errors: 1,
+        message: `No se encontró un usuario con el username "${parsed.data.captain_username}"`,
+        body,
+      };
     }
 
-    return createSuccessResponse("Team created successfully", {
-      name: "",
-      major: null,
-      captain_id: null,
-    });
+    await env.DB.prepare(
+      `
+      INSERT INTO teams (name, captain_id, major, created_at, updated_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `,
+    )
+      .bind(parsed.data.name, captainUser.id, parsed.data.major || null)
+      .run();
+
+    revalidatePath("/admin/dashboard/teams");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Equipo "${parsed.data.name}" creado exitosamente`,
+      body,
+    };
   } catch (error) {
-    return createErrorResponse("Unexpected error creating team", {
-      name: formData.get("name") as string,
-      major: (formData.get("major") as string) || null,
-      captain_id: null,
-    });
+    console.error("Error creating team:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al crear el equipo. Inténtalo de nuevo.",
+      body,
+    };
   }
 }
 
 export async function updateTeam(
-  prev: ActionResponse<TeamUpdate & { id: string }>,
-  formData: FormData,
-): Promise<ActionResponse<TeamUpdate & { id: string }>> {
-  try {
-    const supabase = await createClient();
-
-    const schema = z
-      .object({
-        id: uuidSchema,
-        name: z.string().min(1, "Team name cannot be empty").optional(),
-        major: z.string().min(1, "Major cannot be empty").optional(),
-        captain_id: z.string().uuid().nullable().optional(),
-      })
-      .refine(
-        (data) => {
-          const hasValidFields = Object.entries(data).some(([key, value]) => {
-            if (key === "id") return false;
-            return value !== undefined && value !== null && value !== "";
-          });
-          return hasValidFields;
-        },
-        {
-          message: "At least one field must be provided for update",
-        },
-      );
-
-    const body: TeamUpdate & { id: string } = {
-      id: (formData.get("id") as string).trim(),
-      name: (formData.get("name") as string)?.trim() || undefined,
-      major: (formData.get("major") as string)?.trim() || undefined,
-      captain_id: null,
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      id: number;
+      name: string;
+      major?: string;
+      captain_username?: string;
     };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para actualizar equipos",
+      body: {
+        id: parseInt(formData.get("id") as string) || 0,
+        name: formData.get("name") as string,
+        major: formData.get("major") as string,
+        captain_username: formData.get("captain_username") as string,
+      },
+    };
+  }
 
-    const { success, data, error: validationError } = schema.safeParse(body);
+  const id = parseInt(formData.get("id") as string);
+  if (isNaN(id)) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID del equipo inválido",
+      body: {
+        id: 0,
+        name: formData.get("name") as string,
+        major: formData.get("major") as string,
+        captain_username: formData.get("captain_username") as string,
+      },
+    };
+  }
 
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
+  const body = {
+    id,
+    name: formData.get("name") as string,
+    major: (formData.get("major") as string) || undefined,
+    captain_username: (formData.get("captain_username") as string) || undefined,
+  };
+
+  const parsed = teamUpdateSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "Revisa los campos e inténtalo de nuevo.",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingTeam = await env.DB.prepare(
+      `
+      SELECT id FROM teams WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first();
+
+    if (!existingTeam) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "El equipo no existe",
+        body,
+      };
     }
 
-    const updateData: TeamUpdate = {};
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== "id" && value !== undefined && value !== null && value !== "") {
-        updateData[key as keyof TeamUpdate] = value;
+    const nameConflict = await env.DB.prepare(
+      `
+      SELECT id FROM teams WHERE name = ? AND id != ?
+    `,
+    )
+      .bind(parsed.data.name, parsed.data.id)
+      .first();
+
+    if (nameConflict) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "Ya existe otro equipo con ese nombre",
+        body,
+      };
+    }
+
+    let captainId = null;
+    if (parsed.data.captain_username) {
+      const captainUser = await env.DB.prepare(
+        `
+        SELECT id FROM profiles WHERE username = ?
+      `,
+      )
+        .bind(parsed.data.captain_username)
+        .first<{ id: string }>();
+
+      if (!captainUser) {
+        return {
+          success: 0,
+          errors: 1,
+          message: `No se encontró un usuario con el username "${parsed.data.captain_username}"`,
+          body,
+        };
       }
-    });
-
-    if (Object.keys(updateData).length === 0) {
-      return createErrorResponse("No valid fields to update", body);
+      captainId = captainUser.id;
     }
 
-    const { error } = await supabase.from("teams").update(updateData).eq("id", data.id);
-
-    if (error) {
-      return createErrorResponse(error.message || "Error updating team", body);
+    if (captainId) {
+      await env.DB.prepare(
+        `
+        UPDATE teams 
+        SET name = ?, major = ?, captain_id = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+      )
+        .bind(parsed.data.name, parsed.data.major || null, captainId, parsed.data.id)
+        .run();
+    } else {
+      await env.DB.prepare(
+        `
+        UPDATE teams 
+        SET name = ?, major = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+      )
+        .bind(parsed.data.name, parsed.data.major || null, parsed.data.id)
+        .run();
     }
 
-    return createSuccessResponse("Team updated successfully", body);
+    revalidatePath("/admin/dashboard/teams");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Equipo "${parsed.data.name}" actualizado exitosamente`,
+      body,
+    };
   } catch (error) {
-    return createErrorResponse("Unexpected error updating team", {
-      id: (formData.get("id") as string) || "",
-      name: (formData.get("name") as string) || undefined,
-      major: (formData.get("major") as string) || undefined,
-      captain_id: null,
-    });
+    console.error("Error updating team:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al actualizar el equipo. Inténtalo de nuevo.",
+      body,
+    };
   }
 }
 
 export async function deleteTeam(
-  prev: ActionResponse<{ id: string }>,
-  formData: FormData,
-): Promise<ActionResponse<{ id: string }>> {
-  try {
-    const supabase = await createClient();
-
-    const schema = z.object({
-      id: uuidSchema,
-    });
-
-    const body = {
-      id: (formData.get("id") as string).trim(),
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      id: number;
     };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para eliminar equipos",
+      body: {
+        id: parseInt(formData.get("id") as string) || 0,
+      },
+    };
+  }
 
-    const { success, data, error: validationError } = schema.safeParse(body);
+  const id = parseInt(formData.get("id") as string);
+  if (isNaN(id)) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID del equipo inválido",
+      body: {
+        id: 0,
+      },
+    };
+  }
 
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
+  const body = {
+    id,
+  };
+
+  const parsed = teamDeleteSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID del equipo inválido",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingTeam = await env.DB.prepare(
+      `
+      SELECT id, name FROM teams WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first<{ id: number; name: string }>();
+
+    if (!existingTeam) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "El equipo no existe",
+        body,
+      };
     }
 
-    const { error } = await supabase.from("teams").delete().eq("id", data.id);
+    const hasPlayers = await env.DB.prepare(
+      `
+      SELECT COUNT(*) as count FROM players WHERE team_id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first<{ count: number }>();
 
-    if (error) {
-      return createErrorResponse(error.message || "Error deleting team", body);
+    const hasMatches = await env.DB.prepare(
+      `
+      SELECT COUNT(*) as count FROM matches 
+      WHERE local_team_id = ? OR visitor_team_id = ?
+    `,
+    )
+      .bind(parsed.data.id, parsed.data.id)
+      .first<{ count: number }>();
+
+    if ((hasPlayers?.count ?? 0) > 0 || (hasMatches?.count ?? 0) > 0) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "No se puede eliminar el equipo porque tiene jugadores o partidos asociados",
+        body,
+      };
     }
 
-    return createSuccessResponse("Team deleted successfully", body);
+    await env.DB.prepare(
+      `
+      DELETE FROM teams WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .run();
+
+    revalidatePath("/admin/dashboard/teams");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Equipo "${existingTeam.name}" eliminado exitosamente`,
+      body,
+    };
   } catch (error) {
-    return createErrorResponse("Unexpected error deleting team", {
-      id: (formData.get("id") as string) || "",
-    });
+    console.error("Error deleting team:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al eliminar el equipo. Inténtalo de nuevo.",
+      body,
+    };
   }
 }

@@ -1,192 +1,454 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
+import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
 
-import { createClient } from "@/lib/supabase/server";
-import { Tables, TablesInsert, TablesUpdate } from "@/lib/types/database";
+import { getAuthStatus } from "@/lib/services/auth";
+import type { Competition } from "@/lib/types";
 
-import { ActionResponse, createErrorResponse, createSuccessResponse } from "./types";
+// Validation schemas
+const competitionCreateSchema = z.object({
+  name: z
+    .string()
+    .min(2, "El nombre de la competición debe tener al menos 2 caracteres")
+    .max(100, "El nombre de la competición no puede exceder los 100 caracteres"),
+  year: z.number().min(2020, "El año debe ser posterior a 2020").max(2050, "El año no puede ser posterior a 2050"),
+  semester: z.number().min(1, "El semestre debe ser 1 o 2").max(2, "El semestre debe ser 1 o 2"),
+  start_date: z.string().min(1, "La fecha de inicio es requerida"),
+  end_date: z.string().min(1, "La fecha de fin es requerida"),
+});
 
-type Competition = Tables<"competitions">;
-type CompetitionInsert = TablesInsert<"competitions">;
-type CompetitionUpdate = TablesUpdate<"competitions">;
+const competitionUpdateSchema = z.object({
+  id: z.number().min(1, "El ID de la competición es requerido"),
+  name: z
+    .string()
+    .min(2, "El nombre de la competición debe tener al menos 2 caracteres")
+    .max(100, "El nombre de la competición no puede exceder los 100 caracteres"),
+  year: z.number().min(2020, "El año debe ser posterior a 2020").max(2050, "El año no puede ser posterior a 2050"),
+  semester: z.number().min(1, "El semestre debe ser 1 o 2").max(2, "El semestre debe ser 1 o 2"),
+  start_date: z.string().min(1, "La fecha de inicio es requerida"),
+  end_date: z.string().min(1, "La fecha de fin es requerida"),
+});
 
-// UUID validation schema
-const uuidSchema = z.string().uuid("Invalid UUID format");
+const competitionDeleteSchema = z.object({
+  id: z.number().min(1, "El ID de la competición es requerido"),
+});
 
-export async function getCompetitions() {
-  // 2 sec promise for testing
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+// Database operations
+export async function getCompetitions(): Promise<Competition[]> {
+  const { env } = getRequestContext();
+  const competitions = await env.DB.prepare(
+    `
+    SELECT id, name, year, semester, start_date, end_date, created_at
+    FROM competitions
+    ORDER BY year DESC, semester DESC
+  `,
+  ).all<Competition>();
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("competitions")
-    .select("id, name, year, semester, start_date, end_date")
-    .order("name", { ascending: true });
-
-  if (error) return null;
-
-  return data as Competition[];
+  return competitions.results || [];
 }
 
-export async function deleteCompetition(
-  prev: ActionResponse<{ id: string }>,
-  formData: FormData,
-): Promise<ActionResponse<{ id: string }>> {
-  try {
-    const supabase = await createClient();
+export async function getCompetitionById(id: number): Promise<Competition | null> {
+  const { env } = getRequestContext();
+  const competition = await env.DB.prepare(
+    `
+    SELECT id, name, year, semester, start_date, end_date, created_at
+    FROM competitions
+    WHERE id = ?
+  `,
+  )
+    .bind(id)
+    .first<Competition>();
 
-    const schema = z.object({
-      id: uuidSchema,
-    });
-
-    const body = {
-      id: (formData.get("id") as string).trim(),
-    };
-
-    const { success, data, error: validationError } = schema.safeParse(body);
-
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
-    }
-
-    const { error } = await supabase.from("competitions").delete().eq("id", data.id);
-
-    if (error) {
-      return createErrorResponse(error.message || "Error deleting competition", body);
-    }
-
-    return createSuccessResponse("Competition deleted successfully", body);
-  } catch (error) {
-    return createErrorResponse("Unexpected error deleting competition", {
-      id: (formData.get("id") as string) || "",
-    });
-  }
+  return competition || null;
 }
 
+// Server actions
 export async function createCompetition(
-  prev: ActionResponse<CompetitionInsert>,
-  formData: FormData,
-): Promise<ActionResponse<CompetitionInsert>> {
-  try {
-    const supabase = await createClient();
-
-    const schema = z.object({
-      name: z.string().min(1, "Competition name is required"),
-      year: z.number().min(2000, "Year must be 2000 or later"),
-      semester: z.string().min(1, "Semester is required").optional(),
-      start_date: z.string().min(1, "Start date is required").optional(),
-      end_date: z.string().min(1, "End date is required").optional(),
-    });
-
-    const body: CompetitionInsert = {
-      name: (formData.get("name") as string).trim(),
-      year: Number(formData.get("year")),
-      semester: (formData.get("semester") as string)?.trim() || null,
-      start_date: (formData.get("start_date") as string)?.trim() || null,
-      end_date: (formData.get("end_date") as string)?.trim() || null,
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      name: string;
+      year: number;
+      semester: number;
+      start_date: string;
+      end_date: string;
     };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para crear competiciones",
+      body: {
+        name: formData.get("name") as string,
+        year: parseInt(formData.get("year") as string) || 0,
+        semester: parseInt(formData.get("semester") as string) || 0,
+        start_date: formData.get("start_date") as string,
+        end_date: formData.get("end_date") as string,
+      },
+    };
+  }
 
-    const { success, data, error: validationError } = schema.safeParse(body);
+  const body = {
+    name: formData.get("name") as string,
+    year: parseInt(formData.get("year") as string) || 0,
+    semester: parseInt(formData.get("semester") as string) || 0,
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string,
+  };
 
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
+  const parsed = competitionCreateSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "Revisa los campos e inténtalo de nuevo.",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingCompetition = await env.DB.prepare(
+      `
+      SELECT id FROM competitions WHERE year = ? AND semester = ?
+    `,
+    )
+      .bind(parsed.data.year, parsed.data.semester)
+      .first();
+
+    if (existingCompetition) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "Ya existe una competición para este año y semestre",
+        body,
+      };
     }
 
-    const { error } = await supabase.from("competitions").insert(data);
+    const startDate = new Date(parsed.data.start_date);
+    const endDate = new Date(parsed.data.end_date);
 
-    if (error) {
-      return createErrorResponse(error.message || "Error creating competition", body);
+    if (startDate >= endDate) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "La fecha de inicio debe ser anterior a la fecha de fin",
+        body,
+      };
     }
 
-    return createSuccessResponse("Competition created successfully", {
-      name: "",
-      year: 0,
-      semester: null,
-      start_date: null,
-      end_date: null,
-    });
+    await env.DB.prepare(
+      `
+      INSERT INTO competitions (name, year, semester, start_date, end_date, created_at)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `,
+    )
+      .bind(parsed.data.name, parsed.data.year, parsed.data.semester, parsed.data.start_date, parsed.data.end_date)
+      .run();
+
+    revalidatePath("/admin/dashboard/competitions");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Competición "${parsed.data.name}" creada exitosamente`,
+      body,
+    };
   } catch (error) {
-    return createErrorResponse("Unexpected error creating competition", {
-      name: (formData.get("name") as string) || "",
-      year: Number(formData.get("year")) || 0,
-      semester: (formData.get("semester") as string) || null,
-      start_date: (formData.get("start_date") as string) || null,
-      end_date: (formData.get("end_date") as string) || null,
-    });
+    console.error("Error creating competition:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al crear la competición. Inténtalo de nuevo.",
+      body,
+    };
   }
 }
 
 export async function updateCompetition(
-  prev: ActionResponse<CompetitionUpdate & { id: string }>,
-  formData: FormData,
-): Promise<ActionResponse<CompetitionUpdate & { id: string }>> {
-  try {
-    const supabase = await createClient();
-
-    const schema = z
-      .object({
-        id: uuidSchema,
-        name: z.string().min(1, "Competition name cannot be empty").optional(),
-        year: z.number().min(2000, "Year must be 2000 or later").optional(),
-        semester: z.string().min(1, "Semester cannot be empty").optional(),
-        start_date: z.string().min(1, "Start date cannot be empty").optional(),
-        end_date: z.string().min(1, "End date cannot be empty").optional(),
-      })
-      .refine(
-        (data) => {
-          const hasValidFields = Object.entries(data).some(([key, value]) => {
-            if (key === "id") return false;
-            return value !== undefined && value !== null && value !== "";
-          });
-          return hasValidFields;
-        },
-        {
-          message: "At least one field must be provided for update",
-        },
-      );
-
-    const body: CompetitionUpdate & { id: string } = {
-      id: (formData.get("id") as string).trim(),
-      name: (formData.get("name") as string)?.trim() || undefined,
-      year: formData.get("year") ? Number(formData.get("year")) : undefined,
-      semester: (formData.get("semester") as string)?.trim() || undefined,
-      start_date: (formData.get("start_date") as string)?.trim() || undefined,
-      end_date: (formData.get("end_date") as string)?.trim() || undefined,
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      id: number;
+      name: string;
+      year: number;
+      semester: number;
+      start_date: string;
+      end_date: string;
     };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para actualizar competiciones",
+      body: {
+        id: parseInt(formData.get("id") as string) || 0,
+        name: formData.get("name") as string,
+        year: parseInt(formData.get("year") as string) || 0,
+        semester: parseInt(formData.get("semester") as string) || 0,
+        start_date: formData.get("start_date") as string,
+        end_date: formData.get("end_date") as string,
+      },
+    };
+  }
 
-    const { success, data, error: validationError } = schema.safeParse(body);
+  const id = parseInt(formData.get("id") as string);
+  if (isNaN(id)) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID de la competición inválido",
+      body: {
+        id: 0,
+        name: formData.get("name") as string,
+        year: parseInt(formData.get("year") as string) || 0,
+        semester: parseInt(formData.get("semester") as string) || 0,
+        start_date: formData.get("start_date") as string,
+        end_date: formData.get("end_date") as string,
+      },
+    };
+  }
 
-    if (!success) {
-      return createErrorResponse(`Validation failed: ${validationError.errors.map((e) => e.message).join(", ")}`, body);
+  const body = {
+    id,
+    name: formData.get("name") as string,
+    year: parseInt(formData.get("year") as string) || 0,
+    semester: parseInt(formData.get("semester") as string) || 0,
+    start_date: formData.get("start_date") as string,
+    end_date: formData.get("end_date") as string,
+  };
+
+  const parsed = competitionUpdateSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "Revisa los campos e inténtalo de nuevo.",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingCompetition = await env.DB.prepare(
+      `
+      SELECT id FROM competitions WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first();
+
+    if (!existingCompetition) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "La competición no existe",
+        body,
+      };
     }
 
-    const updateData: CompetitionUpdate = {};
-    Object.entries(data).forEach(([key, value]) => {
-      if (key !== "id" && value !== undefined && value !== null && value !== "") {
-        (updateData as any)[key] = value;
-      }
-    });
+    const yearSemesterConflict = await env.DB.prepare(
+      `
+      SELECT id FROM competitions WHERE year = ? AND semester = ? AND id != ?
+    `,
+    )
+      .bind(parsed.data.year, parsed.data.semester, parsed.data.id)
+      .first();
 
-    if (Object.keys(updateData).length === 0) {
-      return createErrorResponse("No valid fields to update", body);
+    if (yearSemesterConflict) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "Ya existe otra competición para este año y semestre",
+        body,
+      };
     }
 
-    const { error } = await supabase.from("competitions").update(updateData).eq("id", data.id);
+    const startDate = new Date(parsed.data.start_date);
+    const endDate = new Date(parsed.data.end_date);
 
-    if (error) {
-      return createErrorResponse(error.message || "Error updating competition", body);
+    if (startDate >= endDate) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "La fecha de inicio debe ser anterior a la fecha de fin",
+        body,
+      };
     }
 
-    return createSuccessResponse("Competition updated successfully", body);
+    await env.DB.prepare(
+      `
+      UPDATE competitions 
+      SET name = ?, year = ?, semester = ?, start_date = ?, end_date = ?
+      WHERE id = ?
+    `,
+    )
+      .bind(
+        parsed.data.name,
+        parsed.data.year,
+        parsed.data.semester,
+        parsed.data.start_date,
+        parsed.data.end_date,
+        parsed.data.id,
+      )
+      .run();
+
+    revalidatePath("/admin/dashboard/competitions");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Competición "${parsed.data.name}" actualizada exitosamente`,
+      body,
+    };
   } catch (error) {
-    return createErrorResponse("Unexpected error updating competition", {
-      id: (formData.get("id") as string) || "",
-      name: (formData.get("name") as string) || undefined,
-      year: formData.get("year") ? Number(formData.get("year")) : undefined,
-      semester: (formData.get("semester") as string) || undefined,
-      start_date: (formData.get("start_date") as string) || undefined,
-      end_date: (formData.get("end_date") as string) || undefined,
-    });
+    console.error("Error updating competition:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al actualizar la competición. Inténtalo de nuevo.",
+      body,
+    };
+  }
+}
+
+export async function deleteCompetition(
+  _prev: {
+    errors: number;
+    success: number;
+    message: string;
+    body: {
+      id: number;
+    };
+  },
+  formData: FormData,
+) {
+  const { isAdmin } = await getAuthStatus();
+  if (!isAdmin) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "No tienes permisos para eliminar competiciones",
+      body: {
+        id: parseInt(formData.get("id") as string) || 0,
+      },
+    };
+  }
+
+  const id = parseInt(formData.get("id") as string);
+  if (isNaN(id)) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID de la competición inválido",
+      body: {
+        id: 0,
+      },
+    };
+  }
+
+  const body = {
+    id,
+  };
+
+  const parsed = competitionDeleteSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "ID de la competición inválido",
+      body,
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const existingCompetition = await env.DB.prepare(
+      `
+      SELECT id, name FROM competitions WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first<{ id: number; name: string }>();
+
+    if (!existingCompetition) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "La competición no existe",
+        body,
+      };
+    }
+
+    const hasMatches = await env.DB.prepare(
+      `
+      SELECT COUNT(*) as count FROM matches WHERE competition_id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first<{ count: number }>();
+
+    const hasTeamCompetitions = await env.DB.prepare(
+      `
+      SELECT COUNT(*) as count FROM team_competitions WHERE competition_id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .first<{ count: number }>();
+
+    if ((hasMatches?.count ?? 0) > 0 || (hasTeamCompetitions?.count ?? 0) > 0) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "No se puede eliminar la competición porque tiene partidos o equipos asociados",
+        body,
+      };
+    }
+
+    await env.DB.prepare(
+      `
+      DELETE FROM competitions WHERE id = ?
+    `,
+    )
+      .bind(parsed.data.id)
+      .run();
+
+    revalidatePath("/admin/dashboard/competitions");
+
+    return {
+      success: 1,
+      errors: 0,
+      message: `Competición "${existingCompetition.name}" eliminada exitosamente`,
+      body,
+    };
+  } catch (error) {
+    console.error("Error deleting competition:", error);
+    return {
+      success: 0,
+      errors: 1,
+      message: "Error al eliminar la competición. Inténtalo de nuevo.",
+      body,
+    };
   }
 }
