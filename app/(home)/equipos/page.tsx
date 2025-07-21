@@ -1,63 +1,116 @@
 import Image from "next/image";
 
-import image1 from "@/../public/assets/image1.png";
-import image2 from "@/../public/assets/image2.png";
+import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
+import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
+import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
+import ManchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceLogo.png";
+import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
+import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
+import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
+import OldBoysLogo from "@/../public/assets/teams/OldBoysLogo.png";
+import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const runtime = "edge";
+
+const teams = [
+  {
+    name: "Atletico Byte",
+    logo: AtleticoByteLogo,
+    departments: "Computación - Software",
+    alt: "Logo de Atletico Byte",
+  },
+  {
+    name: "Industrial FC",
+    logo: IndustrialFCLogo,
+    departments: "Investigación Operativa",
+    alt: "Logo de Industrial FC",
+  },
+  {
+    name: "Manchester Civil",
+    logo: ManchesterCivilLogo,
+    departments: "Civil - Transporte - Construcción",
+    alt: "Logo de Manchester Civil",
+  },
+  {
+    name: "Manchester Science",
+    logo: ManchesterScienceLogo,
+    departments: "Química - Física - Matemática Biomédica - Biología",
+    alt: "Logo de Manchester Science",
+  },
+  {
+    name: "Minerham Forest",
+    logo: MinerhamForestLogo,
+    departments: "Minería - Ambiental - Hidráulica - Geociencias",
+    alt: "Logo de Minerham Forest",
+  },
+  {
+    name: "Naranja Mecanica",
+    logo: NaranjaMecanicaLogo,
+    departments: "Mecánica - Diseño e Innovación (IDI)",
+    alt: "Logo de Naranja Mecanica",
+  },
+  {
+    name: "New Boys",
+    logo: NewBoysLogo,
+    departments: "Novatos",
+    alt: "Logo de New Boys",
+  },
+  {
+    name: "Old Boys",
+    logo: OldBoysLogo,
+    departments: "Ex Alumnos",
+    alt: "Logo de Old Boys",
+  },
+  {
+    name: "Robovolt United",
+    logo: RobovoltUnitedLogo,
+    departments: "Eléctrica - Robótica",
+    alt: "Logo de Robovolt United",
+  },
+];
 
 export default function EquiposPage() {
   return (
     <>
-      <h1 className="text-primary-darken mt-10 text-center text-4xl font-bold">Equipos</h1>
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row">
-        <div className="w-full max-w-[399px]">
-          <Image
-            src={image1}
-            alt="Major League UC - Comunidad de fútbol"
-            className="h-full w-full rounded-lg object-cover"
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 399px"
-          />
-        </div>
-        <div className="flex max-w-xl flex-col gap-5">
-          <h2 className="text-2xl font-bold">Lorem ipsum dolor sit amet</h2>
-          <p className="text-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna leo, placerat quis eleifend eget,
-            accumsan dignissim sapien. Nunc tempus nunc in nulla lacinia, eget eleifend orci luctus. Suspendisse ac
-            mauris elementum, posuere nisl vitae, ornare arcu. Nullam sem enim, molestie sed iaculis cursus, consectetur
-            id libero. Fusce faucibus vitae sem et volutpat. Maecenas sed euismod elit.
-          </p>
-          <p className="text-lg">
-            Etiam sollicitudin eu ante sed auctor. In vitae arcu quam. Nunc tincidunt, ligula placerat dictum tincidunt,
-            risus risus commodo ex, nec eleifend enim magna ut mauris. Donec tempor nec ante ac sollicitudin. Orci
-            varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce non aliquam elit,
-            non vulputate nisl.
-          </p>
+      <h1 className="text-foreground mt-10 px-5 text-center text-4xl font-bold">
+        Los Equipos de <span className="text-primary-darken">Major League UC</span>
+      </h1>
+
+      <section className="px-5 py-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {teams.map((team, index) => (
+              <div
+                key={team.name}
+                className="bg-background-header border-border-header hover:border-primary/50 flex flex-col items-center rounded-lg border p-6 transition-all"
+              >
+                <div className="mb-4 flex h-24 w-24 items-center justify-center">
+                  <Image
+                    src={team.logo}
+                    alt={team.alt}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                    sizes="96px"
+                    width={96}
+                    height={96}
+                  />
+                </div>
+                <h3 className="text-primary mb-3 text-center text-xl font-bold">{team.name}</h3>
+                <p className="text-ml-grey text-center text-sm leading-relaxed">{team.departments}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row-reverse">
-        <div className="w-full max-w-[399px]">
-          <Image
-            src={image2}
-            alt="Espacio para jugar fútbol en Major League UC"
-            className="h-full w-full rounded-lg object-cover"
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 399px"
-          />
-        </div>
-        <div className="flex max-w-xl flex-col gap-5">
-          <h2 className="text-2xl font-bold">Lorem ipsum dolor sit amet</h2>
-          <p className="text-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna leo, placerat quis eleifend eget,
-            accumsan dignissim sapien. Nunc tempus nunc in nulla lacinia, eget eleifend orci luctus. Suspendisse ac
-            mauris elementum, posuere nisl vitae, ornare arcu. Nullam sem enim, molestie sed iaculis cursus, consectetur
-            id libero. Fusce faucibus vitae sem et volutpat. Maecenas sed euismod elit.
-          </p>
-          <p className="text-lg">
-            Etiam sollicitudin eu ante sed auctor. In vitae arcu quam. Nunc tincidunt, ligula placerat dictum tincidunt,
-            risus risus commodo ex, nec eleifend enim magna ut mauris. Donec tempor nec ante ac sollicitudin. Orci
-            varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce non aliquam elit,
-            non vulputate nisl.
+
+      <section className="mb-4 flex flex-col items-center justify-center gap-10 px-5 py-10">
+        <div className="flex max-w-4xl flex-col gap-5 text-center">
+          <h2 className="text-primary-darken text-2xl font-bold">Una Liga, Múltiples Especialidades</h2>
+          <p className="text-foreground text-lg">
+            Cada equipo representa la excelencia de su área académica trasladada al campo de juego. Desde la precisión
+            de Ingeniería Civil hasta la innovación de Computación, desde la tradición de los Old Boys hasta el
+            entusiasmo de los New Boys, Major League UC es donde la diversidad académica se une en la pasión por el
+            fútbol.
           </p>
         </div>
       </section>
