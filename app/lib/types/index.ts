@@ -40,7 +40,7 @@ export interface Player {
   first_name: string;
   last_name: string;
   nickname?: string;
-  age: number;
+  birthday: string;
   position: "GK" | "DEF" | "MID" | "FWD";
   created_at?: string;
   updated_at?: string;
@@ -104,7 +104,8 @@ export interface JoinTeamRequest {
   date: string;
   first_name: string;
   last_name: string;
-  age: number;
+  nickname?: string;
+  birthday: string;
   preferred_position: "GK" | "DEF" | "MID" | "FWD";
   status: "pending" | "approved" | "rejected";
   notes?: string;
@@ -310,7 +311,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "team_name", label: "Equipo", type: "text" },
       { key: "profile_username", label: "Usuario", type: "text" },
       { key: "position", label: "Posición", type: "badge" },
-      { key: "age", label: "Edad", type: "text" },
+      { key: "birthday", label: "Fecha de Nacimiento", type: "date" },
     ],
     actions: [
       { type: "create", label: "Crear Jugador", variant: "primary" },
@@ -354,10 +355,9 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         required: false,
       },
       {
-        name: "age",
-        label: "Edad",
-        type: "number",
-        placeholder: "22",
+        name: "birthday",
+        label: "Fecha de Nacimiento",
+        type: "date",
         required: true,
       },
       {
@@ -647,6 +647,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "first_name", label: "Nombre", type: "text" },
       { key: "last_name", label: "Apellido", type: "text" },
       { key: "team_name", label: "Equipo", type: "text" },
+      { key: "nickname", label: "Apodo", type: "text" },
       { key: "profile_username", label: "Usuario", type: "text" },
       { key: "preferred_position", label: "Posición", type: "badge" },
       { key: "status", label: "Estado", type: "badge" },
@@ -686,10 +687,16 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         required: true,
       },
       {
-        name: "age",
-        label: "Edad",
-        type: "number",
-        placeholder: "22",
+        name: "nickname",
+        label: "Apodo",
+        type: "text",
+        placeholder: "Juanito",
+        required: false,
+      },
+      {
+        name: "birthday",
+        label: "Fecha de Nacimiento",
+        type: "date",
         required: true,
       },
       {

@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { getAuthStatus } from "@/lib/services/auth";
 import type { Player } from "@/lib/types";
+import { calculateAge } from "@/lib/utils/cn";
 
 // Validation schemas
 const playerCreateSchema = z.object({
@@ -15,7 +16,14 @@ const playerCreateSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
   nickname: z.string().max(25, "El apodo no puede exceder los 25 caracteres").optional(),
-  age: z.number().min(15, "La edad mínima es 15 años").max(50, "La edad máxima es 50 años"),
+  birthday: z
+    .string()
+    .min(1, "La fecha de nacimiento es requerida")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const age = calculateAge(date);
+      return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
+    }, "La edad debe estar entre 15 y 50 años"),
   position: z.enum(["GK", "DEF", "MID", "FWD"]),
 });
 
@@ -26,7 +34,14 @@ const playerUpdateSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
   nickname: z.string().max(25, "El apodo no puede exceder los 25 caracteres").optional(),
-  age: z.number().min(15, "La edad mínima es 15 años").max(50, "La edad máxima es 50 años"),
+  birthday: z
+    .string()
+    .min(1, "La fecha de nacimiento es requerida")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const age = calculateAge(date);
+      return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
+    }, "La edad debe estar entre 15 y 50 años"),
   position: z.enum(["GK", "DEF", "MID", "FWD"]),
 });
 
@@ -39,7 +54,7 @@ export async function getPlayers(): Promise<Player[]> {
   const { env } = getRequestContext();
   const players = await env.DB.prepare(
     `
-    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.age, p.position, p.created_at, p.updated_at,
+    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.created_at, p.updated_at,
            t.name as team_name, pr.username as profile_username
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
@@ -55,7 +70,7 @@ export async function getPlayerById(id: number): Promise<Player | null> {
   const { env } = getRequestContext();
   const player = await env.DB.prepare(
     `
-    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.age, p.position, p.created_at, p.updated_at,
+    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.created_at, p.updated_at,
            t.name as team_name, pr.username as profile_username
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
@@ -81,7 +96,7 @@ export async function createPlayer(
       first_name: string;
       last_name: string;
       nickname?: string;
-      age: number;
+      birthday: string;
       position: string;
     };
   },
@@ -99,7 +114,7 @@ export async function createPlayer(
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
         nickname: formData.get("nickname") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
       },
     };
@@ -111,7 +126,7 @@ export async function createPlayer(
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
     nickname: (formData.get("nickname") as string) || undefined,
-    age: parseInt(formData.get("age") as string) || 0,
+    birthday: formData.get("birthday") as string,
     position: formData.get("position") as string,
   };
 
@@ -168,7 +183,7 @@ export async function createPlayer(
 
     await env.DB.prepare(
       `
-      INSERT INTO players (team_id, profile_id, first_name, last_name, nickname, age, position, created_at, updated_at)
+      INSERT INTO players (team_id, profile_id, first_name, last_name, nickname, birthday, position, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
@@ -178,7 +193,7 @@ export async function createPlayer(
         parsed.data.first_name,
         parsed.data.last_name,
         parsed.data.nickname || null,
-        parsed.data.age,
+        parsed.data.birthday,
         parsed.data.position,
       )
       .run();
@@ -214,7 +229,7 @@ export async function updatePlayer(
       first_name: string;
       last_name: string;
       nickname?: string;
-      age: number;
+      birthday: string;
       position: string;
     };
   },
@@ -233,7 +248,7 @@ export async function updatePlayer(
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
         nickname: formData.get("nickname") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
       },
     };
@@ -252,7 +267,7 @@ export async function updatePlayer(
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
         nickname: formData.get("nickname") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
       },
     };
@@ -265,7 +280,7 @@ export async function updatePlayer(
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
     nickname: (formData.get("nickname") as string) || undefined,
-    age: parseInt(formData.get("age") as string) || 0,
+    birthday: formData.get("birthday") as string,
     position: formData.get("position") as string,
   };
 
@@ -336,7 +351,7 @@ export async function updatePlayer(
     await env.DB.prepare(
       `
       UPDATE players 
-      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, age = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, position = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
     )
@@ -346,7 +361,7 @@ export async function updatePlayer(
         parsed.data.first_name,
         parsed.data.last_name,
         parsed.data.nickname || null,
-        parsed.data.age,
+        parsed.data.birthday,
         parsed.data.position,
         parsed.data.id,
       )

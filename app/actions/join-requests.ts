@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { getAuthStatus } from "@/lib/services/auth";
 import type { JoinTeamRequest } from "@/lib/types";
+import { calculateAge } from "@/lib/utils/cn";
 
 // Validation schemas
 const joinRequestCreateSchema = z.object({
@@ -14,7 +15,15 @@ const joinRequestCreateSchema = z.object({
   profile_id: z.string().min(1, "El ID del perfil es requerido"),
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
-  age: z.number().min(15, "La edad mínima es 15 años").max(50, "La edad máxima es 50 años"),
+  nickname: z.string().optional(),
+  birthday: z
+    .string()
+    .min(1, "La fecha de nacimiento es requerida")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const age = calculateAge(date);
+      return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
+    }, "La edad debe estar entre 15 y 50 años"),
   preferred_position: z.enum(["GK", "DEF", "MID", "FWD"]),
   status: z.enum(["pending", "approved", "rejected"]).optional(),
   notes: z.string().optional(),
@@ -26,7 +35,15 @@ const joinRequestUpdateSchema = z.object({
   profile_id: z.string().min(1, "El ID del perfil es requerido"),
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
-  age: z.number().min(15, "La edad mínima es 15 años").max(50, "La edad máxima es 50 años"),
+  nickname: z.string().optional(),
+  birthday: z
+    .string()
+    .min(1, "La fecha de nacimiento es requerida")
+    .refine((date) => {
+      const birthDate = new Date(date);
+      const age = calculateAge(date);
+      return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
+    }, "La edad debe estar entre 15 y 50 años"),
   preferred_position: z.enum(["GK", "DEF", "MID", "FWD"]),
   status: z.enum(["pending", "approved", "rejected"]).optional(),
   notes: z.string().optional(),
@@ -41,7 +58,7 @@ export async function getJoinTeamRequests(): Promise<JoinTeamRequest[]> {
   const { env } = getRequestContext();
   const requests = await env.DB.prepare(
     `
-    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.age, 
+    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
            jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
@@ -58,7 +75,7 @@ export async function getJoinTeamRequestById(id: number): Promise<JoinTeamReques
   const { env } = getRequestContext();
   const request = await env.DB.prepare(
     `
-    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.age, 
+    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.birthday, 
            jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
@@ -84,7 +101,7 @@ export async function createJoinTeamRequest(
       profile_id: string;
       first_name: string;
       last_name: string;
-      age: number;
+      birthday: string;
       preferred_position: string;
       status?: string;
       notes?: string;
@@ -103,7 +120,7 @@ export async function createJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
@@ -116,7 +133,7 @@ export async function createJoinTeamRequest(
     profile_id: formData.get("profile_id") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    age: parseInt(formData.get("age") as string) || 0,
+    birthday: formData.get("birthday") as string,
     preferred_position: formData.get("preferred_position") as string,
     status: (formData.get("status") as string) || "pending",
     notes: (formData.get("notes") as string) || undefined,
@@ -175,8 +192,8 @@ export async function createJoinTeamRequest(
 
     await env.DB.prepare(
       `
-      INSERT INTO join_team_requests (team_id, profile_id, date, first_name, last_name, age, preferred_position, status, notes, created_at, updated_at)
-      VALUES (?, ?, DATE('now'), ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO join_team_requests (team_id, profile_id, date, first_name, last_name, nickname, birthday, preferred_position, status, notes, created_at, updated_at)
+      VALUES (?, ?, DATE('now'), ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
       .bind(
@@ -184,7 +201,8 @@ export async function createJoinTeamRequest(
         parsed.data.profile_id,
         parsed.data.first_name,
         parsed.data.last_name,
-        parsed.data.age,
+        parsed.data.nickname || null,
+        parsed.data.birthday,
         parsed.data.preferred_position,
         parsed.data.status || "pending",
         parsed.data.notes || null,
@@ -221,7 +239,7 @@ export async function updateJoinTeamRequest(
       profile_id: string;
       first_name: string;
       last_name: string;
-      age: number;
+      birthday: string;
       preferred_position: string;
       status?: string;
       notes?: string;
@@ -241,7 +259,7 @@ export async function updateJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
@@ -261,7 +279,7 @@ export async function updateJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
-        age: parseInt(formData.get("age") as string) || 0,
+        birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
@@ -275,7 +293,7 @@ export async function updateJoinTeamRequest(
     profile_id: formData.get("profile_id") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
-    age: parseInt(formData.get("age") as string) || 0,
+    birthday: formData.get("birthday") as string,
     preferred_position: formData.get("preferred_position") as string,
     status: (formData.get("status") as string) || "pending",
     notes: (formData.get("notes") as string) || undefined,
@@ -348,7 +366,7 @@ export async function updateJoinTeamRequest(
     await env.DB.prepare(
       `
       UPDATE join_team_requests 
-      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, age = ?, preferred_position = ?, status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, preferred_position = ?, status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
     )
@@ -357,7 +375,8 @@ export async function updateJoinTeamRequest(
         parsed.data.profile_id,
         parsed.data.first_name,
         parsed.data.last_name,
-        parsed.data.age,
+        parsed.data.nickname || null,
+        parsed.data.birthday,
         parsed.data.preferred_position,
         parsed.data.status || "pending",
         parsed.data.notes || null,

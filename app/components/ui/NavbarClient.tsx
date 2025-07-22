@@ -32,7 +32,7 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
                 EQUIPOS
               </NavLink>
             </li>
-            <li>
+            {/* <li>
               <NavLink href="/posiciones/2025/1" type="mobile" onClick={() => setIsMenuOpen(false)}>
                 TABLA DE POSICIONES
               </NavLink>
@@ -41,11 +41,11 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
               <NavLink href="/acerca" type="mobile" onClick={() => setIsMenuOpen(false)}>
                 ACERCA
               </NavLink>
-            </li>
+            </li> */}
             <li>
               {isAuthenticated ? (
                 <Link
-                  href="/profile"
+                  href="/perfil"
                   className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary rounded-md border-2 border-solid px-10 py-2 font-bold tracking-normal transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >

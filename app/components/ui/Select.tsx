@@ -5,6 +5,7 @@ interface SelectProps {
   defaultValue?: string;
   required?: boolean;
   className?: string;
+  onChange?: (value: string) => void;
 }
 
 export default function Select({
@@ -14,6 +15,7 @@ export default function Select({
   defaultValue = "",
   required = false,
   className = "",
+  onChange,
 }: SelectProps) {
   return (
     <div className={`flex w-full flex-col space-y-2 ${className}`}>
@@ -26,6 +28,7 @@ export default function Select({
         name={name}
         defaultValue={defaultValue}
         required={required}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className="border-border-header bg-background-header text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border-2 p-4 focus:ring-2 focus:outline-hidden"
       >
         <option value="">Seleccionar...</option>
