@@ -1,3 +1,23 @@
+-- Drop all triggers
+DROP TRIGGER IF EXISTS update_profiles_timestamp;
+DROP TRIGGER IF EXISTS update_teams_timestamp;
+DROP TRIGGER IF EXISTS update_players_timestamp;
+DROP TRIGGER IF EXISTS update_matches_timestamp;
+DROP TRIGGER IF EXISTS update_join_requests_timestamp;
+DROP TRIGGER IF EXISTS update_preferences_timestamp;
+DROP TRIGGER IF EXISTS create_player_on_approval;
+DROP TRIGGER IF EXISTS create_player_on_instant_approval;
+DROP TRIGGER IF EXISTS remove_player_on_rejection;
+DROP TRIGGER IF EXISTS prevent_captain_removal;
+DROP TRIGGER IF EXISTS update_scores_and_competition_points;
+DROP TRIGGER IF EXISTS prevent_overlapping_matches;
+DROP TRIGGER IF EXISTS create_team_competition_record;
+DROP TRIGGER IF EXISTS validate_event_minute;
+DROP TRIGGER IF EXISTS cleanup_join_request_on_player_deletion;
+DROP TRIGGER IF EXISTS prevent_duplicate_pending_requests;
+DROP TRIGGER IF EXISTS prevent_request_if_already_player;
+
+
 -- 1. Update timestamps on profile changes
 CREATE TRIGGER update_profiles_timestamp
     AFTER UPDATE ON profiles
@@ -70,7 +90,7 @@ CREATE TRIGGER create_player_on_approval
             first_name, 
             last_name, 
             nickname,
-            age, 
+            birthday, 
             position,
             created_at,
             updated_at
@@ -79,12 +99,8 @@ CREATE TRIGGER create_player_on_approval
             NEW.profile_id,
             NEW.first_name,
             NEW.last_name,
-            CASE 
-                WHEN LENGTH(TRIM(COALESCE(NEW.first_name, ''))) > 0 
-                THEN SUBSTR(NEW.first_name, 1, 1) || LOWER(SUBSTR(NEW.first_name, 2)) || 'ito'
-                ELSE NULL 
-            END,
-            NEW.age,
+            NEW.nickname,
+            NEW.birthday,
             NEW.preferred_position,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
@@ -103,7 +119,7 @@ CREATE TRIGGER create_player_on_instant_approval
             first_name, 
             last_name, 
             nickname,
-            age, 
+            birthday, 
             position,
             created_at,
             updated_at
@@ -112,12 +128,8 @@ CREATE TRIGGER create_player_on_instant_approval
             NEW.profile_id,
             NEW.first_name,
             NEW.last_name,
-            CASE 
-                WHEN LENGTH(TRIM(COALESCE(NEW.first_name, ''))) > 0 
-                THEN SUBSTR(NEW.first_name, 1, 1) || LOWER(SUBSTR(NEW.first_name, 2)) || 'ito'
-                ELSE NULL 
-            END,
-            NEW.age,
+            NEW.nickname,
+            NEW.birthday,
             NEW.preferred_position,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
@@ -252,4 +264,46 @@ CREATE TRIGGER validate_event_minute
     WHEN NEW.minute > 120  -- Allow up to 120 minutes (90 + 30 extra time)
     BEGIN
         SELECT RAISE(ABORT, 'Event minute cannot exceed 120 minutes.');
+    END;
+
+-- 14. Clean up join request when player is deleted
+CREATE TRIGGER cleanup_join_request_on_player_deletion
+    AFTER DELETE ON players
+    FOR EACH ROW
+    BEGIN
+        -- Update the join request status to 'rejected' instead of deleting
+        -- This preserves history but allows new requests
+        UPDATE join_team_requests 
+        SET status = 'rejected',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE profile_id = OLD.profile_id 
+          AND team_id = OLD.team_id 
+          AND status = 'approved';
+    END;
+
+-- 15. Prevent duplicate pending requests for same team/profile combination
+CREATE TRIGGER prevent_duplicate_pending_requests
+    BEFORE INSERT ON join_team_requests
+    FOR EACH ROW
+    WHEN EXISTS (
+        SELECT 1 FROM join_team_requests 
+        WHERE profile_id = NEW.profile_id 
+          AND team_id = NEW.team_id 
+          AND status = 'pending'
+    )
+    BEGIN
+        SELECT RAISE(ABORT, 'Ya tienes una solicitud pendiente para este equipo.');
+    END;
+
+-- 16. Prevent new request if user is already an approved player
+CREATE TRIGGER prevent_request_if_already_player
+    BEFORE INSERT ON join_team_requests
+    FOR EACH ROW
+    WHEN EXISTS (
+        SELECT 1 FROM players 
+        WHERE profile_id = NEW.profile_id 
+          AND team_id = NEW.team_id
+    )
+    BEGIN
+        SELECT RAISE(ABORT, 'Ya eres miembro de este equipo.');
     END;

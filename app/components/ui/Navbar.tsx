@@ -15,7 +15,7 @@ async function Navbar() {
   const { isAuthenticated } = await getAuthStatus();
 
   return (
-    <header className="bg-background border-border-header flex h-32 items-center justify-between border-b p-10">
+    <header className="bg-background border-border-header z-1 flex h-32 items-center justify-between border-b p-10">
       <Link className="border-foreground lg:border-r" href="/">
         <Image
           src={logoMajor}
@@ -31,23 +31,23 @@ async function Navbar() {
               EQUIPOS
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink href="/posiciones/2025/1" type="desktop">
               TABLA DE POSICIONES
             </NavLink>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <NavLink href="/acerca" type="desktop">
               ACERCA
             </NavLink>
-          </li>
+          </li> */}
         </ul>
       </nav>
 
       {/* Desktop Auth Button */}
       {isAuthenticated ? (
         <Link
-          href="/profile"
+          href="/perfil"
           className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
         >
           TU PERFIL

@@ -60,7 +60,7 @@ CREATE TABLE players (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     nickname TEXT,
-    age INTEGER CHECK (age > 0 AND age < 100),
+    birthday DATE NOT NULL,
     position TEXT CHECK (position IN ('GK', 'DEF', 'MID', 'FWD')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -162,15 +162,15 @@ CREATE TABLE join_team_requests (
     date DATE NOT NULL DEFAULT (DATE('now')),
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    age INTEGER CHECK (age > 0 AND age < 100),
+    nickname TEXT,
+    birthday DATE NOT NULL,
     preferred_position TEXT CHECK (preferred_position IN ('GK', 'DEF', 'MID', 'FWD')),
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    UNIQUE(team_id, profile_id) -- One request per user per team
+    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- User Preferences
@@ -240,6 +240,8 @@ CREATE INDEX idx_lineups_match ON lineups(match_id);
 CREATE INDEX idx_streams_match ON streams(match_id);
 CREATE INDEX idx_requests_team ON join_team_requests(team_id);
 CREATE INDEX idx_requests_profile ON join_team_requests(profile_id);
+CREATE INDEX idx_requests_status ON join_team_requests(status);
+CREATE UNIQUE INDEX idx_requests_pending_unique ON join_team_requests(team_id, profile_id) WHERE status = 'pending';
 CREATE INDEX idx_notifications_profile ON notifications(profile_id);
 CREATE INDEX idx_notifications_match ON notifications(match_id);
 CREATE INDEX idx_favorites_teams_profile ON user_favorite_teams(profile_id);

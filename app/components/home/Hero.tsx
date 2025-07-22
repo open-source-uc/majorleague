@@ -6,7 +6,7 @@ import NextMatches from "../home/NextMatches";
 
 export default function Hero() {
   return (
-    <section className="bg-primary flex h-max w-full flex-col items-center justify-between gap-20 px-0 md:flex-row md:px-10">
+    <section className="bg-primary flex h-max w-full flex-col items-center justify-between gap-10 px-0 py-10 md:flex-row md:gap-20 md:px-10">
       <div className="relative block h-max overflow-hidden">
         <h1 className="text-7xl font-bold text-black lg:text-9xl">
           VIVE EL <br className="md:hidden" />
