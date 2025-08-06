@@ -58,7 +58,7 @@ export async function getJoinTeamRequests(): Promise<JoinTeamRequest[]> {
   const { env } = getRequestContext();
   const requests = await env.DB.prepare(
     `
-    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
+    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
            jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
@@ -75,7 +75,7 @@ export async function getJoinTeamRequestById(id: number): Promise<JoinTeamReques
   const { env } = getRequestContext();
   const request = await env.DB.prepare(
     `
-    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.birthday, 
+    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.birthday, 
            jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
@@ -192,8 +192,8 @@ export async function createJoinTeamRequest(
 
     await env.DB.prepare(
       `
-      INSERT INTO join_team_requests (team_id, profile_id, date, first_name, last_name, nickname, birthday, preferred_position, status, notes, created_at, updated_at)
-      VALUES (?, ?, DATE('now'), ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, nickname, birthday, preferred_position, status, notes, created_at, updated_at)
+      VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
       .bind(

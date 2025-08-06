@@ -39,7 +39,6 @@ export async function getUserDataByToken(): Promise<{
 
     const data: RawAuth = await res.json();
     const result = { message: data.message, permissions: data.permissions, id: data.userId };
-
     return result;
   } catch (error) {
     console.error("Error fetching user data:", error);

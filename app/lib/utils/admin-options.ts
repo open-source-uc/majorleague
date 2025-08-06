@@ -61,19 +61,19 @@ export async function getMatchOptions(): Promise<SelectOption[]> {
   const { env } = getRequestContext();
   const matches = await env.DB.prepare(
     `
-    SELECT m.id, m.date, lt.name as local_team, vt.name as visitor_team, c.name as competition
+    SELECT m.id, m.timestamp, lt.name as local_team, vt.name as visitor_team, c.name as competition
     FROM matches m
     LEFT JOIN teams lt ON m.local_team_id = lt.id
     LEFT JOIN teams vt ON m.visitor_team_id = vt.id
     LEFT JOIN competitions c ON m.competition_id = c.id
-    ORDER BY m.date DESC
+    ORDER BY m.timestamp DESC
   `,
-  ).all<{ id: number; date: string; local_team: string; visitor_team: string; competition: string }>();
+  ).all<{ id: number; timestamp: string; local_team: string; visitor_team: string; competition: string }>();
 
   return (
     matches.results?.map((match) => ({
       value: match.id.toString(),
-      label: `${match.local_team} vs ${match.visitor_team} - ${match.date} (${match.competition})`,
+      label: `${match.local_team} vs ${match.visitor_team} - ${match.timestamp} (${match.competition})`,
     })) || []
   );
 }

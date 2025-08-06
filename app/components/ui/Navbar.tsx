@@ -13,6 +13,9 @@ export const runtime = "edge";
 
 async function Navbar() {
   const { isAuthenticated } = await getAuthStatus();
+  const date = new Date();
+  const year = date.getFullYear();
+  const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
     <header className="bg-background border-border-header z-1 flex h-32 items-center justify-between border-b p-10">
@@ -31,11 +34,11 @@ async function Navbar() {
               EQUIPOS
             </NavLink>
           </li>
-          {/* <li>
-            <NavLink href="/posiciones/2025/1" type="desktop">
+          <li>
+            <NavLink href={`/posiciones/${year}/${semester}`} type="desktop">
               TABLA DE POSICIONES
             </NavLink>
-          </li> */}
+          </li>
           {/* <li>
             <NavLink href="/acerca" type="desktop">
               ACERCA

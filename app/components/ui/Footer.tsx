@@ -13,6 +13,9 @@ import FooterCol from "./FooterCol";
 function Footer() {
   const linkStyle = "text-sm md:text-md tracking-normal";
   const linkStyleHover = "hover:text-primary-darken transition-colors duration-100";
+  const date = new Date();
+  const year = date.getFullYear();
+  const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
     <footer className="bg-background border-border-header w-full border-t">
@@ -33,13 +36,13 @@ function Footer() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="flex-1 lg:px-10">
+          <div className="mx-auto flex-1 lg:px-10">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-4">
               <FooterCol title="INICIATIVA">
                 <Link href="/equipos" className={`${linkStyle} ${linkStyleHover}`}>
                   Equipos
                 </Link>
-                <Link href="/posiciones/2025/1" className={`${linkStyle} ${linkStyleHover}`}>
+                <Link href={`/posiciones/${year}/${semester}`} className={`${linkStyle} ${linkStyleHover}`}>
                   Tabla de posiciones
                 </Link>
                 <Link href="/acerca" className={`${linkStyle} ${linkStyleHover}`}>

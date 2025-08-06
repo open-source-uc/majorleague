@@ -60,7 +60,7 @@ export async function getJoinRequestsByProfileId(
     const context = getRequestContext();
     const requests = await context.env.DB.prepare(
       `
-      SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.date, jtr.first_name, jtr.last_name, jtr.birthday, 
+      SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.birthday, 
              jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
              t.name as team_name
       FROM join_team_requests jtr

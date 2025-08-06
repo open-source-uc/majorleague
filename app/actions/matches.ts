@@ -6,15 +6,14 @@ import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
 
 import { getAuthStatus } from "@/lib/services/auth";
-import type { Match } from "@/lib/types";
+import type { Match, NextMatch } from "@/lib/types";
 
 // Validation schemas
 const matchCreateSchema = z.object({
   local_team_id: z.number().min(1, "El equipo local es requerido"),
   visitor_team_id: z.number().min(1, "El equipo visitante es requerido"),
   competition_id: z.number().min(1, "La competición es requerida"),
-  date: z.string().min(1, "La fecha es requerida"),
-  timestamptz: z.string().min(1, "La hora es requerida"),
+  timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   location: z.string().optional(),
   status: z.enum(["scheduled", "cancelled", "live", "in review"]).optional(),
 });
@@ -24,8 +23,7 @@ const matchUpdateSchema = z.object({
   local_team_id: z.number().min(1, "El equipo local es requerido"),
   visitor_team_id: z.number().min(1, "El equipo visitante es requerido"),
   competition_id: z.number().min(1, "La competición es requerida"),
-  date: z.string().min(1, "La fecha es requerida"),
-  timestamptz: z.string().min(1, "La hora es requerida"),
+  timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   location: z.string().optional(),
   local_score: z.number().min(0, "El marcador local debe ser 0 o mayor").optional(),
   visitor_score: z.number().min(0, "El marcador visitante debe ser 0 o mayor").optional(),
@@ -37,18 +35,46 @@ const matchDeleteSchema = z.object({
 });
 
 // Database operations
+export async function getNextMatches(): Promise<NextMatch[]> {
+  const { env } = getRequestContext();
+  const matches = await env.DB.prepare(
+    `
+    SELECT lt.name as local_team_name, vt.name as visitor_team_name, m.status as status, m.timestamp as timestamp
+    FROM matches m
+    LEFT JOIN teams lt ON m.local_team_id = lt.id
+    LEFT JOIN teams vt ON m.visitor_team_id = vt.id
+    WHERE m.status = 'scheduled' OR m.status = 'live'
+    ORDER BY m.timestamp ASC
+    LIMIT 3
+  `,
+  ).all<Match & { local_team_name: string; visitor_team_name: string }>();
+
+  const nextMatches = matches.results.map((match) => {
+    const timestamp = new Date(match.timestamp);
+    return {
+      local_team_name: match.local_team_name,
+      visitor_team_name: match.visitor_team_name,
+      status: match.status,
+      date: `${timestamp.getDate().toString().padStart(2, "0")}/${(timestamp.getMonth() + 1).toString().padStart(2, "0")}`,
+      time: `${timestamp.getHours().toString().padStart(2, "0")}:${timestamp.getMinutes().toString().padStart(2, "0")}`,
+    };
+  });
+
+  return nextMatches;
+}
+
 export async function getMatches(): Promise<Match[]> {
   const { env } = getRequestContext();
   const matches = await env.DB.prepare(
     `
-    SELECT m.id, m.local_team_id, m.visitor_team_id, m.competition_id, m.date, m.timestamptz, 
+    SELECT m.id, m.local_team_id, m.visitor_team_id, m.competition_id, m.timestamp, 
            m.location, m.local_score, m.visitor_score, m.status, m.created_at, m.updated_at,
            lt.name as local_team_name, vt.name as visitor_team_name, c.name as competition_name
     FROM matches m
     LEFT JOIN teams lt ON m.local_team_id = lt.id
     LEFT JOIN teams vt ON m.visitor_team_id = vt.id
     LEFT JOIN competitions c ON m.competition_id = c.id
-    ORDER BY m.date DESC, m.timestamptz DESC
+    ORDER BY m.timestamp DESC
   `,
   ).all<Match & { local_team_name?: string; visitor_team_name?: string; competition_name?: string }>();
 
@@ -59,7 +85,7 @@ export async function getMatchById(id: number): Promise<Match | null> {
   const { env } = getRequestContext();
   const match = await env.DB.prepare(
     `
-    SELECT m.id, m.local_team_id, m.visitor_team_id, m.competition_id, m.date, m.timestamptz, 
+    SELECT m.id, m.local_team_id, m.visitor_team_id, m.competition_id, m.timestamp, 
            m.location, m.local_score, m.visitor_score, m.status, m.created_at, m.updated_at,
            lt.name as local_team_name, vt.name as visitor_team_name, c.name as competition_name
     FROM matches m
@@ -85,8 +111,7 @@ export async function createMatch(
       local_team_id: number;
       visitor_team_id: number;
       competition_id: number;
-      date: string;
-      timestamptz: string;
+      timestamp: string;
       location?: string;
       status?: string;
     };
@@ -103,8 +128,7 @@ export async function createMatch(
         local_team_id: parseInt(formData.get("local_team_id") as string) || 0,
         visitor_team_id: parseInt(formData.get("visitor_team_id") as string) || 0,
         competition_id: parseInt(formData.get("competition_id") as string) || 0,
-        date: formData.get("date") as string,
-        timestamptz: formData.get("timestamptz") as string,
+        timestamp: formData.get("timestamp") as string,
         location: formData.get("location") as string,
         status: formData.get("status") as string,
       },
@@ -122,10 +146,9 @@ export async function createMatch(
     local_team_id: parseInt(formData.get("local_team_id") as string) || 0,
     visitor_team_id: parseInt(formData.get("visitor_team_id") as string) || 0,
     competition_id: parseInt(formData.get("competition_id") as string) || 0,
-    date: formData.get("date") as string,
-    timestamptz: convertDateTimeLocal(formData.get("timestamptz") as string),
+    timestamp: convertDateTimeLocal(formData.get("timestamp") as string),
     location: (formData.get("location") as string) || undefined,
-    status: (formData.get("status") as string) || "in review",
+    status: (formData.get("status") as string) || "scheduled",
   };
 
   const parsed = matchCreateSchema.safeParse(body);
@@ -181,18 +204,17 @@ export async function createMatch(
 
     await env.DB.prepare(
       `
-      INSERT INTO matches (local_team_id, visitor_team_id, competition_id, date, timestamptz, location, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, location, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
       .bind(
         parsed.data.local_team_id,
         parsed.data.visitor_team_id,
         parsed.data.competition_id,
-        parsed.data.date,
-        parsed.data.timestamptz,
+        parsed.data.timestamp,
         parsed.data.location || null,
-        parsed.data.status || "in review",
+        parsed.data.status || "scheduled",
       )
       .run();
 
@@ -225,8 +247,7 @@ export async function updateMatch(
       local_team_id: number;
       visitor_team_id: number;
       competition_id: number;
-      date: string;
-      timestamptz: string;
+      timestamp: string;
       location?: string;
       local_score?: number;
       visitor_score?: number;
@@ -247,8 +268,7 @@ export async function updateMatch(
         local_team_id: parseInt(formData.get("local_team_id") as string) || 0,
         visitor_team_id: parseInt(formData.get("visitor_team_id") as string) || 0,
         competition_id: parseInt(formData.get("competition_id") as string) || 0,
-        date: formData.get("date") as string,
-        timestamptz: formData.get("timestamptz") as string,
+        timestamp: formData.get("timestamp") as string,
         location: formData.get("location") as string,
         local_score: parseInt(formData.get("local_score") as string) || 0,
         visitor_score: parseInt(formData.get("visitor_score") as string) || 0,
@@ -268,8 +288,7 @@ export async function updateMatch(
         local_team_id: parseInt(formData.get("local_team_id") as string) || 0,
         visitor_team_id: parseInt(formData.get("visitor_team_id") as string) || 0,
         competition_id: parseInt(formData.get("competition_id") as string) || 0,
-        date: formData.get("date") as string,
-        timestamptz: formData.get("timestamptz") as string,
+        timestamp: formData.get("timestamp") as string,
         location: formData.get("location") as string,
         local_score: parseInt(formData.get("local_score") as string) || 0,
         visitor_score: parseInt(formData.get("visitor_score") as string) || 0,
@@ -290,12 +309,11 @@ export async function updateMatch(
     local_team_id: parseInt(formData.get("local_team_id") as string) || 0,
     visitor_team_id: parseInt(formData.get("visitor_team_id") as string) || 0,
     competition_id: parseInt(formData.get("competition_id") as string) || 0,
-    date: formData.get("date") as string,
-    timestamptz: convertDateTimeLocal(formData.get("timestamptz") as string),
+    timestamp: convertDateTimeLocal(formData.get("timestamp") as string),
     location: (formData.get("location") as string) || undefined,
     local_score: parseInt(formData.get("local_score") as string) || 0,
     visitor_score: parseInt(formData.get("visitor_score") as string) || 0,
-    status: (formData.get("status") as string) || "in review",
+    status: (formData.get("status") as string) || "scheduled",
   };
 
   const parsed = matchUpdateSchema.safeParse(body);
@@ -392,7 +410,7 @@ export async function updateMatch(
     await env.DB.prepare(
       `
       UPDATE matches 
-      SET local_team_id = ?, visitor_team_id = ?, competition_id = ?, date = ?, timestamptz = ?, 
+      SET local_team_id = ?, visitor_team_id = ?, competition_id = ?, timestamp = ?, 
           location = ?, local_score = ?, visitor_score = ?, status = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
@@ -401,12 +419,11 @@ export async function updateMatch(
         parsed.data.local_team_id,
         parsed.data.visitor_team_id,
         parsed.data.competition_id,
-        parsed.data.date,
-        parsed.data.timestamptz,
+        parsed.data.timestamp,
         parsed.data.location || null,
         parsed.data.local_score || 0,
         parsed.data.visitor_score || 0,
-        parsed.data.status || "in review",
+        parsed.data.status || "scheduled",
         parsed.data.id,
       )
       .run();

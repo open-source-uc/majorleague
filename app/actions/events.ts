@@ -36,9 +36,9 @@ export async function getEvents(): Promise<Event[]> {
   const events = await env.DB.prepare(
     `
     SELECT e.id, e.match_id, e.team_id, e.type, e.minute, e.description, e.created_at,
-           m.date as match_date, t.name as team_name,
+           m.timestamp as match_date, t.name as team_name,
            lt.name as local_team_name, vt.name as visitor_team_name,
-           (lt.name || ' vs ' || vt.name || ' - ' || m.date) as match_description
+           (lt.name || ' vs ' || vt.name || ' - ' || m.timestamp) as match_description
     FROM events e
     LEFT JOIN matches m ON e.match_id = m.id
     LEFT JOIN teams t ON e.team_id = t.id
@@ -64,7 +64,7 @@ export async function getEventById(id: number): Promise<Event | null> {
   const event = await env.DB.prepare(
     `
     SELECT e.id, e.match_id, e.team_id, e.type, e.minute, e.description, e.created_at,
-           m.date as match_date, t.name as team_name,
+           m.timestamp as match_date, t.name as team_name,
            lt.name as local_team_name, vt.name as visitor_team_name
     FROM events e
     LEFT JOIN matches m ON e.match_id = m.id

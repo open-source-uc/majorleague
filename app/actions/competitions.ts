@@ -16,8 +16,8 @@ const competitionCreateSchema = z.object({
     .max(100, "El nombre de la competición no puede exceder los 100 caracteres"),
   year: z.number().min(2020, "El año debe ser posterior a 2020").max(2050, "El año no puede ser posterior a 2050"),
   semester: z.number().min(1, "El semestre debe ser 1 o 2").max(2, "El semestre debe ser 1 o 2"),
-  start_date: z.string().min(1, "La fecha de inicio es requerida"),
-  end_date: z.string().min(1, "La fecha de fin es requerida"),
+  start_timestamp: z.string().min(1, "La fecha y hora de inicio es requerida"),
+  end_timestamp: z.string().min(1, "La fecha y hora de fin es requerida"),
 });
 
 const competitionUpdateSchema = z.object({
@@ -28,8 +28,8 @@ const competitionUpdateSchema = z.object({
     .max(100, "El nombre de la competición no puede exceder los 100 caracteres"),
   year: z.number().min(2020, "El año debe ser posterior a 2020").max(2050, "El año no puede ser posterior a 2050"),
   semester: z.number().min(1, "El semestre debe ser 1 o 2").max(2, "El semestre debe ser 1 o 2"),
-  start_date: z.string().min(1, "La fecha de inicio es requerida"),
-  end_date: z.string().min(1, "La fecha de fin es requerida"),
+  start_timestamp: z.string().min(1, "La fecha y hora de inicio es requerida"),
+  end_timestamp: z.string().min(1, "La fecha y hora de fin es requerida"),
 });
 
 const competitionDeleteSchema = z.object({
@@ -41,7 +41,7 @@ export async function getCompetitions(): Promise<Competition[]> {
   const { env } = getRequestContext();
   const competitions = await env.DB.prepare(
     `
-    SELECT id, name, year, semester, start_date, end_date, created_at
+    SELECT id, name, year, semester, start_timestamp, end_timestamp, created_at
     FROM competitions
     ORDER BY year DESC, semester DESC
   `,
@@ -54,7 +54,7 @@ export async function getCompetitionById(id: number): Promise<Competition | null
   const { env } = getRequestContext();
   const competition = await env.DB.prepare(
     `
-    SELECT id, name, year, semester, start_date, end_date, created_at
+    SELECT id, name, year, semester, start_timestamp, end_timestamp, created_at
     FROM competitions
     WHERE id = ?
   `,
@@ -75,8 +75,8 @@ export async function createCompetition(
       name: string;
       year: number;
       semester: number;
-      start_date: string;
-      end_date: string;
+      start_timestamp: string;
+      end_timestamp: string;
     };
   },
   formData: FormData,
@@ -91,8 +91,8 @@ export async function createCompetition(
         name: formData.get("name") as string,
         year: parseInt(formData.get("year") as string) || 0,
         semester: parseInt(formData.get("semester") as string) || 0,
-        start_date: formData.get("start_date") as string,
-        end_date: formData.get("end_date") as string,
+        start_timestamp: formData.get("start_timestamp") as string,
+        end_timestamp: formData.get("end_timestamp") as string,
       },
     };
   }
@@ -101,8 +101,8 @@ export async function createCompetition(
     name: formData.get("name") as string,
     year: parseInt(formData.get("year") as string) || 0,
     semester: parseInt(formData.get("semester") as string) || 0,
-    start_date: formData.get("start_date") as string,
-    end_date: formData.get("end_date") as string,
+    start_timestamp: formData.get("start_timestamp") as string,
+    end_timestamp: formData.get("end_timestamp") as string,
   };
 
   const parsed = competitionCreateSchema.safeParse(body);
@@ -136,8 +136,8 @@ export async function createCompetition(
       };
     }
 
-    const startDate = new Date(parsed.data.start_date);
-    const endDate = new Date(parsed.data.end_date);
+    const startDate = new Date(parsed.data.start_timestamp);
+    const endDate = new Date(parsed.data.end_timestamp);
 
     if (startDate >= endDate) {
       return {
@@ -150,11 +150,17 @@ export async function createCompetition(
 
     await env.DB.prepare(
       `
-      INSERT INTO competitions (name, year, semester, start_date, end_date, created_at)
+      INSERT INTO competitions (name, year, semester, start_timestamp, end_timestamp, created_at)
       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
     )
-      .bind(parsed.data.name, parsed.data.year, parsed.data.semester, parsed.data.start_date, parsed.data.end_date)
+      .bind(
+        parsed.data.name,
+        parsed.data.year,
+        parsed.data.semester,
+        parsed.data.start_timestamp,
+        parsed.data.end_timestamp,
+      )
       .run();
 
     revalidatePath("/admin/dashboard/competitions");
@@ -186,8 +192,8 @@ export async function updateCompetition(
       name: string;
       year: number;
       semester: number;
-      start_date: string;
-      end_date: string;
+      start_timestamp: string;
+      end_timestamp: string;
     };
   },
   formData: FormData,
@@ -203,8 +209,8 @@ export async function updateCompetition(
         name: formData.get("name") as string,
         year: parseInt(formData.get("year") as string) || 0,
         semester: parseInt(formData.get("semester") as string) || 0,
-        start_date: formData.get("start_date") as string,
-        end_date: formData.get("end_date") as string,
+        start_timestamp: formData.get("start_timestamp") as string,
+        end_timestamp: formData.get("end_timestamp") as string,
       },
     };
   }
@@ -220,8 +226,8 @@ export async function updateCompetition(
         name: formData.get("name") as string,
         year: parseInt(formData.get("year") as string) || 0,
         semester: parseInt(formData.get("semester") as string) || 0,
-        start_date: formData.get("start_date") as string,
-        end_date: formData.get("end_date") as string,
+        start_timestamp: formData.get("start_timestamp") as string,
+        end_timestamp: formData.get("end_timestamp") as string,
       },
     };
   }
@@ -231,8 +237,8 @@ export async function updateCompetition(
     name: formData.get("name") as string,
     year: parseInt(formData.get("year") as string) || 0,
     semester: parseInt(formData.get("semester") as string) || 0,
-    start_date: formData.get("start_date") as string,
-    end_date: formData.get("end_date") as string,
+    start_timestamp: formData.get("start_timestamp") as string,
+    end_timestamp: formData.get("end_timestamp") as string,
   };
 
   const parsed = competitionUpdateSchema.safeParse(body);
@@ -283,8 +289,8 @@ export async function updateCompetition(
       };
     }
 
-    const startDate = new Date(parsed.data.start_date);
-    const endDate = new Date(parsed.data.end_date);
+    const startDate = new Date(parsed.data.start_timestamp);
+    const endDate = new Date(parsed.data.end_timestamp);
 
     if (startDate >= endDate) {
       return {
@@ -298,7 +304,7 @@ export async function updateCompetition(
     await env.DB.prepare(
       `
       UPDATE competitions 
-      SET name = ?, year = ?, semester = ?, start_date = ?, end_date = ?
+      SET name = ?, year = ?, semester = ?, start_timestamp = ?, end_timestamp = ?
       WHERE id = ?
     `,
     )
@@ -306,8 +312,8 @@ export async function updateCompetition(
         parsed.data.name,
         parsed.data.year,
         parsed.data.semester,
-        parsed.data.start_date,
-        parsed.data.end_date,
+        parsed.data.start_timestamp,
+        parsed.data.end_timestamp,
         parsed.data.id,
       )
       .run();

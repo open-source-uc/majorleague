@@ -28,8 +28,8 @@ export interface Competition {
   name: string;
   year: number;
   semester: number;
-  start_date: string;
-  end_date: string;
+  start_timestamp: string;
+  end_timestamp: string;
   created_at?: string;
 }
 
@@ -51,14 +51,21 @@ export interface Match {
   local_team_id: number;
   visitor_team_id: number;
   competition_id: number;
-  date: string;
-  timestamptz: string;
+  timestamp: string;
   location?: string;
   local_score: number;
   visitor_score: number;
   status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
   created_at?: string;
   updated_at?: string;
+}
+
+export interface NextMatch {
+  date: string;
+  time: string;
+  local_team_name: string;
+  visitor_team_name: string;
+  status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
 }
 
 // New entity types
@@ -101,7 +108,7 @@ export interface JoinTeamRequest {
   id: number;
   team_id: number;
   profile_id: string;
-  date: string;
+  timestamp: string;
   first_name: string;
   last_name: string;
   nickname?: string;
@@ -117,7 +124,7 @@ export interface Lineup {
   id: number;
   team_id: number;
   match_id: number;
-  date: string;
+  timestamp: string;
   matrix?: string;
   created_at?: string;
 }
@@ -129,6 +136,22 @@ export interface Event {
   type: "goal" | "yellow_card" | "red_card" | "substitution" | "other";
   minute: number;
   description?: string;
+  created_at?: string;
+}
+
+export interface TeamCompetition {
+  id: number;
+  team_id: number;
+  competition_id: number;
+  points: number;
+  position: number;
+  pj: number;
+  g: number;
+  e: number;
+  p: number;
+  gf: number;
+  gc: number;
+  dg: number;
   created_at?: string;
 }
 
@@ -254,8 +277,8 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "name", label: "Nombre", type: "text" },
       { key: "year", label: "Año", type: "text" },
       { key: "semester", label: "Semestre", type: "badge" },
-      { key: "start_date", label: "Inicio", type: "date" },
-      { key: "end_date", label: "Fin", type: "date" },
+      { key: "start_timestamp", label: "Inicio", type: "date" },
+      { key: "end_timestamp", label: "Fin", type: "date" },
     ],
     actions: [
       { type: "create", label: "Crear Competición", variant: "primary" },
@@ -288,15 +311,15 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         ],
       },
       {
-        name: "start_date",
-        label: "Fecha de Inicio",
-        type: "date",
+        name: "start_timestamp",
+        label: "Fecha y Hora de Inicio",
+        type: "datetime-local",
         required: true,
       },
       {
-        name: "end_date",
-        label: "Fecha de Fin",
-        type: "date",
+        name: "end_timestamp",
+        label: "Fecha y Hora de Fin",
+        type: "datetime-local",
         required: true,
       },
     ],
@@ -377,9 +400,9 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
   matches: {
     title: "Partido",
     description: "Gestionar partidos programados",
-    displayField: "date",
+    displayField: "timestamp",
     displayColumns: [
-      { key: "date", label: "Fecha", type: "date" },
+      { key: "timestamp", label: "Fecha y Hora", type: "date" },
       { key: "local_team_name", label: "Local", type: "text" },
       { key: "visitor_team_name", label: "Visitante", type: "text" },
       { key: "competition_name", label: "Competición", type: "text" },
@@ -414,14 +437,8 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         dataSource: "competitions",
       },
       {
-        name: "date",
-        label: "Fecha del Partido",
-        type: "date",
-        required: true,
-      },
-      {
-        name: "timestamptz",
-        label: "Hora del Partido",
+        name: "timestamp",
+        label: "Fecha y Hora del Partido",
         type: "datetime-local",
         required: true,
       },
@@ -734,11 +751,11 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
   lineups: {
     title: "Alineación",
     description: "Gestionar alineaciones de partidos",
-    displayField: "date",
+    displayField: "timestamp",
     displayColumns: [
       { key: "team_name", label: "Equipo", type: "text" },
       { key: "match_description", label: "Partido", type: "text" },
-      { key: "date", label: "Fecha", type: "date" },
+      { key: "timestamp", label: "Fecha y Hora", type: "date" },
       { key: "matrix", label: "Formación", type: "text" },
     ],
     actions: [
@@ -762,9 +779,9 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         dataSource: "matches",
       },
       {
-        name: "date",
-        label: "Fecha",
-        type: "date",
+        name: "timestamp",
+        label: "Fecha y Hora",
+        type: "datetime-local",
         required: true,
       },
       {

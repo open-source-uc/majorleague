@@ -3,7 +3,7 @@ import Image from "next/image";
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
 import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
-import ManchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceLogo.png";
+import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceLogo.png";
 import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
 import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
 import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
@@ -32,8 +32,8 @@ const teams = [
     alt: "Logo de Manchester Civil",
   },
   {
-    name: "Manchester Science",
-    logo: ManchesterScienceLogo,
+    name: "Mathchester Science",
+    logo: MathchesterScienceLogo,
     departments: "Química - Física - Matemática Biomédica - Biología",
     alt: "Logo de Manchester Science",
   },
@@ -82,7 +82,7 @@ export default function EquiposPage() {
             {teams.map((team, index) => (
               <div
                 key={team.name}
-                className="bg-background-header border-border-header hover:border-primary/50 flex flex-col items-center rounded-lg border p-6 transition-all"
+                className="bg-background border-border-header hover:border-primary/50 flex flex-col items-center rounded-lg border p-6 transition-all"
               >
                 <div className="mb-4 flex h-24 w-24 items-center justify-center">
                   <Image

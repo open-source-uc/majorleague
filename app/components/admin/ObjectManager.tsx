@@ -77,7 +77,12 @@ export default function ObjectManager({
     let processedDefaultValue = defaultValue;
     if (field.type === "datetime-local" && defaultValue) {
       // Convert from "YYYY-MM-DD HH:MM:SS" to "YYYY-MM-DDTHH:MM" format
-      processedDefaultValue = defaultValue.replace(" ", "T").substring(0, 16);
+      // Handle both space and T separators
+      if (defaultValue.includes(" ")) {
+        processedDefaultValue = defaultValue.replace(" ", "T").substring(0, 16);
+      } else if (defaultValue.includes("T")) {
+        processedDefaultValue = defaultValue.substring(0, 16);
+      }
     }
 
     const commonProps = {

@@ -40,8 +40,8 @@ export async function getStreams(): Promise<Stream[]> {
   const streams = await env.DB.prepare(
     `
     SELECT s.id, s.match_id, s.type, s.platform, s.url, s.start_time, s.end_time, s.notes, s.created_at,
-           m.date as match_date, lt.name as local_team_name, vt.name as visitor_team_name,
-           (lt.name || ' vs ' || vt.name || ' - ' || m.date) as match_description
+           m.timestamp as match_date, lt.name as local_team_name, vt.name as visitor_team_name,
+           (lt.name || ' vs ' || vt.name || ' - ' || m.timestamp) as match_description
     FROM streams s
     LEFT JOIN matches m ON s.match_id = m.id
     LEFT JOIN teams lt ON m.local_team_id = lt.id
@@ -60,7 +60,7 @@ export async function getStreamById(id: number): Promise<Stream | null> {
   const stream = await env.DB.prepare(
     `
     SELECT s.id, s.match_id, s.type, s.platform, s.url, s.start_time, s.end_time, s.notes, s.created_at,
-           m.date as match_date, lt.name as local_team_name, vt.name as visitor_team_name
+           m.timestamp as match_date, lt.name as local_team_name, vt.name as visitor_team_name
     FROM streams s
     LEFT JOIN matches m ON s.match_id = m.id
     LEFT JOIN teams lt ON m.local_team_id = lt.id

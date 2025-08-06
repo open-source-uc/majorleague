@@ -12,7 +12,7 @@ import type { Lineup } from "@/lib/types";
 const lineupCreateSchema = z.object({
   team_id: z.number().min(1, "El ID del equipo es requerido"),
   match_id: z.number().min(1, "El ID del partido es requerido"),
-  date: z.string().min(1, "La fecha es requerida"),
+  timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   matrix: z.string().optional(),
 });
 
@@ -20,7 +20,7 @@ const lineupUpdateSchema = z.object({
   id: z.number().min(1, "El ID de la alineación es requerido"),
   team_id: z.number().min(1, "El ID del equipo es requerido"),
   match_id: z.number().min(1, "El ID del partido es requerido"),
-  date: z.string().min(1, "La fecha es requerida"),
+  timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   matrix: z.string().optional(),
 });
 
@@ -33,10 +33,10 @@ export async function getLineups(): Promise<Lineup[]> {
   const { env } = getRequestContext();
   const lineups = await env.DB.prepare(
     `
-    SELECT l.id, l.team_id, l.match_id, l.date, l.matrix, l.created_at,
-           t.name as team_name, m.date as match_date,
+    SELECT l.id, l.team_id, l.match_id, l.timestamp, l.matrix, l.created_at,
+           t.name as team_name, m.timestamp as match_timestamp,
            lt.name as local_team_name, vt.name as visitor_team_name,
-           (lt.name || ' vs ' || vt.name || ' - ' || m.date) as match_description
+           (lt.name || ' vs ' || vt.name || ' - ' || m.timestamp) as match_description
     FROM lineups l
     LEFT JOIN teams t ON l.team_id = t.id
     LEFT JOIN matches m ON l.match_id = m.id
@@ -61,8 +61,8 @@ export async function getLineupById(id: number): Promise<Lineup | null> {
   const { env } = getRequestContext();
   const lineup = await env.DB.prepare(
     `
-    SELECT l.id, l.team_id, l.match_id, l.date, l.matrix, l.created_at,
-           t.name as team_name, m.date as match_date,
+    SELECT l.id, l.team_id, l.match_id, l.timestamp, l.matrix, l.created_at,
+           t.name as team_name, m.timestamp as match_timestamp,
            lt.name as local_team_name, vt.name as visitor_team_name
     FROM lineups l
     LEFT JOIN teams t ON l.team_id = t.id
@@ -87,7 +87,7 @@ export async function createLineup(
     body: {
       team_id: number;
       match_id: number;
-      date: string;
+      timestamp: string;
       matrix?: string;
     };
   },
@@ -102,7 +102,7 @@ export async function createLineup(
       body: {
         team_id: parseInt(formData.get("team_id") as string) || 0,
         match_id: parseInt(formData.get("match_id") as string) || 0,
-        date: formData.get("date") as string,
+        timestamp: formData.get("timestamp") as string,
         matrix: formData.get("matrix") as string,
       },
     };
@@ -111,7 +111,7 @@ export async function createLineup(
   const body = {
     team_id: parseInt(formData.get("team_id") as string) || 0,
     match_id: parseInt(formData.get("match_id") as string) || 0,
-    date: formData.get("date") as string,
+    timestamp: formData.get("timestamp") as string,
     matrix: (formData.get("matrix") as string) || undefined,
   };
 
@@ -177,11 +177,11 @@ export async function createLineup(
 
     await env.DB.prepare(
       `
-      INSERT INTO lineups (team_id, match_id, date, matrix, created_at)
+      INSERT INTO lineups (team_id, match_id, timestamp, matrix, created_at)
       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
     )
-      .bind(parsed.data.team_id, parsed.data.match_id, parsed.data.date, parsed.data.matrix || null)
+      .bind(parsed.data.team_id, parsed.data.match_id, parsed.data.timestamp, parsed.data.matrix || null)
       .run();
 
     revalidatePath("/admin/dashboard/lineups");
@@ -212,7 +212,7 @@ export async function updateLineup(
       id: number;
       team_id: number;
       match_id: number;
-      date: string;
+      timestamp: string;
       matrix?: string;
     };
   },
@@ -228,7 +228,7 @@ export async function updateLineup(
         id: parseInt(formData.get("id") as string) || 0,
         team_id: parseInt(formData.get("team_id") as string) || 0,
         match_id: parseInt(formData.get("match_id") as string) || 0,
-        date: formData.get("date") as string,
+        timestamp: formData.get("timestamp") as string,
         matrix: formData.get("matrix") as string,
       },
     };
@@ -244,7 +244,7 @@ export async function updateLineup(
         id: 0,
         team_id: parseInt(formData.get("team_id") as string) || 0,
         match_id: parseInt(formData.get("match_id") as string) || 0,
-        date: formData.get("date") as string,
+        timestamp: formData.get("timestamp") as string,
         matrix: formData.get("matrix") as string,
       },
     };
@@ -254,7 +254,7 @@ export async function updateLineup(
     id,
     team_id: parseInt(formData.get("team_id") as string) || 0,
     match_id: parseInt(formData.get("match_id") as string) || 0,
-    date: formData.get("date") as string,
+    timestamp: formData.get("timestamp") as string,
     matrix: (formData.get("matrix") as string) || undefined,
   };
 
@@ -334,11 +334,17 @@ export async function updateLineup(
     await env.DB.prepare(
       `
       UPDATE lineups 
-      SET team_id = ?, match_id = ?, date = ?, matrix = ?
+      SET team_id = ?, match_id = ?, timestamp = ?, matrix = ?
       WHERE id = ?
     `,
     )
-      .bind(parsed.data.team_id, parsed.data.match_id, parsed.data.date, parsed.data.matrix || null, parsed.data.id)
+      .bind(
+        parsed.data.team_id,
+        parsed.data.match_id,
+        parsed.data.timestamp,
+        parsed.data.matrix || null,
+        parsed.data.id,
+      )
       .run();
 
     revalidatePath("/admin/dashboard/lineups");

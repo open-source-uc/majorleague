@@ -8,6 +8,10 @@ import { calculateAge } from "@/lib/utils/cn";
 export const runtime = "edge";
 
 export default async function Perfil() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const semester = date.getMonth() < 7 ? 1 : 2;
+
   const { isAdmin, isAuthenticated, userProfile } = await getAuthStatus();
 
   if (!isAuthenticated || !userProfile) {
@@ -162,7 +166,7 @@ export default async function Perfil() {
           </Link>
 
           <Link
-            href="/posiciones"
+            href={`/posiciones/${year}/${semester}`}
             className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
           >
             <div className="text-primary text-xl">🏆</div>

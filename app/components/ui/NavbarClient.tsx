@@ -16,6 +16,9 @@ interface NavbarClientProps {
 
 export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const date = new Date();
+  const year = date.getFullYear();
+  const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
     <>
@@ -32,12 +35,12 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
                 EQUIPOS
               </NavLink>
             </li>
-            {/* <li>
-              <NavLink href="/posiciones/2025/1" type="mobile" onClick={() => setIsMenuOpen(false)}>
+            <li>
+              <NavLink href={`/posiciones/${year}/${semester}`} type="mobile" onClick={() => setIsMenuOpen(false)}>
                 TABLA DE POSICIONES
               </NavLink>
             </li>
-            <li>
+            {/* <li>
               <NavLink href="/acerca" type="mobile" onClick={() => setIsMenuOpen(false)}>
                 ACERCA
               </NavLink>

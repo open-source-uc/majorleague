@@ -35,8 +35,8 @@ CREATE TABLE competitions (
     name TEXT NOT NULL,
     year INTEGER NOT NULL,
     semester INTEGER NOT NULL CHECK (semester IN (1, 2)),
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    start_timestamp DATETIME NOT NULL,
+    end_timestamp DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(year, semester)
 );
@@ -76,6 +76,13 @@ CREATE TABLE team_competitions (
     competition_id INTEGER NOT NULL,
     points INTEGER DEFAULT 0,
     position INTEGER,
+    pj INTEGER DEFAULT 0,  -- Partidos Jugados (Played Games)
+    g INTEGER DEFAULT 0,   -- Ganados (Wins)
+    e INTEGER DEFAULT 0,   -- Empatados (Draws)
+    p INTEGER DEFAULT 0,   -- Perdidos (Losses)
+    gf INTEGER DEFAULT 0,  -- Goles a Favor (Goals For)
+    gc INTEGER DEFAULT 0,  -- Goles en Contra (Goals Against)
+    dg INTEGER DEFAULT 0,  -- Diferencia de Goles (Goal Difference)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
     FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE CASCADE,
@@ -88,8 +95,7 @@ CREATE TABLE matches (
     local_team_id INTEGER NOT NULL,
     visitor_team_id INTEGER NOT NULL,
     competition_id INTEGER NOT NULL,
-    date DATE NOT NULL,
-    timestamptz DATETIME NOT NULL,
+    timestamp DATETIME NOT NULL,
     location TEXT,
     local_score INTEGER DEFAULT 0,
     visitor_score INTEGER DEFAULT 0,
@@ -132,7 +138,7 @@ CREATE TABLE lineups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     team_id INTEGER NOT NULL,
     match_id INTEGER NOT NULL,
-    date DATE NOT NULL,
+    timestamp DATETIME NOT NULL,
     matrix TEXT, -- JSON format for formation (e.g., "4-4-2")
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
@@ -159,7 +165,7 @@ CREATE TABLE join_team_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     team_id INTEGER NOT NULL,
     profile_id TEXT NOT NULL,
-    date DATE NOT NULL DEFAULT (DATE('now')),
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     nickname TEXT,
@@ -232,7 +238,7 @@ CREATE INDEX idx_teams_captain ON teams(captain_id);
 CREATE INDEX idx_players_team ON players(team_id);
 CREATE INDEX idx_players_profile ON players(profile_id);
 CREATE INDEX idx_matches_competition ON matches(competition_id);
-CREATE INDEX idx_matches_date ON matches(date);
+CREATE INDEX idx_matches_timestamp ON matches(timestamp);
 CREATE INDEX idx_matches_teams ON matches(local_team_id, visitor_team_id);
 CREATE INDEX idx_events_match ON events(match_id);
 CREATE INDEX idx_events_team ON events(team_id);

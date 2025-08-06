@@ -183,43 +183,120 @@ CREATE TRIGGER update_scores_and_competition_points
             updated_at = CURRENT_TIMESTAMP
         WHERE id = NEW.id;
         
-        -- Then, recalculate points for all teams in this competition from scratch
-        -- This prevents race conditions by not accumulating points
+        -- Then, recalculate all statistics for all teams in this competition from scratch
+        -- This prevents race conditions by not accumulating values
         UPDATE team_competitions 
-        SET points = (
-            SELECT COALESCE(SUM(
-                CASE 
-                    -- When team is local team
-                    WHEN m.local_team_id = team_competitions.team_id THEN
-                        CASE 
-                            WHEN m.local_score > m.visitor_score THEN 3  -- Win
-                            WHEN m.local_score = m.visitor_score THEN 1  -- Draw
-                            ELSE 0  -- Loss
-                        END
-                    -- When team is visitor team
-                    WHEN m.visitor_team_id = team_competitions.team_id THEN
-                        CASE 
-                            WHEN m.visitor_score > m.local_score THEN 3  -- Win
-                            WHEN m.visitor_score = m.local_score THEN 1  -- Draw
-                            ELSE 0  -- Loss
-                        END
-                    ELSE 0
-                END
-            ), 0)
-            FROM matches m
-            WHERE m.competition_id = NEW.competition_id
-              AND m.status = 'finished'
-              AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
-        )
+        SET 
+            -- Points calculation
+            points = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        -- When team is local team
+                        WHEN m.local_team_id = team_competitions.team_id THEN
+                            CASE 
+                                WHEN m.local_score > m.visitor_score THEN 3  -- Win
+                                WHEN m.local_score = m.visitor_score THEN 1  -- Draw
+                                ELSE 0  -- Loss
+                            END
+                        -- When team is visitor team
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN
+                            CASE 
+                                WHEN m.visitor_score > m.local_score THEN 3  -- Win
+                                WHEN m.visitor_score = m.local_score THEN 1  -- Draw
+                                ELSE 0  -- Loss
+                            END
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- PJ - Partidos Jugados (Played Games)
+            pj = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- G - Ganados (Wins)
+            g = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (
+                    (m.local_team_id = team_competitions.team_id AND m.local_score > m.visitor_score) OR
+                    (m.visitor_team_id = team_competitions.team_id AND m.visitor_score > m.local_score)
+                  )
+            ),
+            -- E - Empatados (Draws)
+            e = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND m.local_score = m.visitor_score
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- P - Perdidos (Losses)
+            p = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (
+                    (m.local_team_id = team_competitions.team_id AND m.local_score < m.visitor_score) OR
+                    (m.visitor_team_id = team_competitions.team_id AND m.visitor_score < m.local_score)
+                  )
+            ),
+            -- GF - Goles a Favor (Goals For)
+            gf = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        WHEN m.local_team_id = team_competitions.team_id THEN m.local_score
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN m.visitor_score
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- GC - Goles en Contra (Goals Against)
+            gc = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        WHEN m.local_team_id = team_competitions.team_id THEN m.visitor_score
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN m.local_score
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = NEW.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            )
         WHERE competition_id = NEW.competition_id;
         
-        -- Recalculate positions for this competition
+        -- Update DG - Diferencia de Goles (Goal Difference) = GF - GC
+        UPDATE team_competitions 
+        SET dg = gf - gc
+        WHERE competition_id = NEW.competition_id;
+        
+        -- Recalculate positions for this competition (Points first, then Goal Difference as tiebreaker)
         UPDATE team_competitions 
         SET position = (
             SELECT COUNT(*) + 1 
             FROM team_competitions tc2 
             WHERE tc2.competition_id = NEW.competition_id 
-              AND tc2.points > team_competitions.points
+              AND (
+                tc2.points > team_competitions.points OR 
+                (tc2.points = team_competitions.points AND tc2.dg > team_competitions.dg)
+              )
         )
         WHERE competition_id = NEW.competition_id;
     END;
@@ -232,8 +309,7 @@ CREATE TRIGGER prevent_overlapping_matches
         SELECT 1 FROM matches 
         WHERE (local_team_id = NEW.local_team_id OR visitor_team_id = NEW.local_team_id 
                OR local_team_id = NEW.visitor_team_id OR visitor_team_id = NEW.visitor_team_id)
-          AND date = NEW.date
-          AND ABS(CAST((julianday(NEW.timestamptz) - julianday(timestamptz)) * 24 * 60 AS INTEGER)) < 120  -- 2 hours
+          AND ABS(CAST((julianday(NEW.timestamp) - julianday(timestamp)) * 24 * 60 AS INTEGER)) < 120  -- 2 hours
           AND status != 'cancelled'
     )
     BEGIN
@@ -248,12 +324,26 @@ CREATE TRIGGER create_team_competition_record
         INSERT INTO team_competitions (
             team_id,
             competition_id,
-            points
+            points,
+            pj,
+            g,
+            e,
+            p,
+            gf,
+            gc,
+            dg
         )
         SELECT 
             NEW.id,
             c.id,
-            0
+            0,  -- points
+            0,  -- pj (played games)
+            0,  -- g (wins)
+            0,  -- e (draws)
+            0,  -- p (losses)
+            0,  -- gf (goals for)
+            0,  -- gc (goals against)
+            0   -- dg (goal difference)
         FROM competitions c;
     END;
 

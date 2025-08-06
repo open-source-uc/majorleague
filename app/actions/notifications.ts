@@ -38,7 +38,7 @@ export async function getNotifications(): Promise<Notification[]> {
     SELECT n.id, n.profile_id, n.match_id, n.preference_id, n.sent_at, n.is_enabled, n.status, n.delivery_info, n.created_at,
            p.username as profile_username,
            CASE 
-             WHEN m.id IS NOT NULL THEN (lt.name || ' vs ' || vt.name || ' - ' || m.date)
+             WHEN m.id IS NOT NULL THEN (lt.name || ' vs ' || vt.name || ' - ' || m.timestamp)
              ELSE NULL
            END as match_description
     FROM notifications n

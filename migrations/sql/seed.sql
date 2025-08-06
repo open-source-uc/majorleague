@@ -9,8 +9,8 @@ INSERT INTO profiles (id, username, email) VALUES
 ('player2', 'player2', 'player2@uc.cl');
 
 -- 2. COMPETITIONS - Single competition
-INSERT INTO competitions (name, year, semester, start_date, end_date) VALUES 
-('Major League 2025', 2025, 1, '2025-03-01', '2025-07-31');
+INSERT INTO competitions (name, year, semester, start_timestamp, end_timestamp) VALUES 
+('Segundo Semestre 2025', 2025, 2, '2025-08-01 00:00:00', '2025-12-31 23:59:59');
 
 -- 3. TEAMS - All teams from equipos.txt
 -- TRIGGER: create_team_competition_record will auto-create team_competitions records
@@ -19,7 +19,7 @@ INSERT INTO teams (name, captain_id, major) VALUES
 ('Atletico Byte', 'admin', 'Computacion - Software'),
 ('Industrial FC', 'admin', 'Investigación Operativa'),
 ('Manchester Civil', 'admin', 'Civil - Transporte - Construccion'),
-('Manchester Science', 'admin', 'Química - Física - Matematica Biomedica - Biologia'),
+('Mathchester Science', 'admin', 'Química - Física - Matematica Biomedica - Biologia'),
 ('Minerham Forest', 'admin', 'Mineria - Ambiental - Hidraulica - Geociencias'),
 ('Naranja Mecanica', 'admin', 'Mecanica - Diseño e Innovación (IDI)'),
 ('New Boys', 'admin', 'Novatos'),
@@ -27,9 +27,9 @@ INSERT INTO teams (name, captain_id, major) VALUES
 ('Robovolt United', 'admin', 'Electrica - Robotica');
 
 -- 4. JOIN_TEAM_REQUESTS - Natural workflow: create pending requests
-INSERT INTO join_team_requests (team_id, profile_id, date, first_name, last_name, birthday, preferred_position, status, notes) VALUES 
-(5, 'player1', '2025-02-15', 'Juan', 'Pérez', '2002-06-15', 'MID', 'pending', 'Solicitud para unirse a Minerham Forest'),
-(8, 'player2', '2025-02-16', 'María', 'González', '2001-08-20', 'FWD', 'pending', 'Solicitud para unirse a Old Boys');
+INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, birthday, preferred_position, status, notes) VALUES 
+(5, 'player1', '2025-08-01 14:30:00', 'Juan', 'Pérez', '2002-06-15', 'MID', 'pending', 'Solicitud para unirse a Minerham Forest'),
+(8, 'player2', '2025-08-01 10:15:00', 'María', 'González', '2001-08-20', 'FWD', 'pending', 'Solicitud para unirse a Old Boys');
 
 -- 5. APPROVE REQUESTS - Natural workflow: approve requests
 -- TRIGGER: create_player_on_approval will auto-create players records
@@ -38,9 +38,9 @@ SET status = 'approved'
 WHERE id IN (1, 2);
 
 -- 6. MATCHES - Two matches between the teams, created with 'in review' status
-INSERT INTO matches (local_team_id, visitor_team_id, competition_id, date, timestamptz, location, local_score, visitor_score, status) VALUES 
-(5, 8, 1, '2025-03-15', '2025-03-15 17:00:00', 'Cancha UC', 0, 0, 'in review'),
-(8, 5, 1, '2025-03-20', '2025-03-20 16:00:00', 'Cancha UC', 0, 0, 'in review');
+INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, location, local_score, visitor_score, status) VALUES 
+(5, 8, 1, '2025-08-01 19:00:00', 'Cancha UC', 0, 0, 'in review'),
+(8, 5, 1, '2025-08-01 16:00:00', 'Cancha UC', 0, 0, 'in review');
 
 -- 7. EVENTS - Add some goals to both matches
 -- TRIGGER: update_match_scores_on_goal_insert will auto-update match scores
