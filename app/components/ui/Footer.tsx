@@ -70,19 +70,7 @@ function Footer() {
                 <FooterCol title="SÍGUENOS EN">
                   <div className="flex gap-4">
                     <a
-                      href="https://www.linkedin.com/company/"
-                      className="group transition-transform duration-100 hover:scale-110"
-                      aria-label="LinkedIn"
-                    >
-                      <Image
-                        src={linkedin}
-                        alt="LinkedIn"
-                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
-                        priority
-                      />
-                    </a>
-                    <a
-                      href="https://www.youtube.com/"
+                      href="https://www.youtube.com/watch?v=0ewCq6rPgrI&list=PLKjWaWKhKm7qBGB_zrWmdkJ88UifQH_87"
                       className="group transition-transform duration-100 hover:scale-110"
                       aria-label="YouTube"
                     >
@@ -94,7 +82,7 @@ function Footer() {
                       />
                     </a>
                     <a
-                      href="https://www.instagram.com/"
+                      href="https://www.instagram.com/major_league_uc/"
                       className="group transition-transform duration-100 hover:scale-110"
                       aria-label="Instagram"
                     >
