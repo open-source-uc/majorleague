@@ -1,0 +1,51 @@
+/* Theme variables and color definitions */
+@theme static inline {
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	/* Custom breakpoints */
+	--breakpoint-tablet: 768px;
+	--breakpoint-desktop: 1154px;
+}
+
+:root {
+	--radius: 0.625rem;
+	--background: oklch(0.173 0 0);
+	--foreground: oklch(0.9881 0 0);
+	--card: oklch(0.273 0 0);  
+	--card-foreground: oklch(0.8881 0 0);
+	--popover: oklch(0.273 0 0);
+	--popover-foreground: oklch(0.8881 0 0);
+	--primary: oklch(0.852 0.1802 104.38);
+	--primary-foreground: oklch(0.252 0.1802 104.38);
+	--muted: oklch(0.6993 0.141 94.85);
+	--muted-foreground: oklch(0.2993 0.141 94.85);
+	--accent: oklch(0.7668 0 0);
+	--accent-foreground: oklch(0.173 0 0);
+	--border: oklch(0.3881 0 0);
+	--input: oklch(0.535 0 0);
+	--ring: oklch(0.6993 0.141 94.85);
+    --success: oklch(0.852 0.1802 144.38);
+    --warning: oklch(0.852 0.1802 50.38);
+    --destructive: oklch(0.852 0.2502 20.38);
+}

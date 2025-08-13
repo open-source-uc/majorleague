@@ -4,12 +4,10 @@ import { Metadata } from "next";
 
 import Footer from "./components/ui/Footer";
 import Navbar from "./components/ui/Navbar";
-import "./globals.css";
+import "./styles/globals.css";
 
 const albert_sans = Albert_Sans({
   subsets: ["latin"],
-  display: "swap",
-  variable: "--font-albert-sans",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning={true}>
+    <html lang="es" suppressHydrationWarning={true} className={albert_sans.className}>
       <head>
         <link rel="preload" href="/assets/hero.png" as="image" />
         <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
