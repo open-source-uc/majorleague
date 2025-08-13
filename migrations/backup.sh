@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Major League Database Setup Script
-# Sets up schema and triggers
+# Major League Database Backup Script
+# Creates database backup
 
 set -e  # Exit on any error
 
@@ -32,12 +32,12 @@ print_warning() {
 # Main script
 echo ""
 printf "${BLUE}================================${NC}\n"
-printf "${BLUE}  Major League Database Setup   ${NC}\n"
+printf "${BLUE}  Major League Database Backup  ${NC}\n"
 printf "${BLUE}================================${NC}\n"
 echo ""
 
 # Ask for environment
-echo "¿En qué entorno deseas ejecutar el setup?"
+echo "¿De qué entorno deseas crear el backup?"
 echo "1) Local (development)"
 echo "2) Remoto (production)"
 read -p "Selecciona una opción (1-2): " env_choice
@@ -57,7 +57,7 @@ case $env_choice in
         ;;
 esac
 
-print_info "Ejecutando setup en entorno: $ENV_NAME"
+print_info "Creando backup del entorno: $ENV_NAME"
 echo ""
 
 # Check if npx is available
@@ -66,33 +66,34 @@ if ! command -v npx &> /dev/null; then
     exit 1
 fi
 
-# Check if sql files exist
-if [ ! -f "migrations/sql/schema.sql" ]; then
-    print_error "Archivo migrations/sql/schema.sql no encontrado"
-    exit 1
+# Create backups directory if it doesn't exist
+BACKUP_DIR="./migrations/backups"
+if [ ! -d "$BACKUP_DIR" ]; then
+    mkdir -p "$BACKUP_DIR"
+    print_info "Directorio de backups creado: $BACKUP_DIR"
 fi
 
-if [ ! -f "migrations/sql/triggers.sql" ]; then
-    print_error "Archivo migrations/sql/triggers.sql no encontrado"
-    exit 1
-fi
+# Generate backup filename with timestamp
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/backup_${ENV_NAME,,}_$DATE.sql"
 
-print_info "Aplicando schema..."
-if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/schema.sql; then
-    print_success "Schema aplicado correctamente"
+print_info "Creando backup en: $BACKUP_FILE"
+
+# Create backup using npx wrangler d1 backup
+if npx wrangler d1 backup download majorleague $DB_FLAG --output="$BACKUP_FILE"; then
+    print_success "Backup creado correctamente: $BACKUP_FILE"
+    
+    # Show backup file size
+    if command -v ls &> /dev/null; then
+        FILE_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
+        print_info "Tamaño del backup: $FILE_SIZE"
+    fi
 else
-    print_error "Error al aplicar schema"
-    exit 1
-fi
-
-print_info "Aplicando triggers..."
-if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/triggers.sql; then
-    print_success "Triggers aplicados correctamente"
-else
-    print_error "Error al aplicar triggers"
+    print_error "Error al crear backup"
     exit 1
 fi
 
 echo ""
-print_success "Setup completado exitosamente en entorno $ENV_NAME"
+print_success "Backup completado exitosamente"
+print_info "Archivo guardado en: $BACKUP_FILE"
 echo ""

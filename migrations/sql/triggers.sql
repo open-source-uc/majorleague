@@ -16,6 +16,9 @@ DROP TRIGGER IF EXISTS validate_event_minute;
 DROP TRIGGER IF EXISTS cleanup_join_request_on_player_deletion;
 DROP TRIGGER IF EXISTS prevent_duplicate_pending_requests;
 DROP TRIGGER IF EXISTS prevent_request_if_already_player;
+DROP TRIGGER IF EXISTS update_match_planilleros_ts;
+DROP TRIGGER IF EXISTS update_attendance_ts;
+DROP TRIGGER IF EXISTS check_match_completion;
 
 
 -- 1. Update timestamps on profile changes
@@ -396,4 +399,57 @@ CREATE TRIGGER prevent_request_if_already_player
     )
     BEGIN
         SELECT RAISE(ABORT, 'Ya eres miembro de este equipo.');
+    END;
+
+-- 17. Auto-update timestamps for match_planilleros
+CREATE TRIGGER update_match_planilleros_ts
+    BEFORE UPDATE ON match_planilleros
+    FOR EACH ROW
+    BEGIN
+        UPDATE match_planilleros 
+        SET updated_at = CURRENT_TIMESTAMP 
+        WHERE id = NEW.id;
+    END;
+
+-- 18. Auto-update timestamps for match_attendance
+CREATE TRIGGER update_attendance_ts
+    BEFORE UPDATE ON match_attendance
+    FOR EACH ROW
+    BEGIN
+        UPDATE match_attendance 
+        SET updated_at = CURRENT_TIMESTAMP 
+        WHERE id = NEW.id;
+    END;
+
+-- 19. Auto-complete match when both scorecards are validated
+CREATE TRIGGER check_match_completion
+    AFTER UPDATE ON scorecard_validations
+    FOR EACH ROW
+    WHEN NEW.status = 'approved'
+    BEGIN
+        -- Only finish if both teams were validated by the corresponding rival planillero
+        UPDATE matches 
+        SET status = 'finished'
+        WHERE id = NEW.match_id
+          AND status = 'in_review'
+          AND EXISTS (
+            -- Validation of local team by visitor planillero
+            SELECT 1 FROM scorecard_validations sv1
+            JOIN match_planilleros mp1 ON sv1.validator_profile_id = mp1.profile_id
+            JOIN matches m1 ON sv1.match_id = m1.id
+            WHERE sv1.match_id = NEW.match_id
+              AND sv1.validated_team_id = m1.local_team_id
+              AND mp1.team_id = m1.visitor_team_id
+              AND sv1.status = 'approved'
+          )
+          AND EXISTS (
+            -- Validation of visitor team by local planillero  
+            SELECT 1 FROM scorecard_validations sv2
+            JOIN match_planilleros mp2 ON sv2.validator_profile_id = mp2.profile_id
+            JOIN matches m2 ON sv2.match_id = m2.id
+            WHERE sv2.match_id = NEW.match_id
+              AND sv2.validated_team_id = m2.visitor_team_id
+              AND mp2.team_id = m2.local_team_id
+              AND sv2.status = 'approved'
+          );
     END;
