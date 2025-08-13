@@ -53,6 +53,7 @@ backups/
 # OS files
 .DS_Store
 Thumbs.db 
+shell.nix
 
 # If sh is executed on /migrations
 /migrations/node_modules
