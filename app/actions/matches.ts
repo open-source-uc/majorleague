@@ -15,7 +15,7 @@ const matchCreateSchema = z.object({
   competition_id: z.number().min(1, "La competición es requerida"),
   timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   location: z.string().optional(),
-  status: z.enum(["scheduled", "cancelled", "live", "in review"]).optional(),
+  status: z.enum(["scheduled", "cancelled", "live", "in_review"]).optional(),
 });
 
 const matchUpdateSchema = z.object({
@@ -27,7 +27,7 @@ const matchUpdateSchema = z.object({
   location: z.string().optional(),
   local_score: z.number().min(0, "El marcador local debe ser 0 o mayor").optional(),
   visitor_score: z.number().min(0, "El marcador visitante debe ser 0 o mayor").optional(),
-  status: z.enum(["scheduled", "live", "finished", "cancelled", "in review"]).optional(),
+  status: z.enum(["scheduled", "live", "finished", "cancelled", "in_review"]).optional(),
 });
 
 const matchDeleteSchema = z.object({
@@ -343,7 +343,7 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "finished" && existingMatch.status !== "in review") {
+    if (parsed.data.status === "finished" && existingMatch.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -352,7 +352,7 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "live" && existingMatch.status !== "in review") {
+    if (parsed.data.status === "live" && existingMatch.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -361,7 +361,7 @@ export async function updateMatch(
       };
     }
 
-    if (existingMatch.status === "finished" && parsed.data.status !== "in review") {
+    if (existingMatch.status === "finished" && parsed.data.status !== "in_review") {
       return {
         success: 0,
         errors: 1,

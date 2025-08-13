@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getPlayerByProfileId, getJoinRequestsByProfileId } from "@/actions/auth";
+import { isPlanillero } from "@/actions/planilleros";
 import { getAuthStatus } from "@/lib/services/auth";
 import { calculateAge } from "@/lib/utils/cn";
 
@@ -18,8 +19,11 @@ export default async function Perfil() {
     return redirect("/login");
   }
 
-  const playerInfo = await getPlayerByProfileId(userProfile.id);
-  const pendingRequests = await getJoinRequestsByProfileId(userProfile.id);
+  const [playerInfo, pendingRequests, userIsPlanillero] = await Promise.all([
+    getPlayerByProfileId(userProfile.id),
+    getJoinRequestsByProfileId(userProfile.id),
+    isPlanillero(userProfile.id),
+  ]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-CL", {
@@ -197,6 +201,19 @@ export default async function Perfil() {
               <div className="text-ml-grey text-sm">Ver estado de participación</div>
             </div>
           </Link>
+
+          {userIsPlanillero ? (
+            <Link
+              href="/planillero"
+              className="bg-primary-darken hover:bg-primary text-background flex items-center gap-3 rounded-lg p-4 transition-colors"
+            >
+              <div className="text-xl">📝</div>
+              <div>
+                <div className="font-medium">Planillero</div>
+                <div className="text-sm opacity-90">Gestionar partidos asignados</div>
+              </div>
+            </Link>
+          ) : null}
 
           {isAdmin ? (
             <Link

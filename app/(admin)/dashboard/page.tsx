@@ -30,6 +30,11 @@ export default async function Dashboard() {
         { name: "Equipos", href: "/dashboard/teams", description: "Administrar equipos y configuraciones" },
         { name: "Competiciones", href: "/dashboard/competitions", description: "Gestionar competiciones y torneos" },
         { name: "Partidos", href: "/dashboard/matches", description: "Programar y gestionar partidos" },
+        {
+          name: "Planilleros",
+          href: "/dashboard/planilleros",
+          description: "Asignar y gestionar planilleros de partidos",
+        },
       ],
     },
     {

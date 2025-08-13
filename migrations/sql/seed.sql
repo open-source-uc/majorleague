@@ -1,18 +1,205 @@
 -- Seed data for Major League Database
--- Simplified version using natural insertion flow with triggers
--- 2 teams, 2 matches, 2 players, 1 user
+-- Extended version using natural insertion flow with triggers
+-- 9 teams, 180 players (20 per team), 1 admin user
 
--- 1. PROFILES - Base users
+-- 1. PROFILES - Base users (admin + 180 players)
 INSERT INTO profiles (id, username, email) VALUES 
 ('admin', 'admin', 'admin@osuc.dev'),
-('player1', 'player1', 'player1@uc.cl'),
-('player2', 'player2', 'player2@uc.cl');
+-- Atletico Byte players (20)
+('ab_player1', 'ab_player1', 'ab_player1@uc.cl'),
+('ab_player2', 'ab_player2', 'ab_player2@uc.cl'),
+('ab_player3', 'ab_player3', 'ab_player3@uc.cl'),
+('ab_player4', 'ab_player4', 'ab_player4@uc.cl'),
+('ab_player5', 'ab_player5', 'ab_player5@uc.cl'),
+('ab_player6', 'ab_player6', 'ab_player6@uc.cl'),
+('ab_player7', 'ab_player7', 'ab_player7@uc.cl'),
+('ab_player8', 'ab_player8', 'ab_player8@uc.cl'),
+('ab_player9', 'ab_player9', 'ab_player9@uc.cl'),
+('ab_player10', 'ab_player10', 'ab_player10@uc.cl'),
+('ab_player11', 'ab_player11', 'ab_player11@uc.cl'),
+('ab_player12', 'ab_player12', 'ab_player12@uc.cl'),
+('ab_player13', 'ab_player13', 'ab_player13@uc.cl'),
+('ab_player14', 'ab_player14', 'ab_player14@uc.cl'),
+('ab_player15', 'ab_player15', 'ab_player15@uc.cl'),
+('ab_player16', 'ab_player16', 'ab_player16@uc.cl'),
+('ab_player17', 'ab_player17', 'ab_player17@uc.cl'),
+('ab_player18', 'ab_player18', 'ab_player18@uc.cl'),
+('ab_player19', 'ab_player19', 'ab_player19@uc.cl'),
+('ab_player20', 'ab_player20', 'ab_player20@uc.cl'),
+-- Industrial FC players (20)
+('ifc_player1', 'ifc_player1', 'ifc_player1@uc.cl'),
+('ifc_player2', 'ifc_player2', 'ifc_player2@uc.cl'),
+('ifc_player3', 'ifc_player3', 'ifc_player3@uc.cl'),
+('ifc_player4', 'ifc_player4', 'ifc_player4@uc.cl'),
+('ifc_player5', 'ifc_player5', 'ifc_player5@uc.cl'),
+('ifc_player6', 'ifc_player6', 'ifc_player6@uc.cl'),
+('ifc_player7', 'ifc_player7', 'ifc_player7@uc.cl'),
+('ifc_player8', 'ifc_player8', 'ifc_player8@uc.cl'),
+('ifc_player9', 'ifc_player9', 'ifc_player9@uc.cl'),
+('ifc_player10', 'ifc_player10', 'ifc_player10@uc.cl'),
+('ifc_player11', 'ifc_player11', 'ifc_player11@uc.cl'),
+('ifc_player12', 'ifc_player12', 'ifc_player12@uc.cl'),
+('ifc_player13', 'ifc_player13', 'ifc_player13@uc.cl'),
+('ifc_player14', 'ifc_player14', 'ifc_player14@uc.cl'),
+('ifc_player15', 'ifc_player15', 'ifc_player15@uc.cl'),
+('ifc_player16', 'ifc_player16', 'ifc_player16@uc.cl'),
+('ifc_player17', 'ifc_player17', 'ifc_player17@uc.cl'),
+('ifc_player18', 'ifc_player18', 'ifc_player18@uc.cl'),
+('ifc_player19', 'ifc_player19', 'ifc_player19@uc.cl'),
+('ifc_player20', 'ifc_player20', 'ifc_player20@uc.cl'),
+-- Manchester Civil players (20)
+('mc_player1', 'mc_player1', 'mc_player1@uc.cl'),
+('mc_player2', 'mc_player2', 'mc_player2@uc.cl'),
+('mc_player3', 'mc_player3', 'mc_player3@uc.cl'),
+('mc_player4', 'mc_player4', 'mc_player4@uc.cl'),
+('mc_player5', 'mc_player5', 'mc_player5@uc.cl'),
+('mc_player6', 'mc_player6', 'mc_player6@uc.cl'),
+('mc_player7', 'mc_player7', 'mc_player7@uc.cl'),
+('mc_player8', 'mc_player8', 'mc_player8@uc.cl'),
+('mc_player9', 'mc_player9', 'mc_player9@uc.cl'),
+('mc_player10', 'mc_player10', 'mc_player10@uc.cl'),
+('mc_player11', 'mc_player11', 'mc_player11@uc.cl'),
+('mc_player12', 'mc_player12', 'mc_player12@uc.cl'),
+('mc_player13', 'mc_player13', 'mc_player13@uc.cl'),
+('mc_player14', 'mc_player14', 'mc_player14@uc.cl'),
+('mc_player15', 'mc_player15', 'mc_player15@uc.cl'),
+('mc_player16', 'mc_player16', 'mc_player16@uc.cl'),
+('mc_player17', 'mc_player17', 'mc_player17@uc.cl'),
+('mc_player18', 'mc_player18', 'mc_player18@uc.cl'),
+('mc_player19', 'mc_player19', 'mc_player19@uc.cl'),
+('mc_player20', 'mc_player20', 'mc_player20@uc.cl'),
+-- Mathchester Science players (20)
+('ms_player1', 'ms_player1', 'ms_player1@uc.cl'),
+('ms_player2', 'ms_player2', 'ms_player2@uc.cl'),
+('ms_player3', 'ms_player3', 'ms_player3@uc.cl'),
+('ms_player4', 'ms_player4', 'ms_player4@uc.cl'),
+('ms_player5', 'ms_player5', 'ms_player5@uc.cl'),
+('ms_player6', 'ms_player6', 'ms_player6@uc.cl'),
+('ms_player7', 'ms_player7', 'ms_player7@uc.cl'),
+('ms_player8', 'ms_player8', 'ms_player8@uc.cl'),
+('ms_player9', 'ms_player9', 'ms_player9@uc.cl'),
+('ms_player10', 'ms_player10', 'ms_player10@uc.cl'),
+('ms_player11', 'ms_player11', 'ms_player11@uc.cl'),
+('ms_player12', 'ms_player12', 'ms_player12@uc.cl'),
+('ms_player13', 'ms_player13', 'ms_player13@uc.cl'),
+('ms_player14', 'ms_player14', 'ms_player14@uc.cl'),
+('ms_player15', 'ms_player15', 'ms_player15@uc.cl'),
+('ms_player16', 'ms_player16', 'ms_player16@uc.cl'),
+('ms_player17', 'ms_player17', 'ms_player17@uc.cl'),
+('ms_player18', 'ms_player18', 'ms_player18@uc.cl'),
+('ms_player19', 'ms_player19', 'ms_player19@uc.cl'),
+('ms_player20', 'ms_player20', 'ms_player20@uc.cl'),
+-- Minerham Forest players (20)
+('mf_player1', 'mf_player1', 'mf_player1@uc.cl'),
+('mf_player2', 'mf_player2', 'mf_player2@uc.cl'),
+('mf_player3', 'mf_player3', 'mf_player3@uc.cl'),
+('mf_player4', 'mf_player4', 'mf_player4@uc.cl'),
+('mf_player5', 'mf_player5', 'mf_player5@uc.cl'),
+('mf_player6', 'mf_player6', 'mf_player6@uc.cl'),
+('mf_player7', 'mf_player7', 'mf_player7@uc.cl'),
+('mf_player8', 'mf_player8', 'mf_player8@uc.cl'),
+('mf_player9', 'mf_player9', 'mf_player9@uc.cl'),
+('mf_player10', 'mf_player10', 'mf_player10@uc.cl'),
+('mf_player11', 'mf_player11', 'mf_player11@uc.cl'),
+('mf_player12', 'mf_player12', 'mf_player12@uc.cl'),
+('mf_player13', 'mf_player13', 'mf_player13@uc.cl'),
+('mf_player14', 'mf_player14', 'mf_player14@uc.cl'),
+('mf_player15', 'mf_player15', 'mf_player15@uc.cl'),
+('mf_player16', 'mf_player16', 'mf_player16@uc.cl'),
+('mf_player17', 'mf_player17', 'mf_player17@uc.cl'),
+('mf_player18', 'mf_player18', 'mf_player18@uc.cl'),
+('mf_player19', 'mf_player19', 'mf_player19@uc.cl'),
+('mf_player20', 'mf_player20', 'mf_player20@uc.cl'),
+-- Naranja Mecanica players (20)
+('nm_player1', 'nm_player1', 'nm_player1@uc.cl'),
+('nm_player2', 'nm_player2', 'nm_player2@uc.cl'),
+('nm_player3', 'nm_player3', 'nm_player3@uc.cl'),
+('nm_player4', 'nm_player4', 'nm_player4@uc.cl'),
+('nm_player5', 'nm_player5', 'nm_player5@uc.cl'),
+('nm_player6', 'nm_player6', 'nm_player6@uc.cl'),
+('nm_player7', 'nm_player7', 'nm_player7@uc.cl'),
+('nm_player8', 'nm_player8', 'nm_player8@uc.cl'),
+('nm_player9', 'nm_player9', 'nm_player9@uc.cl'),
+('nm_player10', 'nm_player10', 'nm_player10@uc.cl'),
+('nm_player11', 'nm_player11', 'nm_player11@uc.cl'),
+('nm_player12', 'nm_player12', 'nm_player12@uc.cl'),
+('nm_player13', 'nm_player13', 'nm_player13@uc.cl'),
+('nm_player14', 'nm_player14', 'nm_player14@uc.cl'),
+('nm_player15', 'nm_player15', 'nm_player15@uc.cl'),
+('nm_player16', 'nm_player16', 'nm_player16@uc.cl'),
+('nm_player17', 'nm_player17', 'nm_player17@uc.cl'),
+('nm_player18', 'nm_player18', 'nm_player18@uc.cl'),
+('nm_player19', 'nm_player19', 'nm_player19@uc.cl'),
+('nm_player20', 'nm_player20', 'nm_player20@uc.cl'),
+-- New Boys players (20)
+('nb_player1', 'nb_player1', 'nb_player1@uc.cl'),
+('nb_player2', 'nb_player2', 'nb_player2@uc.cl'),
+('nb_player3', 'nb_player3', 'nb_player3@uc.cl'),
+('nb_player4', 'nb_player4', 'nb_player4@uc.cl'),
+('nb_player5', 'nb_player5', 'nb_player5@uc.cl'),
+('nb_player6', 'nb_player6', 'nb_player6@uc.cl'),
+('nb_player7', 'nb_player7', 'nb_player7@uc.cl'),
+('nb_player8', 'nb_player8', 'nb_player8@uc.cl'),
+('nb_player9', 'nb_player9', 'nb_player9@uc.cl'),
+('nb_player10', 'nb_player10', 'nb_player10@uc.cl'),
+('nb_player11', 'nb_player11', 'nb_player11@uc.cl'),
+('nb_player12', 'nb_player12', 'nb_player12@uc.cl'),
+('nb_player13', 'nb_player13', 'nb_player13@uc.cl'),
+('nb_player14', 'nb_player14', 'nb_player14@uc.cl'),
+('nb_player15', 'nb_player15', 'nb_player15@uc.cl'),
+('nb_player16', 'nb_player16', 'nb_player16@uc.cl'),
+('nb_player17', 'nb_player17', 'nb_player17@uc.cl'),
+('nb_player18', 'nb_player18', 'nb_player18@uc.cl'),
+('nb_player19', 'nb_player19', 'nb_player19@uc.cl'),
+('nb_player20', 'nb_player20', 'nb_player20@uc.cl'),
+-- Old Boys players (20)
+('ob_player1', 'ob_player1', 'ob_player1@uc.cl'),
+('ob_player2', 'ob_player2', 'ob_player2@uc.cl'),
+('ob_player3', 'ob_player3', 'ob_player3@uc.cl'),
+('ob_player4', 'ob_player4', 'ob_player4@uc.cl'),
+('ob_player5', 'ob_player5', 'ob_player5@uc.cl'),
+('ob_player6', 'ob_player6', 'ob_player6@uc.cl'),
+('ob_player7', 'ob_player7', 'ob_player7@uc.cl'),
+('ob_player8', 'ob_player8', 'ob_player8@uc.cl'),
+('ob_player9', 'ob_player9', 'ob_player9@uc.cl'),
+('ob_player10', 'ob_player10', 'ob_player10@uc.cl'),
+('ob_player11', 'ob_player11', 'ob_player11@uc.cl'),
+('ob_player12', 'ob_player12', 'ob_player12@uc.cl'),
+('ob_player13', 'ob_player13', 'ob_player13@uc.cl'),
+('ob_player14', 'ob_player14', 'ob_player14@uc.cl'),
+('ob_player15', 'ob_player15', 'ob_player15@uc.cl'),
+('ob_player16', 'ob_player16', 'ob_player16@uc.cl'),
+('ob_player17', 'ob_player17', 'ob_player17@uc.cl'),
+('ob_player18', 'ob_player18', 'ob_player18@uc.cl'),
+('ob_player19', 'ob_player19', 'ob_player19@uc.cl'),
+('ob_player20', 'ob_player20', 'ob_player20@uc.cl'),
+-- Robovolt United players (20)
+('ru_player1', 'ru_player1', 'ru_player1@uc.cl'),
+('ru_player2', 'ru_player2', 'ru_player2@uc.cl'),
+('ru_player3', 'ru_player3', 'ru_player3@uc.cl'),
+('ru_player4', 'ru_player4', 'ru_player4@uc.cl'),
+('ru_player5', 'ru_player5', 'ru_player5@uc.cl'),
+('ru_player6', 'ru_player6', 'ru_player6@uc.cl'),
+('ru_player7', 'ru_player7', 'ru_player7@uc.cl'),
+('ru_player8', 'ru_player8', 'ru_player8@uc.cl'),
+('ru_player9', 'ru_player9', 'ru_player9@uc.cl'),
+('ru_player10', 'ru_player10', 'ru_player10@uc.cl'),
+('ru_player11', 'ru_player11', 'ru_player11@uc.cl'),
+('ru_player12', 'ru_player12', 'ru_player12@uc.cl'),
+('ru_player13', 'ru_player13', 'ru_player13@uc.cl'),
+('ru_player14', 'ru_player14', 'ru_player14@uc.cl'),
+('ru_player15', 'ru_player15', 'ru_player15@uc.cl'),
+('ru_player16', 'ru_player16', 'ru_player16@uc.cl'),
+('ru_player17', 'ru_player17', 'ru_player17@uc.cl'),
+('ru_player18', 'ru_player18', 'ru_player18@uc.cl'),
+('ru_player19', 'ru_player19', 'ru_player19@uc.cl'),
+('ru_player20', 'ru_player20', 'ru_player20@uc.cl');
 
 -- 2. COMPETITIONS - Single competition
 INSERT INTO competitions (name, year, semester, start_timestamp, end_timestamp) VALUES 
 ('Segundo Semestre 2025', 2025, 2, '2025-08-01 00:00:00', '2025-12-31 23:59:59');
 
--- 3. TEAMS - All teams from equipos.txt
+-- 3. TEAMS - All teams
 -- TRIGGER: create_team_competition_record will auto-create team_competitions records
 -- Initially, admin is captain of all teams
 INSERT INTO teams (name, captain_id, major) VALUES 
@@ -26,48 +213,229 @@ INSERT INTO teams (name, captain_id, major) VALUES
 ('Old Boys', 'admin', 'Ex Alumnos'),
 ('Robovolt United', 'admin', 'Electrica - Robotica');
 
--- 4. JOIN_TEAM_REQUESTS - Natural workflow: create pending requests
+-- 4. JOIN_TEAM_REQUESTS - Natural workflow: create pending requests (180 total)
 INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, birthday, preferred_position, status, notes) VALUES 
-(5, 'player1', '2025-08-01 14:30:00', 'Juan', 'Pérez', '2002-06-15', 'MID', 'pending', 'Solicitud para unirse a Minerham Forest'),
-(8, 'player2', '2025-08-01 10:15:00', 'María', 'González', '2001-08-20', 'FWD', 'pending', 'Solicitud para unirse a Old Boys');
+-- Atletico Byte (Team 1) - 20 players
+(1, 'ab_player1', '2025-08-01 10:00:00', 'Carmen', 'González', '2001-12-03', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player2', '2025-08-01 10:05:00', 'Benjamín', 'Jiménez', '2001-03-14', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player3', '2025-08-01 10:10:00', 'Tomás', 'González', '2001-06-14', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player4', '2025-08-01 10:15:00', 'Matías', 'Torres', '2002-06-15', 'DEF', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player5', '2025-08-01 10:20:00', 'Diego', 'Vargas', '2001-03-20', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player6', '2025-08-01 10:25:00', 'Luis', 'Campos', '2002-09-24', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player7', '2025-08-01 10:30:00', 'Pablo', 'Martín', '2002-02-13', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player8', '2025-08-01 10:35:00', 'Nicolás', 'Alvarez', '2002-03-16', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player9', '2025-08-01 10:40:00', 'Carlos', 'Sánchez', '2002-11-08', 'GK', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player10', '2025-08-01 10:45:00', 'Diego', 'Silva', '2002-09-08', 'GK', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player11', '2025-08-01 10:50:00', 'Alejandra', 'Muñoz', '2002-12-28', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player12', '2025-08-01 10:55:00', 'Ana', 'Rodríguez', '2002-01-25', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player13', '2025-08-01 11:00:00', 'Andrés', 'Morales', '2001-03-18', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player14', '2025-08-01 11:05:00', 'Tomás', 'Bravo', '2002-03-03', 'GK', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player15', '2025-08-01 11:10:00', 'Monica', 'Fernández', '2002-03-23', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player16', '2025-08-01 11:15:00', 'Luis', 'Muñoz', '2002-04-17', 'MID', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player17', '2025-08-01 11:20:00', 'Luis', 'Jiménez', '2002-04-21', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player18', '2025-08-01 11:25:00', 'Nicolás', 'Espinoza', '2002-03-10', 'GK', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player19', '2025-08-01 11:30:00', 'Emilio', 'Vargas', '2002-01-08', 'FWD', 'pending', 'Jugador de Atletico Byte'),
+(1, 'ab_player20', '2025-08-01 11:35:00', 'Alejandra', 'Martín', '2001-03-02', 'MID', 'pending', 'Jugador de Atletico Byte'),
+-- Industrial FC (Team 2) - 20 players
+(2, 'ifc_player1', '2025-08-01 12:00:00', 'Ignacio', 'Guerrero', '2001-06-25', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player2', '2025-08-01 12:05:00', 'Claudia', 'Hernández', '2002-07-18', 'MID', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player3', '2025-08-01 12:10:00', 'Diego', 'Vargas', '2001-12-24', 'MID', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player4', '2025-08-01 12:15:00', 'Gabriel', 'Alvarez', '2001-09-14', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player5', '2025-08-01 12:20:00', 'Joaquín', 'Campos', '2002-12-11', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player6', '2025-08-01 12:25:00', 'Rodrigo', 'González', '2002-05-16', 'MID', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player7', '2025-08-01 12:30:00', 'Tomás', 'Torres', '2002-07-14', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player8', '2025-08-01 12:35:00', 'Cristóbal', 'Morales', '2001-12-04', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player9', '2025-08-01 12:40:00', 'Francisca', 'Guerrero', '2002-06-04', 'MID', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player10', '2025-08-01 12:45:00', 'Diego', 'Martín', '2002-05-13', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player11', '2025-08-01 12:50:00', 'Daniel', 'Cortés', '2001-07-21', 'MID', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player12', '2025-08-01 12:55:00', 'Francisca', 'Muñoz', '2001-09-05', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player13', '2025-08-01 13:00:00', 'Francisca', 'Fuentes', '2002-09-22', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player14', '2025-08-01 13:05:00', 'Carmen', 'González', '2002-01-27', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player15', '2025-08-01 13:10:00', 'Rodrigo', 'Rojas', '2002-09-08', 'GK', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player16', '2025-08-01 13:15:00', 'Matías', 'Fernández', '2001-01-07', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player17', '2025-08-01 13:20:00', 'Tomás', 'Rodríguez', '2001-07-25', 'DEF', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player18', '2025-08-01 13:25:00', 'Ignacio', 'Sánchez', '2001-08-08', 'FWD', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player19', '2025-08-01 13:30:00', 'Carmen', 'Muñoz', '2001-06-27', 'DEF', 'pending', 'Jugador de Industrial FC'),
+(2, 'ifc_player20', '2025-08-01 13:35:00', 'Claudia', 'Pérez', '2002-07-08', 'DEF', 'pending', 'Jugador de Industrial FC'),
+-- Manchester Civil (Team 3) - 20 players
+(3, 'mc_player1', '2025-08-01 14:00:00', 'Andrés', 'Alvarez', '2001-08-03', 'DEF', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player2', '2025-08-01 14:05:00', 'Vicente', 'Morales', '2001-12-17', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player3', '2025-08-01 14:10:00', 'Isabel', 'Sánchez', '2002-10-03', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player4', '2025-08-01 14:15:00', 'Ricardo', 'Rodríguez', '2001-11-23', 'FWD', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player5', '2025-08-01 14:20:00', 'Gonzalo', 'Sánchez', '2002-06-26', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player6', '2025-08-01 14:25:00', 'Miguel', 'Sánchez', '2001-08-23', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player7', '2025-08-01 14:30:00', 'Gonzalo', 'García', '2002-01-24', 'DEF', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player8', '2025-08-01 14:35:00', 'Monica', 'Martín', '2001-06-06', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player9', '2025-08-01 14:40:00', 'Claudio', 'Torres', '2002-04-16', 'DEF', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player10', '2025-08-01 14:45:00', 'María', 'Rojas', '2001-12-13', 'GK', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player11', '2025-08-01 14:50:00', 'Cristóbal', 'Sánchez', '2001-10-28', 'DEF', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player12', '2025-08-01 14:55:00', 'Francisca', 'Torres', '2002-05-25', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player13', '2025-08-01 15:00:00', 'Luis', 'García', '2001-02-27', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player14', '2025-08-01 15:05:00', 'Gonzalo', 'Bravo', '2001-11-04', 'MID', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player15', '2025-08-01 15:10:00', 'Matías', 'Castro', '2001-01-15', 'GK', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player16', '2025-08-01 15:15:00', 'Carmen', 'Vargas', '2001-11-02', 'GK', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player17', '2025-08-01 15:20:00', 'Martín', 'Castro', '2001-06-22', 'FWD', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player18', '2025-08-01 15:25:00', 'Diego', 'Hernández', '2002-06-17', 'FWD', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player19', '2025-08-01 15:30:00', 'Ana', 'Flores', '2002-04-04', 'FWD', 'pending', 'Estudiante de ingeniería civil'),
+(3, 'mc_player20', '2025-08-01 15:35:00', 'Luis', 'Mendoza', '2002-12-07', 'FWD', 'pending', 'Estudiante de ingeniería civil'),
+-- Mathchester Science (Team 4) - 20 players
+(4, 'ms_player1', '2025-08-01 16:00:00', 'Alejandro', 'Pérez', '2002-07-03', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player2', '2025-08-01 16:05:00', 'Carlos', 'Hernández', '2002-06-10', 'GK', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player3', '2025-08-01 16:10:00', 'Fernando', 'Vargas', '2001-05-05', 'MID', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player4', '2025-08-01 16:15:00', 'Ricardo', 'Flores', '2001-09-24', 'MID', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player5', '2025-08-01 16:20:00', 'Patricia', 'Flores', '2002-02-06', 'FWD', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player6', '2025-08-01 16:25:00', 'Gabriel', 'Guerrero', '2002-09-09', 'GK', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player7', '2025-08-01 16:30:00', 'Joaquín', 'Rodríguez', '2002-03-11', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player8', '2025-08-01 16:35:00', 'Cristóbal', 'Rojas', '2002-06-04', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player9', '2025-08-01 16:40:00', 'Sebastián', 'Fernández', '2002-06-26', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player10', '2025-08-01 16:45:00', 'Alejandra', 'Espinoza', '2001-07-07', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player11', '2025-08-01 16:50:00', 'Maximiliano', 'Vega', '2001-04-28', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player12', '2025-08-01 16:55:00', 'Martín', 'Muñoz', '2002-05-03', 'GK', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player13', '2025-08-01 17:00:00', 'Ricardo', 'Torres', '2001-07-23', 'FWD', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player14', '2025-08-01 17:05:00', 'Ana', 'Fuentes', '2002-02-08', 'FWD', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player15', '2025-08-01 17:10:00', 'Monica', 'Vargas', '2001-05-14', 'GK', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player16', '2025-08-01 17:15:00', 'Pablo', 'Sánchez', '2002-11-28', 'FWD', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player17', '2025-08-01 17:20:00', 'Carlos', 'Rodríguez', '2002-04-04', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player18', '2025-08-01 17:25:00', 'Ana', 'Vega', '2002-12-10', 'GK', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player19', '2025-08-01 17:30:00', 'Sebastián', 'Castro', '2001-01-20', 'DEF', 'pending', 'Estudiante de ciencias'),
+(4, 'ms_player20', '2025-08-01 17:35:00', 'Tomás', 'Vargas', '2002-08-09', 'GK', 'pending', 'Estudiante de ciencias'),
+-- Minerham Forest (Team 5) - 20 players
+(5, 'mf_player1', '2025-08-01 18:00:00', 'Javier', 'Fernández', '2002-11-19', 'GK', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player2', '2025-08-01 18:05:00', 'Felipe', 'Navarro', '2002-12-15', 'GK', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player3', '2025-08-01 18:10:00', 'Carmen', 'Hernández', '2001-08-19', 'FWD', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player4', '2025-08-01 18:15:00', 'Patricia', 'Rodríguez', '2002-05-15', 'MID', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player5', '2025-08-01 18:20:00', 'Esteban', 'Castro', '2001-11-01', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player6', '2025-08-01 18:25:00', 'Emilio', 'Vega', '2002-02-20', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player7', '2025-08-01 18:30:00', 'Gonzalo', 'Hernández', '2002-07-24', 'FWD', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player8', '2025-08-01 18:35:00', 'Ana', 'Silva', '2002-12-24', 'MID', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player9', '2025-08-01 18:40:00', 'Matías', 'Jiménez', '2002-06-04', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player10', '2025-08-01 18:45:00', 'Alejandro', 'Muñoz', '2001-05-16', 'MID', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player11', '2025-08-01 18:50:00', 'Monica', 'González', '2002-06-06', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player12', '2025-08-01 18:55:00', 'Martín', 'Vargas', '2002-05-04', 'FWD', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player13', '2025-08-01 19:00:00', 'Lorena', 'Hernández', '2001-06-03', 'MID', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player14', '2025-08-01 19:05:00', 'Claudia', 'Castro', '2001-09-09', 'GK', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player15', '2025-08-01 19:10:00', 'Gonzalo', 'Torres', '2001-03-18', 'GK', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player16', '2025-08-01 19:15:00', 'Patricio', 'Hernández', '2001-03-09', 'FWD', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player17', '2025-08-01 19:20:00', 'Vicente', 'Mendoza', '2002-12-28', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player18', '2025-08-01 19:25:00', 'Fernando', 'Rojas', '2001-02-22', 'DEF', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player19', '2025-08-01 19:30:00', 'Carlos', 'Silva', '2001-04-08', 'MID', 'pending', 'Estudiante de minería/ambiental'),
+(5, 'mf_player20', '2025-08-01 19:35:00', 'Gonzalo', 'González', '2001-05-15', 'FWD', 'pending', 'Estudiante de minería/ambiental'),
+-- Naranja Mecanica (Team 6) - 20 players
+(6, 'nm_player1', '2025-08-01 20:00:00', 'Patricio', 'Guerrero', '2001-09-17', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player2', '2025-08-01 20:05:00', 'Patricio', 'Torres', '2002-10-02', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player3', '2025-08-01 20:10:00', 'Carmen', 'Sánchez', '2002-04-27', 'MID', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player4', '2025-08-01 20:15:00', 'Gonzalo', 'Rojas', '2002-08-24', 'MID', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player5', '2025-08-01 20:20:00', 'Emilio', 'Navarro', '2001-03-25', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player6', '2025-08-01 20:25:00', 'Claudia', 'Navarro', '2002-04-14', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player7', '2025-08-01 20:30:00', 'Sebastián', 'Navarro', '2001-12-08', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player8', '2025-08-01 20:35:00', 'Pablo', 'Campos', '2002-02-09', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player9', '2025-08-01 20:40:00', 'Javier', 'Muñoz', '2002-08-09', 'GK', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player10', '2025-08-01 20:45:00', 'Carlos', 'Vega', '2001-11-13', 'FWD', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player11', '2025-08-01 20:50:00', 'Javier', 'Sánchez', '2001-12-17', 'FWD', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player12', '2025-08-01 20:55:00', 'Isabel', 'Morales', '2001-01-23', 'FWD', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player13', '2025-08-01 21:00:00', 'Ignacio', 'Martín', '2002-08-11', 'GK', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player14', '2025-08-01 21:05:00', 'Carlos', 'González', '2001-01-10', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player15', '2025-08-01 21:10:00', 'Emilio', 'Silva', '2001-02-03', 'MID', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player16', '2025-08-01 21:15:00', 'Claudia', 'Bravo', '2001-09-24', 'MID', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player17', '2025-08-01 21:20:00', 'Carlos', 'Espinoza', '2002-10-24', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player18', '2025-08-01 21:25:00', 'Felipe', 'Martín', '2002-05-19', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player19', '2025-08-01 21:30:00', 'Carlos', 'Sánchez', '2001-01-06', 'DEF', 'pending', 'Jugador de Naranja Mecanica'),
+(6, 'nm_player20', '2025-08-01 21:35:00', 'María', 'Mendoza', '2001-08-18', 'MID', 'pending', 'Jugador de Naranja Mecanica'),
+-- New Boys (Team 7) - 20 players
+(7, 'nb_player1', '2025-08-01 22:00:00', 'Emilio', 'Muñoz', '2001-06-23', 'MID', 'pending', 'Jugador novato de Emilio'),
+(7, 'nb_player2', '2025-08-01 22:05:00', 'Vicente', 'Fuentes', '2001-02-10', 'DEF', 'pending', 'Jugador novato de Vicente'),
+(7, 'nb_player3', '2025-08-01 22:10:00', 'Emilio', 'Mendoza', '2002-10-19', 'MID', 'pending', 'Jugador novato de Emilio'),
+(7, 'nb_player4', '2025-08-01 22:15:00', 'Lorena', 'Fuentes', '2001-08-08', 'DEF', 'pending', 'Jugador novato de Lorena'),
+(7, 'nb_player5', '2025-08-01 22:20:00', 'Carlos', 'Rodríguez', '2002-10-20', 'GK', 'pending', 'Jugador novato de Carlos'),
+(7, 'nb_player6', '2025-08-01 22:25:00', 'Carlos', 'Campos', '2002-05-11', 'GK', 'pending', 'Jugador novato de Carlos'),
+(7, 'nb_player7', '2025-08-01 22:30:00', 'Diego', 'Morales', '2002-11-14', 'DEF', 'pending', 'Jugador novato de Diego'),
+(7, 'nb_player8', '2025-08-01 22:35:00', 'Patricia', 'Vargas', '2001-05-08', 'DEF', 'pending', 'Jugador novato de Patricia'),
+(7, 'nb_player9', '2025-08-01 22:40:00', 'Andrés', 'Martínez', '2002-12-26', 'MID', 'pending', 'Jugador novato de Andrés'),
+(7, 'nb_player10', '2025-08-01 22:45:00', 'Claudio', 'Bravo', '2002-02-01', 'GK', 'pending', 'Jugador novato de Claudio'),
+(7, 'nb_player11', '2025-08-01 22:50:00', 'Isabel', 'Mendoza', '2001-07-07', 'GK', 'pending', 'Jugador novato de Isabel'),
+(7, 'nb_player12', '2025-08-01 22:55:00', 'Carlos', 'Mendoza', '2002-01-07', 'MID', 'pending', 'Jugador novato de Carlos'),
+(7, 'nb_player13', '2025-08-01 23:00:00', 'Claudio', 'Bravo', '2002-06-17', 'GK', 'pending', 'Jugador novato de Claudio'),
+(7, 'nb_player14', '2025-08-01 23:05:00', 'Tomás', 'Bravo', '2001-07-03', 'FWD', 'pending', 'Jugador novato de Tomás'),
+(7, 'nb_player15', '2025-08-01 23:10:00', 'Fernando', 'Rodríguez', '2001-10-24', 'GK', 'pending', 'Jugador novato de Fernando'),
+(7, 'nb_player16', '2025-08-01 23:15:00', 'Pablo', 'Castro', '2002-12-13', 'MID', 'pending', 'Jugador novato de Pablo'),
+(7, 'nb_player17', '2025-08-01 23:20:00', 'Monica', 'Flores', '2001-02-13', 'MID', 'pending', 'Jugador novato de Monica'),
+(7, 'nb_player18', '2025-08-01 23:25:00', 'Gabriel', 'Rodríguez', '2001-06-09', 'FWD', 'pending', 'Jugador novato de Gabriel'),
+(7, 'nb_player19', '2025-08-01 23:30:00', 'Emilio', 'Flores', '2002-02-06', 'GK', 'pending', 'Jugador novato de Emilio'),
+(7, 'nb_player20', '2025-08-01 23:35:00', 'Martín', 'Campos', '2001-08-08', 'DEF', 'pending', 'Jugador novato de Martín'),
+-- Old Boys (Team 8) - 20 players
+(8, 'ob_player1', '2025-08-01 24:00:00', 'Javier', 'Cortés', '2001-07-12', 'GK', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player2', '2025-08-01 24:05:00', 'Patricia', 'Alvarez', '2002-10-01', 'GK', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player3', '2025-08-01 24:10:00', 'Pablo', 'Muñoz', '2001-07-24', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player4', '2025-08-01 24:15:00', 'Claudia', 'González', '2001-09-17', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player5', '2025-08-01 24:20:00', 'Ignacio', 'Jiménez', '2001-06-09', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player6', '2025-08-01 24:25:00', 'Ana', 'Ramírez', '2001-05-24', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player7', '2025-08-01 24:30:00', 'Miguel', 'Alvarez', '2002-08-21', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player8', '2025-08-01 24:35:00', 'Luis', 'Fernández', '2002-11-27', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player9', '2025-08-01 24:40:00', 'Gabriel', 'Alvarez', '2001-06-14', 'DEF', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player10', '2025-08-01 24:45:00', 'Ana', 'Jiménez', '2002-11-28', 'DEF', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player11', '2025-08-01 24:50:00', 'Claudio', 'Vega', '2001-05-23', 'GK', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player12', '2025-08-01 24:55:00', 'Carlos', 'Muñoz', '2001-04-02', 'GK', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player13', '2025-08-01 25:00:00', 'Pablo', 'Torres', '2002-09-03', 'GK', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player14', '2025-08-01 25:05:00', 'Gabriel', 'Fuentes', '2001-07-03', 'DEF', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player15', '2025-08-01 25:10:00', 'Monica', 'Muñoz', '2002-11-21', 'DEF', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player16', '2025-08-01 25:15:00', 'Nicolás', 'Bravo', '2002-06-21', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player17', '2025-08-01 25:20:00', 'Joaquín', 'Alvarez', '2001-12-07', 'MID', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player18', '2025-08-01 25:25:00', 'Cristóbal', 'Fuentes', '2001-06-26', 'MID', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player19', '2025-08-01 25:30:00', 'Isabel', 'Cortés', '2002-03-08', 'FWD', 'pending', 'Ex-alumno experimentado'),
+(8, 'ob_player20', '2025-08-01 25:35:00', 'Ricardo', 'Espinoza', '2001-08-11', 'FWD', 'pending', 'Ex-alumno experimentado'),
+-- Robovolt United (Team 9) - 20 players
+(9, 'ru_player1', '2025-08-01 26:00:00', 'Fernando', 'Fernández', '2002-05-11', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player2', '2025-08-01 26:05:00', 'Tomás', 'Navarro', '2001-07-07', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player3', '2025-08-01 26:10:00', 'Claudia', 'Martín', '2001-05-11', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player4', '2025-08-01 26:15:00', 'Rodrigo', 'Rojas', '2002-08-09', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player5', '2025-08-01 26:20:00', 'Nicolás', 'Fuentes', '2002-04-22', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player6', '2025-08-01 26:25:00', 'Diego', 'Martín', '2001-06-20', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player7', '2025-08-01 26:30:00', 'Diego', 'Sánchez', '2001-05-10', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player8', '2025-08-01 26:35:00', 'Vicente', 'Vega', '2001-09-06', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player9', '2025-08-01 26:40:00', 'Joaquín', 'Guerrero', '2001-02-24', 'DEF', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player10', '2025-08-01 26:45:00', 'Joaquín', 'Torres', '2001-11-15', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player11', '2025-08-01 26:50:00', 'Ignacio', 'López', '2002-11-07', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player12', '2025-08-01 26:55:00', 'Gabriel', 'González', '2002-05-06', 'MID', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player13', '2025-08-01 27:00:00', 'Gabriel', 'Cortés', '2001-04-12', 'MID', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player14', '2025-08-01 27:05:00', 'Cristóbal', 'Jiménez', '2001-08-27', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player15', '2025-08-01 27:10:00', 'Claudio', 'González', '2001-10-23', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player16', '2025-08-01 27:15:00', 'Claudia', 'Guerrero', '2002-10-13', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player17', '2025-08-01 27:20:00', 'Vicente', 'Vargas', '2002-10-02', 'FWD', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player18', '2025-08-01 27:25:00', 'Isabel', 'García', '2002-03-15', 'GK', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player19', '2025-08-01 27:30:00', 'Daniel', 'Torres', '2002-05-27', 'MID', 'pending', 'Jugador de Robovolt United'),
+(9, 'ru_player20', '2025-08-01 27:35:00', 'Gonzalo', 'Morales', '2002-07-06', 'FWD', 'pending', 'Jugador de Robovolt United');
 
 -- 5. APPROVE REQUESTS - Natural workflow: approve requests
 -- TRIGGER: create_player_on_approval will auto-create players records
 UPDATE join_team_requests 
 SET status = 'approved' 
-WHERE id IN (1, 2);
+WHERE id BETWEEN 1 AND 180;
 
--- 6. MATCHES - Two matches between the teams, created with 'in review' status
+-- 6. MATCHES - Sample matches between teams (future dates)
 INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, location, local_score, visitor_score, status) VALUES 
-(5, 8, 1, '2025-08-01 19:00:00', 'Cancha UC', 0, 0, 'in review'),
-(8, 5, 1, '2025-08-01 16:00:00', 'Cancha UC', 0, 0, 'in review');
+(1, 2, 1, '2025-08-15 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(3, 4, 1, '2025-08-15 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(5, 6, 1, '2025-08-15 14:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(7, 8, 1, '2025-08-16 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(9, 1, 1, '2025-08-16 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(2, 3, 1, '2025-08-16 14:00:00', 'Cancha UC', 0, 0, 'scheduled');
 
--- 7. EVENTS - Add some goals to both matches
--- TRIGGER: update_match_scores_on_goal_insert will auto-update match scores
-INSERT INTO events (match_id, team_id, type, minute, description) VALUES 
--- Match 1: Minerham Forest (5) vs Old Boys (8) - Result: 2-1
-(1, 5, 'goal', 25, 'Gol de Juan Pérez'),
-(1, 8, 'goal', 30, 'Gol de María González'),
-(1, 5, 'goal', 75, 'Gol ganador de Juan Pérez'),
--- Match 2: Old Boys (8) vs Minerham Forest (5) - Result: 1-2
-(2, 8, 'goal', 20, 'Gol de María González'),
-(2, 5, 'goal', 60, 'Gol de Juan Pérez'),
-(2, 5, 'goal', 85, 'Gol ganador de Juan Pérez');
-
--- 8. FINISH MATCHES - Change status to finished
--- TRIGGER: update_competition_points will auto-calculate team_competitions points & positions
-UPDATE matches 
-SET status = 'finished' 
-WHERE id IN (1, 2);
-
--- 9. BASIC PREFERENCES
+-- 7. BASIC PREFERENCES (sample for admin and some players)
 INSERT INTO preferences (profile_id, type, channel, lead_time_minutes, is_enabled) VALUES 
 ('admin', 'notification', 'push', 10, TRUE),
-('player1', 'notification', 'email', 30, TRUE),
-('player2', 'notification', 'push', 15, TRUE);
+('ab_player1', 'notification', 'email', 30, TRUE),
+('ifc_player1', 'notification', 'push', 15, TRUE),
+('mc_player1', 'notification', 'email', 20, TRUE);
 
--- 10. USER FAVORITE TEAMS
+-- 8. USER FAVORITE TEAMS (sample - players like their own teams)
 INSERT INTO user_favorite_teams (profile_id, team_id) VALUES 
-('admin', 5),    -- Admin likes Minerham Forest
-('player1', 5),  -- Player1 (Juan) likes his own team
-('player2', 8);  -- Player2 (María) likes her own team
+('admin', 1),    -- Admin likes Atletico Byte
+('ab_player1', 1),  -- ab_player1 likes Atletico Byte
+('ifc_player1', 2),  -- ifc_player1 likes Industrial FC
+('mc_player1', 3),  -- mc_player1 likes Manchester Civil
+('ms_player1', 4),  -- ms_player1 likes Mathchester Science
+('mf_player1', 5),  -- mf_player1 likes Minerham Forest
+('nm_player1', 6),  -- nm_player1 likes Naranja Mecanica
+('nb_player1', 7),  -- nb_player1 likes New Boys
+('ob_player1', 8),  -- ob_player1 likes Old Boys
+('ru_player1', 9);  -- ru_player1 likes Robovolt Unite;

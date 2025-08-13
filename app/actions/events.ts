@@ -30,6 +30,13 @@ const eventDeleteSchema = z.object({
   id: z.number().min(1, "El ID del evento es requerido"),
 });
 
+const eventWithPlayerSchema = z.object({
+  match_id: z.number().min(1, "El ID del partido es requerido"),
+  player_id: z.number().min(1, "El ID del jugador es requerido"),
+  event_type: z.enum(["goal", "yellow_card", "red_card", "substitution", "other"]),
+  minute: z.number().min(0, "El minuto debe ser 0 o mayor").max(120, "El minuto no puede ser mayor a 120"),
+});
+
 // Database operations
 export async function getEvents(): Promise<Event[]> {
   const { env } = getRequestContext();
@@ -147,7 +154,7 @@ export async function createEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in review") {
+    if (match.status !== "live" && match.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -307,7 +314,7 @@ export async function updateEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in review") {
+    if (match.status !== "live" && match.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -451,7 +458,7 @@ export async function deleteEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in review") {
+    if (match.status !== "live" && match.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -491,5 +498,98 @@ export async function deleteEvent(
       message: "Error al eliminar el evento. Inténtalo de nuevo.",
       body,
     };
+  }
+}
+
+export async function createEventWithPlayer(_prev: any, formData: FormData) {
+  const { isAuthenticated, userProfile } = await getAuthStatus();
+  if (!isAuthenticated || !userProfile) {
+    return { success: 0, errors: 1, message: "No autorizado" };
+  }
+
+  const body = {
+    match_id: parseInt(formData.get("match_id") as string),
+    player_id: parseInt(formData.get("player_id") as string),
+    event_type: formData.get("event_type") as string,
+    minute: parseInt(formData.get("minute") as string),
+  };
+
+  const parsed = eventWithPlayerSchema.safeParse(body);
+  if (!parsed.success) {
+    return {
+      success: 0,
+      errors: 1,
+      message: "Datos inválidos: " + parsed.error.errors.map((e) => e.message).join(", "),
+    };
+  }
+
+  const { env } = getRequestContext();
+
+  try {
+    const authCheck = await env.DB.prepare(
+      `
+      SELECT mp.team_id, ma.status as attendance_status
+      FROM match_planilleros mp
+      JOIN players p ON p.team_id = mp.team_id
+      JOIN match_attendance ma ON ma.player_id = p.id AND ma.match_id = mp.match_id
+      JOIN matches m ON mp.match_id = m.id
+      WHERE mp.match_id = ? 
+        AND mp.profile_id = ?
+        AND p.id = ?
+        AND m.status IN ('live', 'in_review', 'scheduled')
+        AND ma.status = 'present'
+    `,
+    )
+      .bind(body.match_id, userProfile.id, body.player_id)
+      .first();
+
+    if (!authCheck) {
+      return { success: 0, errors: 1, message: "Jugador no autorizado o no presente" };
+    }
+
+    const validationCheck = await env.DB.prepare(
+      `
+      SELECT status FROM scorecard_validations 
+      WHERE match_id = ? AND validated_team_id = ? AND status = 'approved'
+    `,
+    )
+      .bind(body.match_id, authCheck.team_id)
+      .first();
+
+    if (validationCheck) {
+      return { 
+        success: 0, 
+        errors: 1, 
+        message: "No puedes modificar eventos: tu planilla ya ha sido aprobada por el planillero rival" 
+      };
+    }
+
+    const eventResult = await env.DB.prepare(
+      `
+      INSERT INTO events (match_id, team_id, type, minute, created_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `
+    )
+      .bind(body.match_id, authCheck.team_id, body.event_type, body.minute)
+      .run();
+
+    if (!eventResult.meta.last_row_id) {
+      throw new Error("Failed to create event");
+    }
+
+    await env.DB.prepare(
+      `
+      INSERT INTO event_players (event_id, player_id, role, created_at)
+      VALUES (?, ?, 'main', CURRENT_TIMESTAMP)
+    `,
+    )
+      .bind(eventResult.meta.last_row_id, body.player_id)
+      .run();
+
+    revalidatePath(`/planillero/partido/${body.match_id}`);
+    return { success: 1, errors: 0, message: "Evento registrado exitosamente" };
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return { success: 0, errors: 1, message: "Error al registrar evento" };
   }
 }

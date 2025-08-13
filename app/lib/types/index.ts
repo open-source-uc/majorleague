@@ -459,7 +459,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "live", label: "En Vivo" },
           { value: "finished", label: "Terminado" },
           { value: "cancelled", label: "Cancelado" },
-          { value: "in review", label: "En Revisión" },
+          { value: "in_review", label: "En Revisión" },
         ],
       },
     ],

@@ -2,6 +2,10 @@
 -- Optimized for Cloudflare D1 and BCNF compliance
 
 -- Drop existing tables in correct order (foreign keys first)
+DROP TABLE IF EXISTS audit_log;
+DROP TABLE IF EXISTS match_attendance;
+DROP TABLE IF EXISTS scorecard_validations;
+DROP TABLE IF EXISTS match_planilleros;
 DROP TABLE IF EXISTS streams;
 DROP TABLE IF EXISTS lineups;
 DROP TABLE IF EXISTS event_players;
@@ -62,6 +66,7 @@ CREATE TABLE players (
     nickname TEXT,
     birthday DATE NOT NULL,
     position TEXT CHECK (position IN ('GK', 'DEF', 'MID', 'FWD')),
+    jersey_number INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL,
@@ -99,7 +104,7 @@ CREATE TABLE matches (
     location TEXT,
     local_score INTEGER DEFAULT 0,
     visitor_score INTEGER DEFAULT 0,
-    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'finished', 'cancelled', 'in review')),
+    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'in_review', 'finished', 'cancelled')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (local_team_id) REFERENCES teams(id) ON DELETE RESTRICT,
@@ -171,6 +176,7 @@ CREATE TABLE join_team_requests (
     nickname TEXT,
     birthday DATE NOT NULL,
     preferred_position TEXT CHECK (preferred_position IN ('GK', 'DEF', 'MID', 'FWD')),
+    preferred_jersey_number INTEGER,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -231,6 +237,66 @@ CREATE TABLE user_favorite_matches (
     UNIQUE(profile_id, match_id)
 );
 
+-- Match Planilleros (Scorecard keepers)
+CREATE TABLE match_planilleros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    team_id INTEGER NOT NULL,
+    profile_id TEXT NOT NULL,
+    status TEXT DEFAULT 'assigned' CHECK (status IN ('assigned', 'in_progress', 'completed')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    UNIQUE(match_id, team_id),
+    UNIQUE(match_id, profile_id)
+);
+
+-- Scorecard Validations (Cross-validation between planilleros)
+CREATE TABLE scorecard_validations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    validator_profile_id TEXT NOT NULL,
+    validated_team_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    comments TEXT,
+    validated_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (validator_profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    FOREIGN KEY (validated_team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    UNIQUE(match_id, validator_profile_id, validated_team_id)
+);
+
+-- Match Attendance (Player presence and jersey numbers for each match)
+CREATE TABLE match_attendance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'present' CHECK (status IN ('present', 'absent', 'substitute')),
+    jersey_number INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+    UNIQUE(match_id, player_id)
+);
+
+-- Audit Log (Track all important actions)
+CREATE TABLE audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    actor_profile_id TEXT NOT NULL,
+    action TEXT NOT NULL, -- e.g., 'attendance.update', 'event.create'
+    match_id INTEGER,
+    team_id INTEGER,
+    payload TEXT, -- JSON blob with details
+    FOREIGN KEY (actor_profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
 -- Indexes for performance optimization
 CREATE INDEX idx_profiles_username ON profiles(username);
 CREATE INDEX idx_profiles_email ON profiles(email);
@@ -252,3 +318,18 @@ CREATE INDEX idx_notifications_profile ON notifications(profile_id);
 CREATE INDEX idx_notifications_match ON notifications(match_id);
 CREATE INDEX idx_favorites_teams_profile ON user_favorite_teams(profile_id);
 CREATE INDEX idx_favorites_matches_profile ON user_favorite_matches(profile_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_players_team_jersey_unique
+ON players(team_id, jersey_number)
+WHERE jersey_number IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_match_jersey_unique
+ON match_attendance(match_id, jersey_number)
+WHERE jersey_number IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_mp_match ON match_planilleros(match_id);
+CREATE INDEX IF NOT EXISTS idx_sv_match ON scorecard_validations(match_id);
+CREATE INDEX IF NOT EXISTS idx_ma_match ON match_attendance(match_id);
+CREATE INDEX IF NOT EXISTS idx_audit_match ON audit_log(match_id);
+CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log(actor_profile_id);
+CREATE INDEX IF NOT EXISTS idx_events_match_team ON events(match_id, team_id, minute);
