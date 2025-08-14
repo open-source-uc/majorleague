@@ -7,7 +7,6 @@ import image2 from "@/../public/assets/image2.png";
 
 import Hero from "../components/home/Hero";
 import Sponsors from "../components/home/Sponsors";
-import TextBar from "../components/home/TextBar";
 
 export default function HomePage() {
   return (
