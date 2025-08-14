@@ -12,7 +12,6 @@ import TextBar from "../components/home/TextBar";
 export default function HomePage() {
   return (
     <>
-      <TextBar />
       <Hero />
       <Sponsors />
       <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row">
