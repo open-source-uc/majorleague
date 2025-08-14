@@ -14,7 +14,7 @@ export default function HomePage() {
     <>
       <Hero />
       <Sponsors />
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row">
+      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 desktop:flex-row">
         <div className="w-full max-w-[399px]">
           <Image
             src={image1}
@@ -39,7 +39,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row-reverse">
+      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 desktop:flex-row-reverse">
         <div className="w-full max-w-[399px]">
           <Image
             src={image2}
