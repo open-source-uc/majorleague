@@ -13,6 +13,8 @@ export default function HomePage() {
     <>
       <Hero />
       <Sponsors />
+
+      {/* About Section */}
       <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 desktop:flex-row">
         <div className="w-full max-w-[399px]">
           <Image

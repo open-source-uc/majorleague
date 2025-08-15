@@ -18,31 +18,31 @@ const teams = [
     logo: AtleticoByteLogo,
     departments: "Computación - Software",
     alt: "Logo de Atletico Byte",
-    colors: ["#3B82F6", "#1E40AF"],
-    founded: "2019",
+    colors: ["#174B84", "#B93228"],
+    founded: "2024",
   },
   {
     name: "Industrial FC",
     logo: IndustrialFCLogo,
     departments: "Investigación Operativa",
     alt: "Logo de Industrial FC",
-    colors: ["#F59E0B", "#D97706"],
-    founded: "2018",
+    colors: ["#FBFBFB", "#D9D9D9"],
+    founded: "2024",
   },
   {
     name: "Manchester Civil",
     logo: ManchesterCivilLogo,
     departments: "Civil - Transporte - Construcción",
     alt: "Logo de Manchester Civil",
-    colors: ["#EF4444", "#DC2626"],
-    founded: "2017",
+    colors: ["#F1DD0A", "#B58C00"],
+    founded: "2024",
   },
   {
     name: "Mathchester Science",
     logo: MathchesterScienceLogo,
     departments: "Química - Física - Matemática Biomédica - Biología",
     alt: "Logo de Manchester Science",
-    colors: ["#10B981", "#059669"],
+    colors: ["#18C0DA", "#F8DC5E"],
     founded: "2019",
   },
   {
@@ -50,71 +50,52 @@ const teams = [
     logo: MinerhamForestLogo,
     departments: "Minería - Ambiental - Hidráulica - Geociencias",
     alt: "Logo de Minerham Forest",
-    colors: ["#059669", "#047857"],
-    founded: "2018",
+    colors: ["#313761", "#0C665D"],
+    founded: "2024",
   },
   {
     name: "Naranja Mecanica",
     logo: NaranjaMecanicaLogo,
     departments: "Mecánica - Diseño e Innovación (IDI)",
     alt: "Logo de Naranja Mecanica",
-    colors: ["#F97316", "#EA580C"],
-    founded: "2020",
+    colors: ["#EF5B01", "#E96302"],
+    founded: "2024",
   },
   {
     name: "New Boys",
     logo: NewBoysLogo,
     departments: "Novatos",
     alt: "Logo de New Boys",
-    colors: ["#8B5CF6", "#7C3AED"],
-    founded: "2023",
+    colors: ["#DC0000", "#FFD8D9"],
+    founded: "2024",
   },
   {
     name: "Old Boys",
     logo: OldBoysLogo,
     departments: "Ex Alumnos",
     alt: "Logo de Old Boys",
-    colors: ["#6B7280", "#4B5563"],
-    founded: "2015",
+    colors: ["#171A22", "#00F2EE"],
+    founded: "2024",
   },
   {
     name: "Robovolt United",
     logo: RobovoltUnitedLogo,
     departments: "Eléctrica - Robótica",
     alt: "Logo de Robovolt United",
-    colors: ["#06B6D4", "#0891B2"],
-    founded: "2019",
+    colors: ["#030000", "#F53D57"],
+    founded: "2024",
   },
 ];
 
 export default function EquiposPage() {
   return (
     <>
-      {/* Hero Section - Tournament Style */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),transparent)]" />
-        <div className="relative px-5 py-20">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary">
-              ⚽ TEMPORADA 2024-2025
-            </div>
-            <h1 className="mb-6 text-5xl font-black tracking-tight text-foreground md:text-6xl">
-              CONOCE A LOS 
-              <span className="block text-primary">EQUIPOS</span>
-            </h1>
-            <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              9 equipos legendarios. Una sola pasión. Descubre las fuerzas académicas que dominan el campo de juego en Major League UC.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Teams Grid - FIFA Style Cards */}
+      {/* Teams Grid */}
       <section className="px-5 py-16" aria-label="Equipos participantes del torneo">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-foreground">Los Contendientes</h2>
-            <div className="mx-auto h-1 w-24 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
+            <h2 className="mb-4 text-3xl font-bold text-foreground">Conoce a los Equipos</h2>
+            <div className="mx-auto h-1 w-64 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
           </div>
           
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
@@ -163,7 +144,7 @@ export default function EquiposPage() {
                       <h3 className="mb-1 text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                         {team.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-accent-foreground">
                         Est. {team.founded}
                       </p>
                     </div>
@@ -173,7 +154,7 @@ export default function EquiposPage() {
                   {/* Departments */}
                   <div className="rounded-lg border border-border/50 bg-background/30 p-3">
                     <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Facultades Representadas
+                      Majors Representados
                     </h4>
                     <p className="text-sm text-foreground leading-relaxed">
                       {team.departments}
@@ -194,55 +175,6 @@ export default function EquiposPage() {
         </div>
       </section>
 
-      {/* Tournament Info Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 px-5 py-16">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_80%,rgba(120,119,198,0.2),transparent)]" />
-        <div className="relative mx-auto max-w-6xl">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h2 className="mb-6 text-3xl font-bold text-foreground">
-                Una Liga, <span className="text-primary">Múltiples Especialidades</span>
-              </h2>
-              <p className="mb-6 text-lg text-muted-foreground leading-relaxed">
-                Cada equipo representa la excelencia de su área académica trasladada al campo de juego. Desde la precisión
-                de Ingeniería Civil hasta la innovación de Computación, desde la tradición de los Old Boys hasta el
-                entusiasmo de los New Boys.
-              </p>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="mb-2 text-3xl font-black text-primary">9</div>
-                  <div className="text-sm text-muted-foreground">Equipos Participantes</div>
-                </div>
-                <div className="text-center">
-                  <div className="mb-2 text-3xl font-black text-primary">15+</div>
-                  <div className="text-sm text-muted-foreground">Facultades Representadas</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-primary/20 to-primary/10 blur-xl" />
-              <div className="relative rounded-xl border border-primary/20 bg-background/80 p-8 backdrop-blur-sm">
-                <h3 className="mb-4 text-xl font-bold text-foreground">🏆 Temporada Actual</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Formato:</span>
-                    <span className="font-medium text-foreground">Liga + Playoffs</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Partidos:</span>
-                    <span className="font-medium text-foreground">Todos vs Todos</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Temporada:</span>
-                    <span className="font-medium text-foreground">2024-2025</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
