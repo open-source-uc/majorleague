@@ -39,9 +39,9 @@ const buttonVariants = {
 };
 
 const buttonSizes = {
-  sm: "h-8 px-3 text-sm rounded-sm",
-  md: "h-10 px-4 py-2 text-md rounded-md",
-  lg: "h-12 px-6 py-3 text-lg rounded-lg",
+  sm: "h-8 px-3 text-sm rounded-xs",
+  md: "h-10 px-4 py-2 text-md rounded-sm",
+  lg: "h-12 px-6 py-3 text-lg rounded-sm",
 };
 
 const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(

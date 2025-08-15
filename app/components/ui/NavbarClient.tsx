@@ -96,6 +96,16 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
             </li>
             <li role="none">
               <NavLink 
+                href="/torneo" 
+                type="mobile" 
+                onClick={closeMenu}
+                role="menuitem"
+              >
+                TORNEO
+              </NavLink>
+            </li>
+            <li role="none">
+              <NavLink 
                 href={`/posiciones/${year}/${semester}`} 
                 type="mobile" 
                 onClick={closeMenu}

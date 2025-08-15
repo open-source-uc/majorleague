@@ -43,6 +43,11 @@ async function Navbar() {
             </NavLink>
           </li>
           <li role="none">
+            <NavLink href="/torneo" type="desktop" role="menuitem">
+              TORNEO
+            </NavLink>
+          </li>
+          <li role="none">
             <NavLink href={`/posiciones/${year}/${semester}`} type="desktop" role="menuitem">
               TABLA DE POSICIONES
             </NavLink>
@@ -60,8 +65,8 @@ async function Navbar() {
         <Button
           href="/perfil"
           variant="outline"
-          size="md"
-          className="hidden lg:inline-flex"
+          size="sm"
+          className="hidden tablet:inline-flex"
           aria-label="Ir a tu perfil de usuario"
         >
           TU PERFIL
@@ -70,8 +75,8 @@ async function Navbar() {
         <Button
           href="/login"
           variant="outline"
-          size="md"
-          className="hidden lg:inline-flex"
+          size="sm"
+          className="hidden tablet:inline-flex"
           aria-label="Iniciar sesión en tu cuenta"
         >
           JUEGA POR LA LIGA

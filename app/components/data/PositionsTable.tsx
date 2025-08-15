@@ -23,8 +23,8 @@ export default function PositionsTable({
         <h1 className="mb-2 text-3xl font-bold text-foreground">
           Tabla de Posiciones
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {year} - {semester}
+        <p className="text-sm text-accent-foreground">
+          ¡Revisa cómo le va a tu equipo favorito en esta temporada!
         </p>
       </div>
 
