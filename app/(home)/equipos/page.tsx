@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
+import heroImage from "@/../public/assets/images/hero.webp";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
 import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
 import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceLogo.png";
@@ -91,8 +92,77 @@ export default function EquiposPage() {
   return (
     <>
       {/* Teams Grid */}
-      <section className="px-5 py-16" aria-label="Equipos participantes del torneo">
-        <div className="mx-auto max-w-7xl">
+      <section className="px-5 py-16 relative" aria-label="Equipos participantes del torneo">
+        {/* Floating Images */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Top Left */}
+          <div className="absolute -top-10 -left-10 w-32 h-32 opacity-10 transform rotate-12 animate-pulse">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-full blur-[1px]"
+              loading="lazy"
+              sizes="128px"
+            />
+          </div>
+          
+          {/* Top Right */}
+          <div className="absolute -top-16 -right-8 w-40 h-40 opacity-8 transform -rotate-6 animate-pulse delay-1000">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-lg blur-[1px]"
+              loading="lazy"
+              sizes="160px"
+            />
+          </div>
+          
+          {/* Middle Left */}
+          <div className="absolute top-1/2 -left-12 w-28 h-28 opacity-12 transform rotate-45 animate-pulse delay-2000">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-full blur-[1px]"
+              loading="lazy"
+              sizes="112px"
+            />
+          </div>
+          
+          {/* Middle Right */}
+          <div className="absolute top-1/3 -right-16 w-36 h-36 opacity-10 transform -rotate-12 animate-pulse delay-3000">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-xl blur-[1px]"
+              loading="lazy"
+              sizes="144px"
+            />
+          </div>
+          
+          {/* Bottom Left */}
+          <div className="absolute -bottom-8 -left-6 w-24 h-24 opacity-15 transform rotate-30 animate-pulse delay-4000">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-lg blur-[1px]"
+              loading="lazy"
+              sizes="96px"
+            />
+          </div>
+          
+          {/* Bottom Right */}
+          <div className="absolute -bottom-12 -right-10 w-32 h-32 opacity-8 transform -rotate-20 animate-pulse delay-500">
+            <Image
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover rounded-full blur-[1px]"
+              loading="lazy"
+              sizes="128px"
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl relative z-10">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-foreground">Conoce a los Equipos</h2>
             <div className="mx-auto h-1 w-64 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
