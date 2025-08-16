@@ -78,7 +78,7 @@ export async function getAuthStatus(): Promise<{
     //   created_at: new Date(),
     //   updated_at: new Date(),
     // };
-    
+
     const isAdmin = userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true";
     const isAuthenticated = !!(userData || context.env.ADMIN_USER === "true");
 
