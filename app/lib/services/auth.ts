@@ -57,6 +57,11 @@ export async function getAuthStatus(): Promise<{
     const userData = await getUserDataByToken();
 
     let userProfile = null;
+
+    // Como probar el flujo de los planilleros ->
+    // 1. Crear un partido y asignate a ti y a admin como planilleros
+    // 2. Para revisar la vista del otro planillero (admin), comentar / descomentar el userProfile de admin
+
     if (userData) {
       try {
         userProfile = await getProfile(userData);
@@ -66,6 +71,14 @@ export async function getAuthStatus(): Promise<{
       }
     }
 
+    // userProfile = {
+    //   id: "admin",
+    //   username: "admin",
+    //   email: "admin@admin.com",
+    //   created_at: new Date(),
+    //   updated_at: new Date(),
+    // };
+    
     const isAdmin = userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true";
     const isAuthenticated = !!(userData || context.env.ADMIN_USER === "true");
 

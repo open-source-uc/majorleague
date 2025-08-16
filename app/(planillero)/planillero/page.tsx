@@ -1,6 +1,8 @@
 import { getPlanilleroMatchesGroupedByStatus } from "@/actions/planilleros";
 import { MatchCard } from "@/components/planilleros/MatchCard";
 import { getAuthStatus } from "@/lib/services/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export const runtime = "edge";
 
@@ -8,16 +10,22 @@ export default async function PlanilleroPage() {
   const { userProfile } = await getAuthStatus();
 
   if (!userProfile) {
-    return <div>Error: Usuario no encontrado</div>;
+    redirect("/login");
   }
 
-  const matchesGrouped = await getPlanilleroMatchesGroupedByStatus(userProfile.id);
+  const matches = await getPlanilleroMatchesGroupedByStatus(userProfile.id);
 
-  const { live: liveMatches, in_review: reviewMatches, scheduled: upcomingMatches } = matchesGrouped;
-  const totalMatches = upcomingMatches.length + liveMatches.length + reviewMatches.length;
+  const totalMatches = matches.live.length + matches.in_review.length + matches.scheduled.length;
 
   return (
     <div className="space-y-8">
+      <Link
+        href="/perfil"
+        className="text-primary-darken hover:text-primary mb-6 inline-flex items-center transition-colors"
+      >
+        ← Volver al Perfil
+      </Link>
+
       {/* Header */}
       <div className="bg-background-header border-border-header rounded-lg border p-6">
         <h2 className="text-foreground mb-2 text-2xl font-bold">Mis Partidos Asignados</h2>
@@ -32,45 +40,45 @@ export default async function PlanilleroPage() {
       </div>
 
       {/* Partidos En Vivo */}
-      {liveMatches.length > 0 && (
+      {matches.live.length > 0 && (
         <section>
           <h3 className="text-foreground mb-4 flex items-center gap-2 text-xl font-semibold">
             <span className="text-red-500">🔴</span>
-            En Vivo ({liveMatches.length})
+            En Vivo ({matches.live.length})
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {liveMatches.map((match: any) => (
-              <MatchCard key={match.id} match={match} planilleroStatus={match.planillero_status} />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">  
+            {matches.live.map((match) => (
+              <MatchCard prefetch={true} key={match.id} match={match} userProfile={userProfile} />
             ))}
           </div>
         </section>
       )}
 
       {/* Partidos En Revisión */}
-      {reviewMatches.length > 0 && (
+      {matches.in_review.length > 0 && (
         <section>
           <h3 className="text-foreground mb-4 flex items-center gap-2 text-xl font-semibold">
             <span className="text-blue-500">📋</span>
-            En Revisión ({reviewMatches.length})
+            En Revisión ({matches.in_review.length})
           </h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {reviewMatches.map((match: any) => (
-              <MatchCard key={match.id} match={match} planilleroStatus={match.planillero_status} />
+            {matches.in_review.map((match) => (
+              <MatchCard prefetch={true} key={match.id} match={match} userProfile={userProfile} />
             ))}
           </div>
         </section>
       )}
 
       {/* Próximos Partidos */}
-      {upcomingMatches.length > 0 && (
+      {matches.scheduled.length > 0 && (
         <section>
           <h3 className="text-foreground mb-4 flex items-center gap-2 text-xl font-semibold">
             <span className="text-green-500">📅</span>
-            Próximos ({upcomingMatches.length})
+            Próximos ({matches.scheduled.length})
           </h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingMatches.map((match: any) => (
-              <MatchCard key={match.id} match={match} planilleroStatus={match.planillero_status} />
+            {matches.scheduled.map((match) => (
+              <MatchCard prefetch={false} key={match.id} match={match} userProfile={userProfile} />
             ))}
           </div>
         </section>

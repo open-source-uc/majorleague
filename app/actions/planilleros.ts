@@ -1,13 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { unstable_cache as cache, revalidateTag, revalidatePath } from "next/cache";
 
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
 
 import { getAuthStatus } from "@/lib/services/auth";
 
-// Types
 export interface MatchPlanillero {
   id: number;
   match_id: number;
@@ -16,6 +15,20 @@ export interface MatchPlanillero {
   status: "assigned" | "in_progress" | "completed";
   created_at?: string;
   updated_at?: string;
+}
+
+export interface MatchPlanilleroExtended extends MatchPlanillero {
+  local_team_id: number;
+  visitor_team_id: number;
+  timestamp: string;
+  local_team_name: string;
+  visitor_team_name: string;
+  match_status: "scheduled" | "live" | "in_review" | "finished" | "cancelled";
+  local_score: number;
+  visitor_score: number;
+  location?: string;
+  planillero_status: "assigned" | "in_progress" | "completed";
+  my_team_id: number;
 }
 
 export interface ScorecardValidation {
@@ -39,7 +52,6 @@ export interface MatchAttendance {
   updated_at?: string;
 }
 
-// Base schemas
 const baseIdSchema = {
   match_id: z.number().min(1),
   team_id: z.number().min(1),
@@ -51,7 +63,6 @@ const attendanceStatusSchema = z.enum(["present", "absent", "substitute"]);
 const validationStatusSchema = z.enum(["approved", "rejected"]);
 const jerseyNumberSchema = z.number().min(1).max(99).optional();
 
-// Schemas de validación
 const assignPlanilleroSchema = z.object({
   match_id: baseIdSchema.match_id,
   team_id: baseIdSchema.team_id,
@@ -81,7 +92,6 @@ const validationUpdateSchema = z.object({
   comments: z.string().optional(),
 });
 
-// Unified response helpers
 const createResponse = (success: boolean, message: string, body?: any) => ({
   success: success ? 1 : 0,
   errors: success ? 0 : 1,
@@ -143,9 +153,9 @@ export async function getPlanilleroMatchesByStatus(profile_id: string, status: s
 }
 
 export async function getPlanilleroMatchesGroupedByStatus(profile_id: string): Promise<{
-  live: any[];
-  in_review: any[];
-  scheduled: any[];
+  live: MatchPlanilleroExtended[];
+  in_review: MatchPlanilleroExtended[];
+  scheduled: MatchPlanilleroExtended[];
 }> {
   try {
     const { env } = getRequestContext();
@@ -173,13 +183,13 @@ export async function getPlanilleroMatchesGroupedByStatus(profile_id: string): P
         END,
         m.timestamp ASC`;
 
-    const matches = await env.DB.prepare(query).bind(profile_id).all();
+    const matches = await env.DB.prepare(query).bind(profile_id).all<MatchPlanilleroExtended>();
     const results = matches.results || [];
 
     const grouped = {
-      live: results.filter((m: any) => m.match_status === "live"),
-      in_review: results.filter((m: any) => m.match_status === "in_review"),
-      scheduled: results.filter((m: any) => m.match_status === "scheduled"),
+      live: results.filter((m) => m.match_status === "live"),
+      in_review: results.filter((m) => m.match_status === "in_review"),
+      scheduled: results.filter((m) => m.match_status === "scheduled"),
     };
 
     return grouped;
@@ -1029,25 +1039,26 @@ export async function markPlanilleroCompleted(match_id: number, profile_id: stri
 
     const currentMatch = await env.DB.prepare(`SELECT status FROM matches WHERE id = ?`).bind(match_id).first();
 
+    // Cambiar estado del partido a "in_review" si está en "live"
     if (currentMatch && currentMatch.status === "live") {
       await env.DB.prepare(`UPDATE matches SET status = 'in_review' WHERE id = ?`).bind(match_id).run();
-      
-      const planilleros = await env.DB.prepare(
-        `SELECT profile_id, team_id FROM match_planilleros WHERE match_id = ?`
-      ).bind(match_id).all();
-      
-      const planillerosList = planilleros.results || [];
-      
-      for (const planillero of planillerosList) {
-        const rivalPlanillero = planillerosList.find(p => p.team_id !== planillero.team_id);
-        if (rivalPlanillero) {
-          await env.DB.prepare(`
-            INSERT OR IGNORE INTO scorecard_validations 
-            (match_id, validator_profile_id, validated_team_id, status, created_at)
-            VALUES (?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-          `).bind(match_id, planillero.profile_id, rivalPlanillero.team_id).run();
-        }
-      }
+    }
+    
+    // Siempre crear validación para el planillero rival, independiente del estado del partido
+    const planilleros = await env.DB.prepare(
+      `SELECT profile_id, team_id FROM match_planilleros WHERE match_id = ?`
+    ).bind(match_id).all();
+    
+    const planillerosList = planilleros.results || [];
+    
+    // Solo crear validación para el planillero rival del que está enviando sus eventos
+    const rivalPlanillero = planillerosList.find(p => p.team_id !== planilleroInfo.team_id);
+    if (rivalPlanillero) {
+      await env.DB.prepare(`
+        INSERT OR IGNORE INTO scorecard_validations 
+        (match_id, validator_profile_id, validated_team_id, status, created_at)
+        VALUES (?, ?, ?, 'pending', CURRENT_TIMESTAMP)
+      `).bind(match_id, rivalPlanillero.profile_id, planilleroInfo.team_id).run();
     }
 
     revalidatePath(`/planillero/partido/${match_id}`);
@@ -1075,7 +1086,7 @@ export async function isPlanillero(profile_id: string): Promise<boolean> {
       FROM match_planilleros mp
       JOIN matches m ON mp.match_id = m.id
       WHERE mp.profile_id = ?
-      AND m.status IN ('scheduled', 'live')
+      AND m.status IN ('scheduled', 'live', 'in_review')
     `,
     )
       .bind(profile_id)
@@ -1130,7 +1141,7 @@ export async function getMatchesWithPlanilleros() {
       JOIN teams lt ON m.local_team_id = lt.id
       JOIN teams vt ON m.visitor_team_id = vt.id
       LEFT JOIN match_planilleros mp ON mp.match_id = m.id
-      WHERE m.status IN ('scheduled', 'live')
+      WHERE m.status IN ('scheduled', 'live', 'in_review')
       GROUP BY m.id
       HAVING COUNT(mp.id) < 2
       ORDER BY m.timestamp ASC

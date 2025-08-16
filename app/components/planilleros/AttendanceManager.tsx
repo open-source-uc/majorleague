@@ -1,79 +1,89 @@
 "use client";
 
-import { useActionState, useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Attendance, PlayerWithPosition, useAttendanceManager } from "@/hooks/useAttendanceManager";
 
-import { updateBulkAttendance } from "@/actions/planilleros";
+const ATTENDANCE_STATUS_OPTIONS = [
+	{ value: "present" as const, label: "Presente", shortLabel: "✅", fullLabel: "✅ Presente" },
+	{ value: "substitute" as const, label: "Suplente", shortLabel: "🔄", fullLabel: "🔄 Suplente" },
+	{ value: "absent" as const, label: "Ausente", shortLabel: "❌", fullLabel: "❌ Ausente" },
+] as const;
+
+const FILTER_OPTIONS = [
+	{ key: "all" as const, label: "Todos", icon: "👥" },
+	{ key: "present" as const, label: "Presentes", icon: "✅" },
+	{ key: "substitute" as const, label: "Suplentes", icon: "🔄" },
+	{ key: "absent" as const, label: "Ausentes", icon: "❌" },
+	{ key: "pending" as const, label: "Pendientes", icon: "⏳" },
+] as const;
+
+const STATUS_STYLES = {
+	present: {
+		container: "border-primary bg-primary/5",
+		indicator: "bg-primary",
+		text: "text-primary",
+		button: "border-primary bg-primary/10",
+	},
+	substitute: {
+		container: "border-border-header bg-background-header",
+		indicator: "bg-foreground/60",
+		text: "text-foreground",
+		button: "border-border-header bg-background-header",
+	},
+	absent: {
+		container: "border-border-header bg-background opacity-60",
+		indicator: "bg-foreground/30",
+		text: "text-foreground",
+		button: "border-border-header bg-background",
+	},
+	null: {
+		container: "border-border-header bg-background",
+		indicator: "bg-foreground/40",
+		text: "text-foreground",
+		button: "border-border-header hover:border-primary hover:bg-primary/5",
+	},
+} as const;
 
 const getStatusStyles = (status: string | null) => {
-	const styles = {
-		present: {
-			container: "border-primary bg-primary/5",
-			indicator: "bg-primary",
-			text: "text-primary",
-			button: "border-primary bg-primary/10",
-		},
-		substitute: {
-			container: "border-border-header bg-background-header",
-			indicator: "bg-foreground/60",
-			text: "text-foreground",
-			button: "border-border-header bg-background-header",
-		},
-		absent: {
-			container: "border-border-header bg-background opacity-60",
-			indicator: "bg-foreground/30",
-			text: "text-foreground",
-			button: "border-border-header bg-background",
-		},
-		null: {
-			container: "border-border-header bg-background",
-			indicator: "bg-foreground/40",
-			text: "text-foreground",
-			button: "border-border-header hover:border-primary hover:bg-primary/5",
-		},
-	};
-	return styles[status as keyof typeof styles] || styles.null;
+	return STATUS_STYLES[status as keyof typeof STATUS_STYLES] || STATUS_STYLES.null;
 };
+
 
 interface AttendanceManagerProps {
 	matchId: number;
-	attendance: any[];
-	players: any[];
+	attendance: Attendance[];
+	players: PlayerWithPosition[];
 }
 
 export function AttendanceManager({ matchId, attendance, players }: AttendanceManagerProps) {
-	const hasUnregisteredPlayers = players.some((player) => !attendance.find((a) => a.player_id === player.id));
-	const [isPanelOpen, setIsPanelOpen] = useState(hasUnregisteredPlayers);
+	const [isPanelOpen, setIsPanelOpen] = useState(false);
 	const [filter, setFilter] = useState<"all" | "present" | "substitute" | "absent" | "pending">("all");
-	const [selectedStatusByPlayer, setSelectedStatusByPlayer] = useState<Record<number, "present" | "substitute" | "absent">>({});
-	const [localFeedback, setLocalFeedback] = useState<{ success: 0 | 1; message: string } | null>(null);
 	const rootRef = useRef<HTMLDivElement>(null);
-	const formRef = useRef<HTMLFormElement>(null);
 	const panelRef = useRef<HTMLDivElement>(null);
 	const [panelMaxHeight, setPanelMaxHeight] = useState<string>("0px");
 	const [panelOpacity, setPanelOpacity] = useState<number>(0);
 	const listRef = useRef<HTMLDivElement>(null);
 	const [itemHeight, setItemHeight] = useState<number>(0);
 
-	const getCurrentStatus = (playerId: number): "present" | "substitute" | "absent" | null => {
-		const a = attendance.find((x) => x.player_id === playerId);
-		return (a?.status as any) || null;
-	};
-
-	const getEffectiveStatus = (playerId: number): "present" | "substitute" | "absent" | null => {
-		return selectedStatusByPlayer[playerId] ?? getCurrentStatus(playerId);
-	};
+	const {
+		selectedStatusByPlayer,
+		setSelectedStatusByPlayer,
+		isSubmitting,
+		formRef,
+		getCurrentStatus,
+		getEffectiveStatus,
+		duplicateNumbers,
+		handleBulkSubmit,
+		handleCancel,
+		messageToShow,
+		state,
+	} = useAttendanceManager(matchId, attendance, players);
 
 	const filteredPlayers = useMemo(() => {
 		if (filter === "all") return players;
 		if (filter === "pending") return players.filter((p) => getCurrentStatus(p.id) === null);
 		return players.filter((player) => getEffectiveStatus(player.id) === filter);
-	}, [players, filter, selectedStatusByPlayer, attendance]);
-
-	const [state, formAction] = useActionState(updateBulkAttendance, {
-		success: 0,
-		errors: 0,
-		message: "",
-	});
+	}, [players, filter, getCurrentStatus, getEffectiveStatus]);
 
 	useEffect(() => {
 		if (state.success) {
@@ -81,7 +91,6 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 			if (rootRef.current) {
 				rootRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
 			}
-			setLocalFeedback(null);
 		}
 	}, [state.success]);
 
@@ -108,54 +117,9 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 	const listMaxHeight = useMemo(() => {
 		if (!itemHeight) return undefined;
 		const gap = 12;
-		const count = Math.min(filteredPlayers.length, 1);
+		const count = Math.min(filteredPlayers.length, 2);
 		return `${60 + itemHeight * count + gap * Math.max(count - 1, 0)}px`;
 	}, [itemHeight, filteredPlayers.length]);
-
-	const duplicateNumbers = useMemo(() => {
-		const counts = new Map<number, number>();
-		for (const a of attendance) {
-			if (a.jersey_number) {
-				counts.set(a.jersey_number, (counts.get(a.jersey_number) || 0) + 1);
-			}
-		}
-		const dups = new Set<number>();
-		for (const [num, count] of counts) {
-			if (count > 1) dups.add(num);
-		}
-		return dups;
-	}, [attendance]);
-
-	const handleBulkSubmit = (formData: FormData) => {
-		let changes = 0;
-		for (const player of players) {
-			const currentStatus = getCurrentStatus(player.id);
-			const submittedStatus = formData.get(`player_${player.id}_status`) as string | null;
-			if (submittedStatus && submittedStatus !== currentStatus) {
-				changes++;
-			}
-			const jerseyField = formData.get(`player_${player.id}_jersey`) as string | null;
-			const submittedJersey = jerseyField && jerseyField !== "" ? parseInt(jerseyField) : undefined;
-			const currentJersey = attendance.find((a) => a.player_id === player.id)?.jersey_number as number | undefined;
-			if ((submittedJersey ?? undefined) !== (currentJersey ?? undefined)) {
-				changes++;
-			}
-		}
-		if (changes === 0) {
-			setLocalFeedback({ success: 1, message: "No hay cambios para actualizar" });
-			return;
-		}
-		setLocalFeedback(null);
-		formAction(formData);
-	};
-
-	const handleCancel = () => {
-		setSelectedStatusByPlayer({});
-		formRef.current?.reset();
-		setLocalFeedback({ success: 1, message: "Cambios cancelados" });
-	};
-
-	const messageToShow = localFeedback || (state.message ? { success: state.success as 0 | 1, message: state.message } : null);
 
 	return (
 		<div ref={rootRef} className="space-y-4 min-w-0">
@@ -168,8 +132,11 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 					type="button"
 					onClick={() => setIsPanelOpen(!isPanelOpen)}
 					className="text-foreground hover:bg-background-header flex items-center gap-2 rounded-lg px-4 py-3 font-medium transition-colors border border-border-header min-h-[44px] min-w-[44px]"
+					aria-expanded={isPanelOpen}
+					aria-controls="attendance-panel"
+					aria-label={`${isPanelOpen ? "Contraer" : "Expandir"} panel de asistencia`}
 				>
-					<span className={`transform transition-transform duration-200 ${isPanelOpen ? "rotate-180" : ""}`}>▼</span>
+					<span className={`transform transition-transform duration-200 ${isPanelOpen ? "rotate-180" : ""}`} aria-hidden="true">▼</span>
 					<span className="hidden sm:inline">{isPanelOpen ? "Contraer" : "Expandir"}</span>
 				</button>
 			</div>
@@ -184,6 +151,7 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 			) : null}
 
 					<div
+			id="attendance-panel"
 			ref={panelRef}
 			style={{ maxHeight: panelMaxHeight, opacity: panelOpacity }}
 			className="transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden w-full"
@@ -192,27 +160,23 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 					<form action={handleBulkSubmit} ref={formRef} className="space-y-3">
 						<input type="hidden" name="match_id" value={matchId} />
 
-						<div className="flex gap-2 pb-3 overflow-x-auto flex-nowrap">
-							{[
-								{ key: "all", label: "Todos", icon: "👥" },
-								{ key: "present", label: "Presentes", icon: "✅" },
-								{ key: "substitute", label: "Suplentes", icon: "🔄" },
-								{ key: "absent", label: "Ausentes", icon: "❌" },
-								{ key: "pending", label: "Pendientes", icon: "⏳" },
-							].map(({ key, label, icon }) => (
+						<fieldset className="flex gap-2 pb-3 overflow-x-auto flex-nowrap">
+							<legend className="sr-only">Filtrar jugadores por estado de asistencia</legend>
+							{FILTER_OPTIONS.map(({ key, label, icon }) => (
 								<button
 									key={key}
 									type="button"
-									onClick={() => setFilter(key as any)}
+									onClick={() => setFilter(key as typeof filter)}
 									className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-2 min-h-[44px] ${
 										filter === key ? "border-primary bg-primary/5 text-primary" : "border-border-header bg-background text-foreground"
 									}`}
+									aria-pressed={filter === key}
 								>
-									<span className="text-base">{icon}</span>
+									<span className="text-base" aria-hidden="true">{icon}</span>
 									<span>{label}</span>
 								</button>
 							))}
-						</div>
+						</fieldset>
 
 						<div
 							ref={listRef}
@@ -254,8 +218,9 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 											</div>
 											
 											<div className="flex items-center gap-3">
-												<label className={`text-sm font-medium ${statusStyles.text} whitespace-nowrap`}>Número:</label>
+												<label htmlFor={`player_${player.id}_jersey`} className={`text-sm font-medium ${statusStyles.text} whitespace-nowrap`}>Número:</label>
 												<input
+													id={`player_${player.id}_jersey`}
 													type="number"
 													inputMode="numeric"
 													enterKeyHint="done"
@@ -265,16 +230,19 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 													defaultValue={playerAttendance?.jersey_number || ""}
 													className={`bg-background border text-foreground w-20 sm:w-16 rounded-lg px-3 py-3 text-center font-semibold focus:border-primary focus:ring-1 focus:ring-primary ${isDuplicate ? "border-primary" : "border-border-header"}`}
 													placeholder={player.jersey_number ? `#${player.jersey_number}` : "##"}
+													aria-describedby={isDuplicate ? `duplicate-warning-${player.id}` : undefined}
 												/>
+												{isDuplicate && (
+													<span id={`duplicate-warning-${player.id}`} className="text-xs text-primary" role="alert">
+														Número duplicado
+													</span>
+												)}
 											</div>
 										</div>
 
-										<div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-											{[
-												{ value: "present", label: "Presente", shortLabel: "✅", fullLabel: "✅ Presente" },
-												{ value: "substitute", label: "Suplente", shortLabel: "🔄", fullLabel: "🔄 Suplente" },
-												{ value: "absent", label: "Ausente", shortLabel: "❌", fullLabel: "❌ Ausente" },
-											].map(({ value, label, shortLabel, fullLabel }) => {
+										<fieldset className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+											<legend className="sr-only">Estado de asistencia para {player.first_name} {player.last_name}</legend>
+											{ATTENDANCE_STATUS_OPTIONS.map(({ value, label, shortLabel, fullLabel }) => {
 												const isSelected = effectiveStatus === value;
 												const buttonStyles = getStatusStyles(isSelected ? value : null);
 
@@ -290,18 +258,22 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 														name={`player_${player.id}_status`}
 														value={value}
 														checked={isSelected}
-														onChange={() => setSelectedStatusByPlayer((prev) => ({ ...prev, [player.id]: value as any }))}
+														onChange={() => setSelectedStatusByPlayer((prev) => ({ ...prev, [player.id]: value as "present" | "substitute" | "absent" }))}
 														className="sr-only"
+														aria-describedby={`status-description-${player.id}-${value}`}
 													/>
-													<span className="text-lg sm:text-lg flex-shrink-0">{shortLabel}</span>
-													<span className={`font-medium ${isSelected ? statusStyles.text : "text-foreground"} text-base sm:text-base text-center min-w-0`}>
+													<span className="text-lg sm:text-lg flex-shrink-0" aria-hidden="true">{shortLabel}</span>
+													<span 
+														id={`status-description-${player.id}-${value}`}
+														className={`font-medium ${isSelected ? statusStyles.text : "text-foreground"} text-base sm:text-base text-center min-w-0`}
+													>
 														<span className="sm:hidden">{label}</span>
 														<span className="hidden sm:inline">{label}</span>
 													</span>
 												</label>
 											);
 										})}
-									</div>
+									</fieldset>
 								</div>
 							);
 						})}
@@ -312,8 +284,19 @@ export function AttendanceManager({ matchId, attendance, players }: AttendanceMa
 								<button type="button" onClick={handleCancel} className="bg-foreground hover:bg-foreground/80 text-background rounded-xl px-6 py-4 text-base sm:text-sm font-semibold transition-colors shadow-sm min-h-[56px] order-1 sm:order-2 w-full">
 									Cancelar cambios
 								</button>
-								<button type="submit" className="bg-primary hover:bg-primary-darken text-background rounded-xl px-6 py-4 text-base sm:text-sm font-semibold transition-colors shadow-sm min-h-[56px] order-1 sm:order-2 w-full">
-									Actualizar Asistencia
+								<button 
+									type="submit" 
+									disabled={isSubmitting}
+									className="bg-primary hover:bg-primary-darken disabled:bg-primary/50 disabled:cursor-not-allowed text-background rounded-xl px-6 py-4 text-base sm:text-sm font-semibold transition-colors shadow-sm min-h-[56px] order-1 sm:order-2 w-full flex items-center justify-center gap-2"
+								>
+									{isSubmitting ? (
+										<>
+											<span className="animate-spin h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+											Actualizando...
+										</>
+									) : (
+										"Actualizar Asistencia"
+									)}
 								</button>
 							</div>
 						</div>

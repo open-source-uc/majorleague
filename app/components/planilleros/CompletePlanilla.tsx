@@ -20,8 +20,13 @@ export function CompletePlanilla({ matchId, planilleroStatus, matchStatus, myTea
 
   const shouldShow = () => {
     if (myTeamValidation?.status === "approved") return false;
+    // Permitir envío durante partido en vivo si no está completado
     if (matchStatus === "live" && planilleroStatus !== "completed") return true;
-    if (matchStatus === "in_review" && planilleroStatus === "assigned" && myTeamValidation?.status === "rejected") return true;
+    // Permitir envío durante revisión si no está completado (independiente del otro planillero)
+    if (matchStatus === "in_review" && planilleroStatus !== "completed") return true;
+    // Permitir reenvío si fue rechazado
+    if (matchStatus === "in_review" && planilleroStatus === "assigned" && myTeamValidation?.status === "rejected")
+      return true;
     return false;
   };
 
@@ -37,13 +42,26 @@ export function CompletePlanilla({ matchId, planilleroStatus, matchStatus, myTea
       <div className="mb-4 space-y-2">
         {myTeamValidation?.status === "rejected" ? (
           <>
-            <p className="text-foreground text-sm">Tu planilla fue rechazada. Después de realizar las correcciones necesarias, puedes reenviarla para una nueva revisión.</p>
-            <p className="text-foreground text-sm"><strong>Importante:</strong> Revisa los comentarios del revisor antes de reenviar.</p>
+            <p className="text-foreground text-sm">
+              Tu planilla fue rechazada. Después de realizar las correcciones necesarias, puedes reenviarla para una
+              nueva revisión.
+            </p>
+            <p className="text-foreground text-sm">
+              <strong>Importante:</strong> Revisa los comentarios del revisor antes de reenviar.
+            </p>
           </>
         ) : (
           <>
-            <p className="text-foreground text-sm">Cuando termines de registrar los eventos de tu equipo, envía la planilla para revisión.</p>
-            <p className="text-foreground text-sm"><strong>Importante:</strong> El partido pasará a revisión y podrás validar la planilla rival.</p>
+            <p className="text-foreground text-sm">
+              Cuando termines de registrar los eventos de tu equipo, envía la planilla para revisión del otro
+              planillero.
+            </p>
+            <p className="text-foreground text-xs bg-red-500/10 rounded-lg p-2">
+              <strong>IMPORTANTE:</strong>
+              <br />
+              El partido pasará de "En Vivo" a "En Revisión", afectando el estado del partido en la página
+              principal.
+            </p>
           </>
         )}
       </div>
@@ -65,7 +83,7 @@ export function CompletePlanilla({ matchId, planilleroStatus, matchStatus, myTea
         <input type="hidden" name="match_id" value={matchId} />
         <button
           type="submit"
-          className="bg-primary hover:bg-primary-darken text-white w-full rounded-lg px-6 py-4 text-lg font-semibold shadow-sm transition-colors min-h-[56px]"
+          className="bg-primary/80 hover:bg-primary-darken min-h-[56px] w-full rounded-lg px-6 py-4 text-lg font-semibold text-white shadow-sm transition-colors"
         >
           <span className="mr-2">📋</span>
           {myTeamValidation?.status === "rejected" ? "Reenviar Planilla Corregida" : "Enviar Planilla para Revisión"}
