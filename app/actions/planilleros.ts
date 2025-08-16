@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache as cache, revalidateTag, revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { z } from "zod";
@@ -78,11 +78,15 @@ const attendanceUpdateSchema = z.object({
 
 const bulkAttendanceUpdateSchema = z.object({
   match_id: baseIdSchema.match_id,
-  updates: z.array(z.object({
-    player_id: baseIdSchema.player_id,
-    status: attendanceStatusSchema,
-    jersey_number: jerseyNumberSchema,
-  })).min(1),
+  updates: z
+    .array(
+      z.object({
+        player_id: baseIdSchema.player_id,
+        status: attendanceStatusSchema,
+        jersey_number: jerseyNumberSchema,
+      }),
+    )
+    .min(1),
 });
 
 const validationUpdateSchema = z.object({
@@ -317,7 +321,7 @@ export async function getMatchEvents(match_id: number, team_id?: number) {
     const events = await env.DB.prepare(query)
       .bind(...params)
       .all();
-    
+
     return events.results || [];
   } catch (error) {
     console.error(`Error getting match events for match ${match_id}, team ${team_id || "all"}:`, error);
@@ -348,7 +352,7 @@ export async function getTeamPlayers(team_id: number) {
 export async function getMatchPlanilleroData(match_id: number, profile_id: string) {
   try {
     const { env } = getRequestContext();
-    
+
     const planilleroInfo = await env.DB.prepare(
       `
       SELECT 
@@ -377,11 +381,13 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
     }
 
     const myTeamId = planilleroInfo.team_id as number;
-    const rivalTeamId = myTeamId === planilleroInfo.local_team_id ? planilleroInfo.visitor_team_id : planilleroInfo.local_team_id;
+    const rivalTeamId =
+      myTeamId === planilleroInfo.local_team_id ? planilleroInfo.visitor_team_id : planilleroInfo.local_team_id;
 
     const [myTeamPlayers, myTeamAttendance, validations, myTeamEvents, rivalEvents] = await Promise.all([
       env.DB.prepare(`SELECT * FROM players WHERE team_id = ? ORDER BY position, last_name ASC`).bind(myTeamId).all(),
-      env.DB.prepare(`
+      env.DB.prepare(
+        `
         SELECT 
           ma.*,
           p.first_name,
@@ -393,8 +399,12 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
         JOIN players p ON ma.player_id = p.id
         WHERE ma.match_id = ? AND p.team_id = ?
         ORDER BY p.position, p.last_name
-      `).bind(match_id, myTeamId).all(),
-      env.DB.prepare(`
+      `,
+      )
+        .bind(match_id, myTeamId)
+        .all(),
+      env.DB.prepare(
+        `
         SELECT 
           sv.*,
           p.username as validator_username,
@@ -403,8 +413,12 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
         JOIN profiles p ON sv.validator_profile_id = p.id
         JOIN teams t ON sv.validated_team_id = t.id
         WHERE sv.match_id = ?
-      `).bind(match_id).all(),
-      env.DB.prepare(`
+      `,
+      )
+        .bind(match_id)
+        .all(),
+      env.DB.prepare(
+        `
         SELECT 
           e.*,
           COALESCE(
@@ -416,8 +430,12 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
         LEFT JOIN players p ON ep.player_id = p.id
         WHERE e.match_id = ? AND e.team_id = ?
         GROUP BY e.id ORDER BY e.minute ASC
-      `).bind(match_id, myTeamId).all(),
-      env.DB.prepare(`
+      `,
+      )
+        .bind(match_id, myTeamId)
+        .all(),
+      env.DB.prepare(
+        `
         SELECT 
           e.*,
           COALESCE(
@@ -429,7 +447,10 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
         LEFT JOIN players p ON ep.player_id = p.id
         WHERE e.match_id = ? AND e.team_id = ?
         GROUP BY e.id ORDER BY e.minute ASC
-      `).bind(match_id, rivalTeamId).all()
+      `,
+      )
+        .bind(match_id, rivalTeamId)
+        .all(),
     ]);
 
     const playersWithAttendance = (myTeamPlayers.results || []).map((player: any) => {
@@ -451,8 +472,12 @@ export async function getMatchPlanilleroData(match_id: number, profile_id: strin
       myTeamEvents: myTeamEvents.results || [],
       rivalEvents: rivalEvents.results || [],
       playersWithAttendance,
-      myTeamName: (myTeamId === planilleroInfo.local_team_id ? planilleroInfo.local_team_name : planilleroInfo.visitor_team_name) as string,
-      rivalTeamName: (rivalTeamId === planilleroInfo.local_team_id ? planilleroInfo.local_team_name : planilleroInfo.visitor_team_name) as string,
+      myTeamName: (myTeamId === planilleroInfo.local_team_id
+        ? planilleroInfo.local_team_name
+        : planilleroInfo.visitor_team_name) as string,
+      rivalTeamName: (rivalTeamId === planilleroInfo.local_team_id
+        ? planilleroInfo.local_team_name
+        : planilleroInfo.visitor_team_name) as string,
     };
   } catch (error) {
     console.error(`Error getting match planillero data for match ${match_id}, profile ${profile_id}:`, error);
@@ -466,16 +491,8 @@ interface AuthValidationOptions {
   requirePlayerAccess?: boolean;
 }
 
-async function validatePlanilleroAuth(
-  match_id: number,
-  profile_id: string,
-  options: AuthValidationOptions = {}
-) {
-  const { 
-    requiredMatchStatuses = ["live", "in_review"],
-    requiredTeamId,
-    requirePlayerAccess = false
-  } = options;
+async function validatePlanilleroAuth(match_id: number, profile_id: string, options: AuthValidationOptions = {}) {
+  const { requiredMatchStatuses = ["live", "in_review"], requiredTeamId, requirePlayerAccess = false } = options;
 
   const { env } = getRequestContext();
 
@@ -524,9 +541,9 @@ export async function assignPlanillero(_prev: any, formData: FormData) {
 
   try {
     const { env } = getRequestContext();
-    const match = await env.DB.prepare(
-      `SELECT local_team_id, visitor_team_id FROM matches WHERE id = ?`
-    ).bind(parsed.data.match_id).first();
+    const match = await env.DB.prepare(`SELECT local_team_id, visitor_team_id FROM matches WHERE id = ?`)
+      .bind(parsed.data.match_id)
+      .first();
 
     if (!match) {
       return createResponse(false, "El partido no existe");
@@ -537,16 +554,18 @@ export async function assignPlanillero(_prev: any, formData: FormData) {
     }
 
     const existingPlanillero = await env.DB.prepare(
-      `SELECT id FROM match_planilleros WHERE match_id = ? AND team_id = ?`
-    ).bind(parsed.data.match_id, parsed.data.team_id).first();
+      `SELECT id FROM match_planilleros WHERE match_id = ? AND team_id = ?`,
+    )
+      .bind(parsed.data.match_id, parsed.data.team_id)
+      .first();
 
     if (existingPlanillero) {
       return createResponse(false, "Ya hay un planillero asignado a este equipo para este partido");
     }
 
-    await env.DB.prepare(
-      `INSERT INTO match_planilleros (match_id, team_id, profile_id) VALUES (?, ?, ?)`
-    ).bind(parsed.data.match_id, parsed.data.team_id, parsed.data.profile_id).run();
+    await env.DB.prepare(`INSERT INTO match_planilleros (match_id, team_id, profile_id) VALUES (?, ?, ?)`)
+      .bind(parsed.data.match_id, parsed.data.team_id, parsed.data.profile_id)
+      .run();
 
     revalidatePath("/dashboard/planilleros");
     return createResponse(true, "Planillero asignado exitosamente");
@@ -571,32 +590,38 @@ export async function removePlanillero(_prev: any, formData: FormData) {
   const { env } = getRequestContext();
   try {
     const existingPlanillero = await env.DB.prepare(
-      `SELECT id, profile_id FROM match_planilleros WHERE match_id = ? AND team_id = ?`
-    ).bind(match_id, team_id).first();
+      `SELECT id, profile_id FROM match_planilleros WHERE match_id = ? AND team_id = ?`,
+    )
+      .bind(match_id, team_id)
+      .first();
 
     if (!existingPlanillero) {
-      return { 
-        success: 0, 
-        errors: 1, 
-        message: "No hay planillero asignado para este equipo en este partido" 
+      return {
+        success: 0,
+        errors: 1,
+        message: "No hay planillero asignado para este equipo en este partido",
       };
     }
 
-    await env.DB.prepare(
-      `DELETE FROM match_planilleros WHERE match_id = ? AND team_id = ?`
-    ).bind(match_id, team_id).run();
+    await env.DB.prepare(`DELETE FROM match_planilleros WHERE match_id = ? AND team_id = ?`)
+      .bind(match_id, team_id)
+      .run();
 
     await env.DB.prepare(
       `DELETE FROM match_attendance WHERE match_id = ? AND player_id IN (
         SELECT id FROM players WHERE team_id = ?
-      )`
-    ).bind(match_id, team_id).run();
+      )`,
+    )
+      .bind(match_id, team_id)
+      .run();
 
     await env.DB.prepare(
       `DELETE FROM scorecard_validations WHERE match_id = ? AND (
         validator_profile_id = ? OR validated_team_id = ?
-      )`
-    ).bind(match_id, existingPlanillero.profile_id, team_id).run();
+      )`,
+    )
+      .bind(match_id, existingPlanillero.profile_id, team_id)
+      .run();
 
     revalidatePath("/dashboard/planilleros");
     return { success: 1, errors: 0, message: "Planillero removido exitosamente" };
@@ -625,46 +650,56 @@ export async function changePlanillero(_prev: any, formData: FormData) {
   const { env } = getRequestContext();
   try {
     const existingPlanillero = await env.DB.prepare(
-      `SELECT id, profile_id FROM match_planilleros WHERE match_id = ? AND team_id = ?`
-    ).bind(body.match_id, body.team_id).first();
+      `SELECT id, profile_id FROM match_planilleros WHERE match_id = ? AND team_id = ?`,
+    )
+      .bind(body.match_id, body.team_id)
+      .first();
 
     if (!existingPlanillero) {
-      return { 
-        success: 0, 
-        errors: 1, 
-        message: "No hay planillero asignado para este equipo en este partido" 
+      return {
+        success: 0,
+        errors: 1,
+        message: "No hay planillero asignado para este equipo en este partido",
       };
     }
 
     const conflictingAssignment = await env.DB.prepare(
-      `SELECT id FROM match_planilleros WHERE match_id = ? AND profile_id = ?`
-    ).bind(body.match_id, body.new_profile_id).first();
+      `SELECT id FROM match_planilleros WHERE match_id = ? AND profile_id = ?`,
+    )
+      .bind(body.match_id, body.new_profile_id)
+      .first();
 
     if (conflictingAssignment) {
-      return { 
-        success: 0, 
-        errors: 1, 
-        message: "El planillero seleccionado ya está asignado a este partido" 
+      return {
+        success: 0,
+        errors: 1,
+        message: "El planillero seleccionado ya está asignado a este partido",
       };
     }
 
     await env.DB.prepare(
       `UPDATE match_planilleros 
        SET profile_id = ?, status = 'assigned', updated_at = CURRENT_TIMESTAMP 
-       WHERE match_id = ? AND team_id = ?`
-    ).bind(body.new_profile_id, body.match_id, body.team_id).run();
+       WHERE match_id = ? AND team_id = ?`,
+    )
+      .bind(body.new_profile_id, body.match_id, body.team_id)
+      .run();
 
     await env.DB.prepare(
       `DELETE FROM match_attendance WHERE match_id = ? AND player_id IN (
         SELECT id FROM players WHERE team_id = ?
-      )`
-    ).bind(body.match_id, body.team_id).run();
+      )`,
+    )
+      .bind(body.match_id, body.team_id)
+      .run();
 
     await env.DB.prepare(
       `DELETE FROM scorecard_validations WHERE match_id = ? AND (
         validator_profile_id = ? OR validated_team_id = ?
-      )`
-    ).bind(body.match_id, existingPlanillero.profile_id, body.team_id).run();
+      )`,
+    )
+      .bind(body.match_id, existingPlanillero.profile_id, body.team_id)
+      .run();
 
     revalidatePath("/dashboard/planilleros");
     return { success: 1, errors: 0, message: "Planillero cambiado exitosamente" };
@@ -696,7 +731,7 @@ export async function updateAttendance(_prev: any, formData: FormData) {
 
   try {
     const authCheck = await validatePlanilleroAuth(parsed.data.match_id, userProfile.id, {
-      requiredMatchStatuses: ["scheduled", "live", "in_review"]
+      requiredMatchStatuses: ["scheduled", "live", "in_review"],
     });
 
     if (!authCheck) {
@@ -769,7 +804,7 @@ export async function updateBulkAttendance(_prev: any, formData: FormData) {
 
   try {
     const authCheck = await validatePlanilleroAuth(parsed.data.match_id, userProfile.id, {
-      requiredMatchStatuses: ["scheduled", "live", "in_review"]
+      requiredMatchStatuses: ["scheduled", "live", "in_review"],
     });
 
     if (!authCheck) {
@@ -843,7 +878,7 @@ export async function validateScorecard(_prev: any, formData: FormData) {
 
   try {
     const authCheck = await validatePlanilleroAuth(parsed.data.match_id, userProfile.id, {
-      requiredMatchStatuses: ["in_review"]
+      requiredMatchStatuses: ["in_review"],
     });
 
     if (!authCheck || authCheck.team_id === parsed.data.validated_team_id) {
@@ -874,17 +909,20 @@ export async function validateScorecard(_prev: any, formData: FormData) {
       await env.DB.prepare(
         `UPDATE match_planilleros 
          SET status = 'assigned' 
-         WHERE match_id = ? AND team_id = ? AND status = 'completed'`
-      ).bind(parsed.data.match_id, parsed.data.validated_team_id).run();
+         WHERE match_id = ? AND team_id = ? AND status = 'completed'`,
+      )
+        .bind(parsed.data.match_id, parsed.data.validated_team_id)
+        .run();
     }
 
     revalidatePath(`/planillero/partido/${parsed.data.match_id}`);
-    return { 
-      success: 1, 
-      errors: 0, 
-      message: parsed.data.status === "approved" 
-        ? "Planilla aprobada exitosamente" 
-        : "Planilla rechazada. El equipo puede realizar correcciones y reenviar." 
+    return {
+      success: 1,
+      errors: 0,
+      message:
+        parsed.data.status === "approved"
+          ? "Planilla aprobada exitosamente"
+          : "Planilla rechazada. El equipo puede realizar correcciones y reenviar.",
     };
   } catch (error) {
     console.error(`Error validating scorecard for match ${parsed.data.match_id}:`, error);
@@ -917,7 +955,7 @@ export async function completePlanillero(_prev: any, formData: FormData) {
 
   try {
     const authCheck = await validatePlanilleroAuth(match_id, userProfile.id, {
-      requiredMatchStatuses: ["scheduled", "live", "in_review"]
+      requiredMatchStatuses: ["scheduled", "live", "in_review"],
     });
     if (!authCheck) {
       return {
@@ -952,12 +990,14 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
     minute: parseInt(formData.get("minute") as string),
   };
 
-  const parsed = z.object({
-    match_id: baseIdSchema.match_id,
-    player_id: baseIdSchema.player_id,
-    event_type: z.enum(["goal", "yellow_card", "red_card", "substitution", "other"]),
-    minute: z.number().min(0).max(120),
-  }).safeParse(body);
+  const parsed = z
+    .object({
+      match_id: baseIdSchema.match_id,
+      player_id: baseIdSchema.player_id,
+      event_type: z.enum(["goal", "yellow_card", "red_card", "substitution", "other"]),
+      minute: z.number().min(0).max(120),
+    })
+    .safeParse(body);
 
   if (!parsed.success) {
     return createResponse(false, "Datos inválidos: " + parsed.error.errors.map((e) => e.message).join(", "));
@@ -965,8 +1005,9 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
 
   try {
     const { env } = getRequestContext();
-    
-    const authCheck = await env.DB.prepare(`
+
+    const authCheck = await env.DB.prepare(
+      `
       SELECT mp.team_id, ma.status as attendance_status
       FROM match_planilleros mp
       JOIN players p ON p.team_id = mp.team_id
@@ -974,34 +1015,52 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
       JOIN matches m ON mp.match_id = m.id
       WHERE mp.match_id = ? AND mp.profile_id = ? AND p.id = ?
         AND m.status IN ('live', 'in_review', 'scheduled') AND ma.status = 'present'
-    `).bind(body.match_id, userProfile.id, body.player_id).first();
+    `,
+    )
+      .bind(body.match_id, userProfile.id, body.player_id)
+      .first();
 
     if (!authCheck) {
       return createResponse(false, "Jugador no autorizado o no presente");
     }
 
-    const validationCheck = await env.DB.prepare(`
+    const validationCheck = await env.DB.prepare(
+      `
       SELECT status FROM scorecard_validations 
       WHERE match_id = ? AND validated_team_id = ? AND status = 'approved'
-    `).bind(body.match_id, authCheck.team_id).first();
+    `,
+    )
+      .bind(body.match_id, authCheck.team_id)
+      .first();
 
     if (validationCheck) {
-      return createResponse(false, "No puedes modificar eventos: tu planilla ya ha sido aprobada por el planillero rival");
+      return createResponse(
+        false,
+        "No puedes modificar eventos: tu planilla ya ha sido aprobada por el planillero rival",
+      );
     }
 
-    const eventResult = await env.DB.prepare(`
+    const eventResult = await env.DB.prepare(
+      `
       INSERT INTO events (match_id, team_id, type, minute, created_at)
       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).bind(body.match_id, authCheck.team_id, body.event_type, body.minute).run();
+    `,
+    )
+      .bind(body.match_id, authCheck.team_id, body.event_type, body.minute)
+      .run();
 
     if (!eventResult.meta.last_row_id) {
       throw new Error("Failed to create event");
     }
 
-    await env.DB.prepare(`
+    await env.DB.prepare(
+      `
       INSERT INTO event_players (event_id, player_id, role, created_at)
       VALUES (?, ?, 'main', CURRENT_TIMESTAMP)
-    `).bind(eventResult.meta.last_row_id, body.player_id).run();
+    `,
+    )
+      .bind(eventResult.meta.last_row_id, body.player_id)
+      .run();
 
     revalidatePath(`/planillero/partido/${body.match_id}`);
     return createResponse(true, "Evento registrado exitosamente");
@@ -1014,8 +1073,10 @@ export async function markPlanilleroCompleted(match_id: number, profile_id: stri
   const { env } = getRequestContext();
   try {
     const planilleroInfo = await env.DB.prepare(
-      `SELECT team_id FROM match_planilleros WHERE match_id = ? AND profile_id = ?`
-    ).bind(match_id, profile_id).first();
+      `SELECT team_id FROM match_planilleros WHERE match_id = ? AND profile_id = ?`,
+    )
+      .bind(match_id, profile_id)
+      .first();
 
     if (!planilleroInfo) {
       throw new Error("Planillero no encontrado");
@@ -1034,8 +1095,10 @@ export async function markPlanilleroCompleted(match_id: number, profile_id: stri
     await env.DB.prepare(
       `UPDATE scorecard_validations 
        SET status = 'pending', comments = NULL, validated_at = NULL 
-       WHERE match_id = ? AND validated_team_id = ?`
-    ).bind(match_id, planilleroInfo.team_id).run();
+       WHERE match_id = ? AND validated_team_id = ?`,
+    )
+      .bind(match_id, planilleroInfo.team_id)
+      .run();
 
     const currentMatch = await env.DB.prepare(`SELECT status FROM matches WHERE id = ?`).bind(match_id).first();
 
@@ -1043,22 +1106,26 @@ export async function markPlanilleroCompleted(match_id: number, profile_id: stri
     if (currentMatch && currentMatch.status === "live") {
       await env.DB.prepare(`UPDATE matches SET status = 'in_review' WHERE id = ?`).bind(match_id).run();
     }
-    
+
     // Siempre crear validación para el planillero rival, independiente del estado del partido
-    const planilleros = await env.DB.prepare(
-      `SELECT profile_id, team_id FROM match_planilleros WHERE match_id = ?`
-    ).bind(match_id).all();
-    
+    const planilleros = await env.DB.prepare(`SELECT profile_id, team_id FROM match_planilleros WHERE match_id = ?`)
+      .bind(match_id)
+      .all();
+
     const planillerosList = planilleros.results || [];
-    
+
     // Solo crear validación para el planillero rival del que está enviando sus eventos
-    const rivalPlanillero = planillerosList.find(p => p.team_id !== planilleroInfo.team_id);
+    const rivalPlanillero = planillerosList.find((p) => p.team_id !== planilleroInfo.team_id);
     if (rivalPlanillero) {
-      await env.DB.prepare(`
+      await env.DB.prepare(
+        `
         INSERT OR IGNORE INTO scorecard_validations 
         (match_id, validator_profile_id, validated_team_id, status, created_at)
         VALUES (?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-      `).bind(match_id, rivalPlanillero.profile_id, planilleroInfo.team_id).run();
+      `,
+      )
+        .bind(match_id, rivalPlanillero.profile_id, planilleroInfo.team_id)
+        .run();
     }
 
     revalidatePath(`/planillero/partido/${match_id}`);
@@ -1091,10 +1158,9 @@ export async function isPlanillero(profile_id: string): Promise<boolean> {
     )
       .bind(profile_id)
       .first();
-    
+
     return (result?.count as number) > 0;
   } catch (error) {
-
     return false;
   }
 }

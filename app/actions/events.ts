@@ -557,10 +557,10 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
       .first();
 
     if (validationCheck) {
-      return { 
-        success: 0, 
-        errors: 1, 
-        message: "No puedes modificar eventos: tu planilla ya ha sido aprobada por el planillero rival" 
+      return {
+        success: 0,
+        errors: 1,
+        message: "No puedes modificar eventos: tu planilla ya ha sido aprobada por el planillero rival",
       };
     }
 
@@ -568,7 +568,7 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
       `
       INSERT INTO events (match_id, team_id, type, minute, created_at)
       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `
+    `,
     )
       .bind(body.match_id, authCheck.team_id, body.event_type, body.minute)
       .run();

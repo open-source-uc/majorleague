@@ -14,17 +14,12 @@ interface ScorecardValidatorProps {
   currentValidation?: any;
 }
 
-export function ScorecardValidator({
-  matchId,
-  rivalTeam,
-  currentValidation,
-}: ScorecardValidatorProps) {
+export function ScorecardValidator({ matchId, rivalTeam, currentValidation }: ScorecardValidatorProps) {
   const [state, formAction] = useActionState(validateScorecard, {
     success: 0,
     errors: 0,
     message: "",
   });
-  
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -64,7 +59,7 @@ export function ScorecardValidator({
 
       {/* Vista de eventos del equipo rival optimizada para móvil */}
       <div className="bg-background-header border-border-header rounded-lg border p-4">
-        <h4 className="text-foreground mb-4 font-medium flex items-center gap-2">
+        <h4 className="text-foreground mb-4 flex items-center gap-2 font-medium">
           <span className="text-lg">📊</span>
           Eventos Registrados:
         </h4>
@@ -74,15 +69,15 @@ export function ScorecardValidator({
             .map((event) => (
               <div key={event.id} className="bg-background border-border-header rounded-lg border p-4">
                 <div className="flex items-center gap-4">
-                  <span className="bg-foreground text-background rounded-lg px-3 py-2 font-mono font-bold min-w-[60px] text-center">
+                  <span className="bg-foreground text-background min-w-[60px] rounded-lg px-3 py-2 text-center font-mono font-bold">
                     {event.minute}&apos;
                   </span>
                   <span className="text-2xl">{getEventIcon(event.type)}</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-foreground font-medium block">{getEventLabel(event.type)}</span>
-                    {event.player_name && (
-                      <div className="text-sm text-foreground/70 truncate">{event.player_name}</div>
-                    )}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-foreground block font-medium">{getEventLabel(event.type)}</span>
+                    {event.player_name ? (
+                      <div className="text-foreground/70 truncate text-sm">{event.player_name}</div>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -91,8 +86,8 @@ export function ScorecardValidator({
           {rivalTeam.events.length === 0 && (
             <div className="text-foreground py-8 text-center">
               <span className="mb-3 block text-4xl">📝</span>
-              <p className="font-medium mb-2">No hay eventos registrados</p>
-              <p className="text-sm text-foreground/70">El equipo rival no ha registrado eventos</p>
+              <p className="mb-2 font-medium">No hay eventos registrados</p>
+              <p className="text-foreground/70 text-sm">El equipo rival no ha registrado eventos</p>
             </div>
           )}
         </div>
@@ -109,22 +104,25 @@ export function ScorecardValidator({
                 : "border-border-header bg-background-header text-foreground"
           }`}
         >
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <span className="text-xl">
-              {currentValidation.status === "approved" ? "✅" : 
-               currentValidation.status === "rejected" ? "❌" : "⏳"}
+              {currentValidation.status === "approved" ? "✅" : currentValidation.status === "rejected" ? "❌" : "⏳"}
             </span>
             <span className="font-medium">
-              Estado: {currentValidation.status === "approved" ? "Aprobado" : 
-                      currentValidation.status === "rejected" ? "Rechazado" : "Pendiente"}
+              Estado:{" "}
+              {currentValidation.status === "approved"
+                ? "Aprobado"
+                : currentValidation.status === "rejected"
+                  ? "Rechazado"
+                  : "Pendiente"}
             </span>
           </div>
-          {currentValidation.comments && (
-            <div className="mt-3 p-3 bg-background rounded border border-border-header">
-              <p className="text-sm font-medium mb-1">Comentarios:</p>
+          {currentValidation.comments ? (
+            <div className="bg-background border-border-header mt-3 rounded border p-3">
+              <p className="mb-1 text-sm font-medium">Comentarios:</p>
               <p className="text-sm">{currentValidation.comments}</p>
             </div>
-          )}
+          ) : null}
         </div>
       ) : null}
 
@@ -135,14 +133,14 @@ export function ScorecardValidator({
           <input type="hidden" name="validated_team_id" value={rivalTeam.id} />
 
           <div>
-            <label className="text-foreground mb-3 font-medium flex items-center gap-2">
+            <label className="text-foreground mb-3 flex items-center gap-2 font-medium">
               <span className="text-lg">💬</span>
               Comentarios (opcional):
             </label>
             <textarea
               name="comments"
               rows={4}
-              className="bg-background border-border-header text-foreground w-full rounded-lg border-2 p-4 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+              className="bg-background border-border-header text-foreground focus:border-primary focus:ring-primary w-full resize-none rounded-lg border-2 p-4 focus:ring-1"
               placeholder="Agregar comentarios sobre la planilla..."
             />
           </div>
@@ -152,7 +150,7 @@ export function ScorecardValidator({
               type="submit"
               name="status"
               value="approved"
-              className="bg-primary/80 hover:bg-primary-darken text-white rounded-lg px-6 py-4 font-medium transition-colors shadow-sm min-h-[56px] flex items-center justify-center gap-3"
+              className="bg-primary/80 hover:bg-primary-darken flex min-h-[56px] items-center justify-center gap-3 rounded-lg px-6 py-4 font-medium text-white shadow-sm transition-colors"
             >
               <span className="text-xl">✅</span>
               <span>Aprobar Planilla</span>
@@ -165,7 +163,7 @@ export function ScorecardValidator({
                 const ok = window.confirm("¿Seguro que deseas solicitar corrección?");
                 if (!ok) e.preventDefault();
               }}
-              className="bg-foreground/80 hover:bg-foreground/60 text-background rounded-lg px-6 py-4 font-medium transition-colors shadow-sm min-h-[56px] flex items-center justify-center gap-3"
+              className="bg-foreground/80 hover:bg-foreground/60 text-background flex min-h-[56px] items-center justify-center gap-3 rounded-lg px-6 py-4 font-medium shadow-sm transition-colors"
             >
               <span className="text-xl">❌</span>
               <span>Solicitar Corrección</span>
@@ -173,7 +171,9 @@ export function ScorecardValidator({
           </div>
 
           {state.message ? (
-            <div className={`rounded-lg border p-4 ${state.success ? "border-primary bg-primary/5 text-primary" : "border-border-header bg-background text-foreground"}`}>
+            <div
+              className={`rounded-lg border p-4 ${state.success ? "border-primary bg-primary/5 text-primary" : "border-border-header bg-background text-foreground"}`}
+            >
               <div className="flex items-center gap-3">
                 <span className="text-xl">{state.success ? "✅" : "❌"}</span>
                 <span className="font-medium">{state.message}</span>

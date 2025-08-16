@@ -1,8 +1,9 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 import { getPlanilleroMatchesGroupedByStatus } from "@/actions/planilleros";
 import { MatchCard } from "@/components/planilleros/MatchCard";
 import { getAuthStatus } from "@/lib/services/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
 
 export const runtime = "edge";
 
@@ -46,7 +47,7 @@ export default async function PlanilleroPage() {
             <span className="text-red-500">🔴</span>
             En Vivo ({matches.live.length})
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">  
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {matches.live.map((match) => (
               <MatchCard prefetch={true} key={match.id} match={match} userProfile={userProfile} />
             ))}
