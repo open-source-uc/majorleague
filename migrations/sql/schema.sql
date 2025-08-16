@@ -20,12 +20,12 @@ DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS preferences;
 DROP TABLE IF EXISTS user_favorite_matches;
 DROP TABLE IF EXISTS user_favorite_teams;
-DROP TABLE IF EXISTS profiles;
+-- DROP TABLE IF EXISTS profiles;
 
 -- Core Tables
 
 -- Profiles (Users from auth.osuc.dev)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id TEXT PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     email TEXT UNIQUE,
@@ -49,7 +49,7 @@ CREATE TABLE competitions (
 CREATE TABLE teams (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    captain_id TEXT NOT NULL,
+    captain_id TEXT,
     major TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -298,26 +298,26 @@ CREATE TABLE audit_log (
 );
 
 -- Indexes for performance optimization
-CREATE INDEX idx_profiles_username ON profiles(username);
-CREATE INDEX idx_profiles_email ON profiles(email);
-CREATE INDEX idx_teams_captain ON teams(captain_id);
-CREATE INDEX idx_players_team ON players(team_id);
-CREATE INDEX idx_players_profile ON players(profile_id);
-CREATE INDEX idx_matches_competition ON matches(competition_id);
-CREATE INDEX idx_matches_timestamp ON matches(timestamp);
-CREATE INDEX idx_matches_teams ON matches(local_team_id, visitor_team_id);
-CREATE INDEX idx_events_match ON events(match_id);
-CREATE INDEX idx_events_team ON events(team_id);
-CREATE INDEX idx_lineups_match ON lineups(match_id);
-CREATE INDEX idx_streams_match ON streams(match_id);
-CREATE INDEX idx_requests_team ON join_team_requests(team_id);
-CREATE INDEX idx_requests_profile ON join_team_requests(profile_id);
-CREATE INDEX idx_requests_status ON join_team_requests(status);
-CREATE UNIQUE INDEX idx_requests_pending_unique ON join_team_requests(team_id, profile_id) WHERE status = 'pending';
-CREATE INDEX idx_notifications_profile ON notifications(profile_id);
-CREATE INDEX idx_notifications_match ON notifications(match_id);
-CREATE INDEX idx_favorites_teams_profile ON user_favorite_teams(profile_id);
-CREATE INDEX idx_favorites_matches_profile ON user_favorite_matches(profile_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
+CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
+CREATE INDEX IF NOT EXISTS idx_teams_captain ON teams(captain_id);
+CREATE INDEX IF NOT EXISTS idx_players_team ON players(team_id);
+CREATE INDEX IF NOT EXISTS idx_players_profile ON players(profile_id);
+CREATE INDEX IF NOT EXISTS idx_matches_competition ON matches(competition_id);
+CREATE INDEX IF NOT EXISTS idx_matches_timestamp ON matches(timestamp);
+CREATE INDEX IF NOT EXISTS idx_matches_teams ON matches(local_team_id, visitor_team_id);
+CREATE INDEX IF NOT EXISTS idx_events_match ON events(match_id);
+CREATE INDEX IF NOT EXISTS idx_events_team ON events(team_id);
+CREATE INDEX IF NOT EXISTS idx_lineups_match ON lineups(match_id);
+CREATE INDEX IF NOT EXISTS idx_streams_match ON streams(match_id);
+CREATE INDEX IF NOT EXISTS idx_requests_team ON join_team_requests(team_id);
+CREATE INDEX IF NOT EXISTS idx_requests_profile ON join_team_requests(profile_id);
+CREATE INDEX IF NOT EXISTS idx_requests_status ON join_team_requests(status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_requests_pending_unique ON join_team_requests(team_id, profile_id) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_notifications_profile ON notifications(profile_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_match ON notifications(match_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_teams_profile ON user_favorite_teams(profile_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_matches_profile ON user_favorite_matches(profile_id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_players_team_jersey_unique
 ON players(team_id, jersey_number)

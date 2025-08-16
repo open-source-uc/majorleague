@@ -1,18 +1,19 @@
 import Link from "next/link";
-import { Profile } from "@/lib/types";
+
 import { MatchPlanilleroExtended } from "@/actions/planilleros";
+import { Profile } from "@/lib/types";
 
 interface MatchCardProps {
   match: MatchPlanilleroExtended;
   prefetch: boolean;
   userProfile: Profile;
 }
-  
+
 export function MatchCard({ match, prefetch, userProfile }: MatchCardProps) {
   if (!userProfile) {
     return null;
   }
-  
+
   const statusColors = {
     assigned: "bg-yellow-100 text-yellow-800 border border-yellow-200",
     in_progress: "bg-blue-100 text-blue-800 border border-blue-200",

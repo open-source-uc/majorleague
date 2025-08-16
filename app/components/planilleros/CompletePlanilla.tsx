@@ -56,11 +56,11 @@ export function CompletePlanilla({ matchId, planilleroStatus, matchStatus, myTea
               Cuando termines de registrar los eventos de tu equipo, envía la planilla para revisión del otro
               planillero.
             </p>
-            <p className="text-foreground text-xs bg-red-500/10 rounded-lg p-2">
+            <p className="text-foreground rounded-lg bg-red-500/10 p-2 text-xs">
               <strong>IMPORTANTE:</strong>
               <br />
-              El partido pasará de "En Vivo" a "En Revisión", afectando el estado del partido en la página
-              principal.
+              El partido pasará de &quot;En Vivo&quot; a &quot;En Revisión&quot;, afectando el estado del partido en la
+              página principal.
             </p>
           </>
         )}
