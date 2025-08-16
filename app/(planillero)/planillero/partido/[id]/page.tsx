@@ -3,22 +3,27 @@ import { AttendanceManager } from "@/components/planilleros/AttendanceManager";
 import { CompletePlanilla } from "@/components/planilleros/CompletePlanilla";
 import { EventTracker } from "@/components/planilleros/EventTracker";
 import { ScorecardValidator } from "@/components/planilleros/ScorecardValidator";
+import { RefreshButton } from "@/components/ui/RefreshButton";
 import { getAuthStatus } from "@/lib/services/auth";
+import { Attendance, PlayerWithPosition } from "@/hooks/useAttendanceManager";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const runtime = "edge";
 
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const matchId = parseInt(id);
+
   const { userProfile } = await getAuthStatus();
 
   if (!userProfile) {
-    return <div>Error: Usuario no encontrado</div>;
+    redirect("/login");
   }
 
   const matchData = await getMatchPlanilleroData(matchId, userProfile.id);
 
-  if (!matchData) {
+  if (!matchData || !matchData.planilleroInfo) {
     return (
       <div className="py-12 text-center">
         <h2 className="mb-2 text-3xl font-semibold text-primary">Partido no encontrado</h2>
@@ -52,9 +57,23 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   const myTeamValidationComments = myTeamValidation?.comments as string | undefined;
 
 
+  if (matchData.planilleroInfo.match_status === "finished") {
+    return (
+      <div className="py-12 text-center">
+        <h1 className="mb-2 text-3xl font-semibold text-primary">Partido Finalizado</h1>
+        <p className="text-foreground text-lg">El partido ha finalizado, no puedes modificar los eventos registrados.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 min-w-0">
+      <Link
+        href="/planillero"
+        className="text-primary-darken hover:text-primary mb-6 inline-flex items-center transition-colors"
+      >
+        ← Volver a Mis Partidos
+      </Link>
       {/* Header del Partido */}
       <div className="bg-background-header border-border-header rounded-lg border p-6 shadow">
         <div className="flex items-start justify-between">
@@ -99,7 +118,10 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       {/* Estado de Validación de Mi Planilla */}
       {myTeamValidation && (planilleroInfo.match_status as string) === "in_review" && (
         <div className="bg-background-header border-border-header rounded-lg border p-6 shadow" aria-live="polite">
-          <h3 className="mb-4 text-lg font-semibold">Estado de tu Planilla</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Estado de tu Planilla</h3>
+            <RefreshButton title="Actualizar estado" />
+          </div>
           
           {myTeamValidation.status === "rejected" && (
             <div className="rounded-lg border border-border-header bg-background p-4">
@@ -172,8 +194,8 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
             {/* Asistencia */}
             <AttendanceManager
               matchId={matchId}
-              attendance={myTeamAttendance}
-              players={myTeamPlayers}
+              attendance={myTeamAttendance as unknown as Attendance[]}
+              players={myTeamPlayers as unknown as PlayerWithPosition[]}
             />
           </div>
 
@@ -230,7 +252,12 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         {/* Lado Derecho: Equipo Rival */}
         <div className="space-y-4 lg:space-y-6 min-w-0">
           <div className="bg-background-header border-border-header rounded-lg border p-4 lg:p-6 shadow">
-            <h2 className="mb-4 text-lg lg:text-xl font-semibold">Equipo Rival: {rivalTeamName as string}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg lg:text-xl font-semibold">Equipo Rival: {rivalTeamName as string}</h2>
+              {(planilleroInfo.match_status as string) === "in_review" && (
+                <RefreshButton title="Actualizar validaciones" />
+              )}
+            </div>
 
             {(planilleroInfo.match_status as string) === "in_review" && (
               /* Validación de Planilla Rival */

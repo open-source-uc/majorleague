@@ -152,7 +152,7 @@ export function ScorecardValidator({
               type="submit"
               name="status"
               value="approved"
-              className="bg-primary hover:bg-primary-darken text-white rounded-lg px-6 py-4 font-medium transition-colors shadow-sm min-h-[56px] flex items-center justify-center gap-3"
+              className="bg-primary/80 hover:bg-primary-darken text-white rounded-lg px-6 py-4 font-medium transition-colors shadow-sm min-h-[56px] flex items-center justify-center gap-3"
             >
               <span className="text-xl">✅</span>
               <span>Aprobar Planilla</span>

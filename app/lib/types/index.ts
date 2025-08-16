@@ -168,7 +168,7 @@ export interface ObjectConfig {
 export interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "email" | "number" | "date" | "datetime-local" | "select" | "textarea";
+  type: "text" | "email" | "number" | "date" | "datetime" | "select" | "textarea";
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -178,7 +178,7 @@ export interface FieldConfig {
 export interface DisplayColumn {
   key: string;
   label: string;
-  type?: "text" | "date" | "badge" | "custom";
+  type?: "text" | "date" | "datetime" | "badge" | "custom";
   render?: (value: any, item: any) => string;
 }
 
@@ -313,13 +313,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "start_timestamp",
         label: "Fecha y Hora de Inicio",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {
         name: "end_timestamp",
         label: "Fecha y Hora de Fin",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
     ],
@@ -402,7 +402,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
     description: "Gestionar partidos programados",
     displayField: "timestamp",
     displayColumns: [
-      { key: "timestamp", label: "Fecha y Hora", type: "date" },
+      { key: "timestamp", label: "Fecha y Hora", type: "datetime" },
       { key: "local_team_name", label: "Local", type: "text" },
       { key: "visitor_team_name", label: "Visitante", type: "text" },
       { key: "competition_name", label: "Competición", type: "text" },
@@ -439,7 +439,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "timestamp",
         label: "Fecha y Hora del Partido",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {
@@ -516,13 +516,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "start_time",
         label: "Hora de Inicio",
-        type: "datetime-local",
+        type: "datetime",
         required: false,
       },
       {
         name: "end_time",
         label: "Hora de Fin",
-        type: "datetime-local",
+        type: "datetime",
         required: false,
       },
       {
@@ -781,7 +781,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "timestamp",
         label: "Fecha y Hora",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {

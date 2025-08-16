@@ -66,6 +66,29 @@ if ! command -v npx &> /dev/null; then
     exit 1
 fi
 
+# Select if schema, triggers or both
+echo "¿Qué quieres ejecutar?"
+echo "1) Schema"
+echo "2) Triggers"
+echo "3) Ambos"
+read -p "Selecciona una opción (1-3): " action_choice
+
+case $action_choice in
+    1)
+        ACTION="schema"
+        ;;
+    2)
+        ACTION="triggers"
+        ;;
+    3)
+        ACTION="both"
+        ;;
+    *)
+        print_error "Opción inválida. Usa 1 para schema, 2 para triggers o 3 para ambos."
+        exit 1
+        ;;
+esac
+
 # Check if sql files exist
 if [ ! -f "migrations/sql/schema.sql" ]; then
     print_error "Archivo migrations/sql/schema.sql no encontrado"
@@ -77,6 +100,7 @@ if [ ! -f "migrations/sql/triggers.sql" ]; then
     exit 1
 fi
 
+if [ "$ACTION" = "schema" ] || [ "$ACTION" = "both" ]; then
 print_info "Aplicando schema..."
 if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/schema.sql; then
     print_success "Schema aplicado correctamente"
@@ -84,13 +108,16 @@ else
     print_error "Error al aplicar schema"
     exit 1
 fi
+fi
 
+if [ "$ACTION" = "triggers" ] || [ "$ACTION" = "both" ]; then
 print_info "Aplicando triggers..."
 if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/triggers.sql; then
     print_success "Triggers aplicados correctamente"
 else
     print_error "Error al aplicar triggers"
     exit 1
+fi
 fi
 
 echo ""

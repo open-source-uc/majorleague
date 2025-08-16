@@ -1,20 +1,25 @@
 import Link from "next/link";
+import { Profile } from "@/lib/types";
+import { MatchPlanilleroExtended } from "@/actions/planilleros";
 
 interface MatchCardProps {
-  match: any;
-  planilleroStatus: string;
+  match: MatchPlanilleroExtended;
+  prefetch: boolean;
+  userProfile: Profile;
 }
-
-export function MatchCard({ match, planilleroStatus }: MatchCardProps) {
+  
+export function MatchCard({ match, prefetch, userProfile }: MatchCardProps) {
+  if (!userProfile) {
+    return null;
+  }
+  
   const statusColors = {
     assigned: "bg-yellow-100 text-yellow-800 border border-yellow-200",
     in_progress: "bg-blue-100 text-blue-800 border border-blue-200",
     completed: "bg-green-100 text-green-800 border border-green-200",
   };
 
-  const getMyTeamName = () => {
-    return match.my_team_id === match.local_team_id ? match.local_team_name : match.visitor_team_name;
-  };
+  const myTeamName = match.my_team_id === match.local_team_id ? match.local_team_name : match.visitor_team_name;
 
   return (
     <div className="bg-background-header border-border-header hover:border-primary/30 rounded-lg border p-4 transition-all hover:shadow-lg">
@@ -39,19 +44,20 @@ export function MatchCard({ match, planilleroStatus }: MatchCardProps) {
           {match.location ? <p className="text-foreground text-sm opacity-70">📍 {match.location}</p> : null}
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-sm font-medium ${statusColors[planilleroStatus as keyof typeof statusColors] || "bg-background border-border-header text-foreground border"}`}
+          className={`rounded-full px-3 py-1 text-sm font-medium ${statusColors[match.planillero_status as keyof typeof statusColors] || "bg-background border-border-header text-foreground border"}`}
         >
-          {planilleroStatus === "assigned" && "Asignado"}
-          {planilleroStatus === "in_progress" && "En Progreso"}
-          {planilleroStatus === "completed" && "Completado"}
+          {match.planillero_status === "assigned" && "Asignado"}
+          {match.planillero_status === "in_progress" && "En Progreso"}
+          {match.planillero_status === "completed" && "Completado"}
         </span>
       </div>
 
       <div className="flex items-center justify-between">
         <span className="text-foreground text-sm">
-          Mi equipo: <span className="text-primary font-medium">{getMyTeamName()}</span>
+          Mi equipo: <span className="text-primary font-medium">{myTeamName}</span>
         </span>
         <Link
+          prefetch={prefetch}
           href={`/planillero/partido/${match.id}`}
           className="bg-primary hover:bg-primary-darken flex items-center gap-2 rounded px-4 py-2 text-white shadow-sm transition-colors"
         >

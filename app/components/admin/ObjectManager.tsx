@@ -75,7 +75,7 @@ export default function ObjectManager({
   const renderField = (field: FieldConfig, defaultValue = "") => {
     // Convert datetime format for datetime-local inputs
     let processedDefaultValue = defaultValue;
-    if (field.type === "datetime-local" && defaultValue) {
+    if (field.type === "datetime" && defaultValue) {
       // Convert from "YYYY-MM-DD HH:MM:SS" to "YYYY-MM-DDTHH:MM" format
       // Handle both space and T separators
       if (defaultValue.includes(" ")) {
@@ -117,7 +117,7 @@ export default function ObjectManager({
             />
           </div>
         );
-      case "datetime-local":
+      case "datetime":
         return <Input key={field.name} {...commonProps} type="datetime-local" placeholder={field.placeholder || ""} />;
       default:
         return <Input key={field.name} {...commonProps} type={field.type} placeholder={field.placeholder || ""} />;
@@ -141,6 +141,14 @@ export default function ObjectManager({
           // Otherwise format as date
           return new Date(value).toLocaleDateString("es-ES");
         }
+      case "datetime":
+        return new Date(value).toLocaleString("es-CL", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
       case "badge":
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">

@@ -352,11 +352,11 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "live" && existingMatch.status !== "in_review") {
+    if (parsed.data.status === "live" && existingMatch.status !== "scheduled") {
       return {
         success: 0,
         errors: 1,
-        message: "Un partido solo puede pasar a 'en vivo' desde 'en revisión'",
+        message: "Un partido solo puede pasar a 'en vivo' desde 'programado'",
         body,
       };
     }
@@ -522,22 +522,22 @@ export async function deleteMatch(
       };
     }
 
-    const hasEvents = await env.DB.prepare(`SELECT COUNT(*) as count FROM events WHERE match_id = ?`)
-      .bind(parsed.data.id)
-      .first<{ count: number }>();
+    // const hasEvents = await env.DB.prepare(`SELECT COUNT(*) as count FROM events WHERE match_id = ?`)
+    //   .bind(parsed.data.id)
+    //   .first<{ count: number }>();
 
-    const hasStreams = await env.DB.prepare(`SELECT COUNT(*) as count FROM streams WHERE match_id = ?`)
-      .bind(parsed.data.id)
-      .first<{ count: number }>();
+    // const hasStreams = await env.DB.prepare(`SELECT COUNT(*) as count FROM streams WHERE match_id = ?`)
+    //   .bind(parsed.data.id)
+    //   .first<{ count: number }>();
 
-    if ((hasEvents?.count ?? 0) > 0 || (hasStreams?.count ?? 0) > 0) {
-      return {
-        success: 0,
-        errors: 1,
-        message: "No se puede eliminar el partido porque tiene eventos o streams asociados",
-        body,
-      };
-    }
+    // if ((hasEvents?.count ?? 0) > 0 || (hasStreams?.count ?? 0) > 0) {
+    //   return {
+    //     success: 0,
+    //     errors: 1,
+    //     message: "No se puede eliminar el partido porque tiene eventos o streams asociados",
+    //     body,
+    //   };
+    // }
 
     await env.DB.prepare(`DELETE FROM matches WHERE id = ?`).bind(parsed.data.id).run();
 
