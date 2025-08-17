@@ -96,6 +96,7 @@ CREATE TRIGGER create_player_on_approval
             nickname,
             birthday, 
             position,
+            jersey_number,
             created_at,
             updated_at
         ) VALUES (
@@ -106,6 +107,7 @@ CREATE TRIGGER create_player_on_approval
             NEW.nickname,
             NEW.birthday,
             NEW.preferred_position,
+            NEW.preferred_jersey_number,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         );
@@ -125,6 +127,7 @@ CREATE TRIGGER create_player_on_instant_approval
             nickname,
             birthday, 
             position,
+            jersey_number,
             created_at,
             updated_at
         ) VALUES (
@@ -135,6 +138,7 @@ CREATE TRIGGER create_player_on_instant_approval
             NEW.nickname,
             NEW.birthday,
             NEW.preferred_position,
+            NEW.preferred_jersey_number,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         );

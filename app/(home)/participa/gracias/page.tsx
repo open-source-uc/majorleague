@@ -15,14 +15,6 @@ export default async function GraciasPage() {
 
   const participation = await getParticipation(userProfile.id);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CL", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "pending":
@@ -191,22 +183,29 @@ export default async function GraciasPage() {
                 {getPositionName(participation.preferred_position)}
               </div>
             </div>
+
+            <div>
+              <label className="text-foreground mb-2 block text-sm font-medium">Número de Camiseta</label>
+              <div className="bg-background border-border-header text-foreground rounded-md border p-3">
+                {participation.preferred_jersey_number}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Fecha de Nacimiento</label>
               <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                {participation.birthday ? formatDate(participation.birthday) : "No disponible"}
+                {participation.birthday}
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Fecha de Solicitud</label>
               <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                {participation.created_at ? formatDate(participation.created_at) : "No disponible"}
+                {participation.created_at}
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Estado Actual</label>

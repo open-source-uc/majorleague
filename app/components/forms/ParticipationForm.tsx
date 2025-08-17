@@ -29,7 +29,6 @@ const majorOptions = [
   { value: "Diseño e Innovación", label: "Diseño e Innovación" },
   { value: "Eléctrica", label: "Eléctrica" },
   { value: "Robótica", label: "Robótica" },
-  { value: "Egresado", label: "Egresado" },
   { value: "Otra", label: "Otra" },
 ];
 
@@ -55,10 +54,12 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
       firstName: "",
       lastName: "",
       nickname: "",
+      jerseyNumber: undefined,
     },
   });
 
   const [selectedMajor, setSelectedMajor] = useState(state.body.major);
+
   const [selectedGeneration, setSelectedGeneration] = useState(state.body.generation);
 
   const currentYear = new Date().getFullYear();
@@ -86,38 +87,22 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
     "Diseño e Innovación": ["Naranja Mecanica"],
     Eléctrica: ["Robovolt United"],
     Robótica: ["Robovolt United"],
-    Egresado: ["Old Boys"],
     Otra: [],
   };
 
   const generationYear = parseInt(selectedGeneration) || currentYear;
-  const isNovato = generationYear >= currentYear - 1;
+  const isNovato = selectedGeneration && generationYear >= currentYear - 1;
 
   const getAvailableTeams = () => {
     if (isNovato) {
-      return teams.filter((team) => team.name === "New Boys");
+     return teams;
     }
-
-    if (selectedMajor === "Egresado") {
-      return teams.filter((team) => team.name === "Old Boys");
-    }
-
     if (!selectedMajor) {
-      return teams.filter((team) => !["New Boys", "Old Boys"].includes(team.name));
-    }
-
-    if (selectedMajor === "Otra") {
-      return teams.filter((team) => !["New Boys", "Old Boys"].includes(team.name));
+      return [];
     }
 
     const allowedTeamNames = majorToTeamMapping[selectedMajor] || [];
-    const filteredTeams = teams.filter((team) => allowedTeamNames.includes(team.name));
-
-    if (filteredTeams.length === 0) {
-      return teams.filter((team) => !["New Boys", "Old Boys"].includes(team.name));
-    }
-
-    return filteredTeams;
+    return teams.filter((team) => allowedTeamNames.includes(team.name));
   };
 
   const availableTeams = getAvailableTeams();
@@ -166,10 +151,7 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
             • <strong>Asignación automática:</strong> Tu equipo se determina según tu carrera/estado
           </li>
           <li>
-            • <strong>Novatos (2 últimos años):</strong> Asignados automáticamente a &quot;New Boys&quot;
-          </li>
-          <li>
-            • <strong>Egresados:</strong> Asignados automáticamente a &quot;Old Boys&quot;
+            • <strong>Novatos (2 últimos años):</strong> Pueden elegir cualquier equipo (incluyendo &quot;New Boys&quot;)
           </li>
           <li>
             • <strong>Solicitud única:</strong> Solo puedes tener una solicitud activa a la vez
@@ -237,6 +219,14 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
               required
             />
 
+            <Input
+              label="Número de Camiseta"
+              name="jerseyNumber"
+              type="number"
+              placeholder="10"
+              defaultValue={state.body.jerseyNumber || ""}
+            />
+
             <Select
               label="Generación (Año de ingreso)"
               name="generation"
@@ -260,10 +250,10 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
                 <div className="mt-2 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3">
                   <p className="flex items-center gap-2 text-sm font-medium text-blue-400">
                     <span>🆕</span>
-                    Asignación Automática: Novato
+                    Acceso de Novato
                   </p>
                   <p className="mt-1 text-xs text-blue-300">
-                    Como estudiante de generación {generationYear}, has sido asignado automáticamente al equipo
+                    Como estudiante de generación {generationYear}, puedes elegir cualquier equipo, incluyendo
                     &quot;New Boys&quot;.
                   </p>
                 </div>
@@ -281,29 +271,9 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
                 </div>
               ) : null}
 
-              {!isNovato && selectedMajor === "Egresado" && (
-                <div className="mt-2 rounded-lg border border-purple-500/30 bg-purple-500/10 p-3">
-                  <p className="flex items-center gap-2 text-sm font-medium text-purple-400">
-                    <span>🎓</span>
-                    Asignación Automática: Egresado
-                  </p>
-                  <p className="mt-1 text-xs text-purple-300">
-                    Como egresado, has sido asignado automáticamente al equipo &quot;Old Boys&quot;.
-                  </p>
-                </div>
-              )}
+              
 
-              {!isNovato && selectedMajor === "Otra" && (
-                <div className="mt-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
-                  <p className="flex items-center gap-2 text-sm font-medium text-yellow-400">
-                    <span>🔄</span>
-                    Carrera &quot;Otra&quot; - Selección Libre
-                  </p>
-                  <p className="mt-1 text-xs text-yellow-300">
-                    Al seleccionar &quot;Otra&quot;, puedes elegir entre los equipos generales disponibles.
-                  </p>
-                </div>
-              )}
+              
 
               {!isNovato && !selectedMajor && (
                 <p className="text-ml-grey mt-1 text-xs">

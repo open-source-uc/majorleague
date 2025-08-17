@@ -7,7 +7,6 @@ import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceL
 import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
 import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
 import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
-import OldBoysLogo from "@/../public/assets/teams/OldBoysLogo.png";
 import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const runtime = "edge";
@@ -56,12 +55,6 @@ const teams = [
     alt: "Logo de New Boys",
   },
   {
-    name: "Old Boys",
-    logo: OldBoysLogo,
-    departments: "Ex Alumnos",
-    alt: "Logo de Old Boys",
-  },
-  {
     name: "Robovolt United",
     logo: RobovoltUnitedLogo,
     departments: "Eléctrica - Robótica",
@@ -107,10 +100,7 @@ export default function EquiposPage() {
         <div className="flex max-w-4xl flex-col gap-5 text-center">
           <h2 className="text-primary-darken text-2xl font-bold">Una Liga, Múltiples Especialidades</h2>
           <p className="text-foreground text-lg">
-            Cada equipo representa la excelencia de su área académica trasladada al campo de juego. Desde la precisión
-            de Ingeniería Civil hasta la innovación de Computación, desde la tradición de los Old Boys hasta el
-            entusiasmo de los New Boys, Major League UC es donde la diversidad académica se une en la pasión por el
-            fútbol.
+            Cada equipo representa la excelencia de su área académica trasladada al campo de juego.
           </p>
         </div>
       </section>

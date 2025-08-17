@@ -40,6 +40,7 @@ export interface Player {
   first_name: string;
   last_name: string;
   nickname?: string;
+  jersey_number?: number;
   birthday: string;
   position: "GK" | "DEF" | "MID" | "FWD";
   created_at?: string;
@@ -114,6 +115,7 @@ export interface JoinTeamRequest {
   nickname?: string;
   birthday: string;
   preferred_position: "GK" | "DEF" | "MID" | "FWD";
+  preferred_jersey_number?: number;
   status: "pending" | "approved" | "rejected";
   notes?: string;
   created_at?: string;
@@ -178,7 +180,7 @@ export interface FieldConfig {
 export interface DisplayColumn {
   key: string;
   label: string;
-  type?: "text" | "date" | "datetime" | "badge" | "custom";
+  type?: "text" | "date" | "datetime" | "badge" | "custom" | "number";
   render?: (value: any, item: any) => string;
 }
 
@@ -335,6 +337,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "profile_username", label: "Usuario", type: "text" },
       { key: "position", label: "Posición", type: "badge" },
       { key: "birthday", label: "Fecha de Nacimiento", type: "date" },
+      { key: "jersey_number", label: "Número de Camiseta", type: "number" },
     ],
     actions: [
       { type: "create", label: "Crear Jugador", variant: "primary" },
@@ -394,6 +397,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "MID", label: "Mediocampo (MID)" },
           { value: "FWD", label: "Delantero (FWD)" },
         ],
+      },
+      {
+        name: "jersey_number",
+        label: "Número de Camiseta",
+        type: "number",
+        placeholder: "10",
+        required: false,
       },
     ],
   },
@@ -727,6 +737,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "MID", label: "Mediocampo (MID)" },
           { value: "FWD", label: "Delantero (FWD)" },
         ],
+      },
+      {
+        name: "preferred_jersey_number",
+        label: "Número de Camiseta",
+        type: "number",
+        placeholder: "10",
+        required: false,
       },
       {
         name: "status",

@@ -25,6 +25,7 @@ const playerCreateSchema = z.object({
       return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
     }, "La edad debe estar entre 15 y 50 años"),
   position: z.enum(["GK", "DEF", "MID", "FWD"]),
+  jersey_number: z.number().min(1).max(99).optional(),
 });
 
 const playerUpdateSchema = z.object({
@@ -43,6 +44,7 @@ const playerUpdateSchema = z.object({
       return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
     }, "La edad debe estar entre 15 y 50 años"),
   position: z.enum(["GK", "DEF", "MID", "FWD"]),
+  jersey_number: z.number().min(1).max(99).optional(),
 });
 
 const playerDeleteSchema = z.object({
@@ -54,7 +56,7 @@ export async function getPlayers(): Promise<Player[]> {
   const { env } = getRequestContext();
   const players = await env.DB.prepare(
     `
-    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.created_at, p.updated_at,
+    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.jersey_number, p.created_at, p.updated_at,
            t.name as team_name, pr.username as profile_username
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
@@ -70,7 +72,7 @@ export async function getPlayerById(id: number): Promise<Player | null> {
   const { env } = getRequestContext();
   const player = await env.DB.prepare(
     `
-    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.created_at, p.updated_at,
+    SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.jersey_number, p.created_at, p.updated_at,
            t.name as team_name, pr.username as profile_username
     FROM players p
     LEFT JOIN teams t ON p.team_id = t.id
@@ -98,6 +100,7 @@ export async function createPlayer(
       nickname?: string;
       birthday: string;
       position: string;
+      jersey_number?: number;
     };
   },
   formData: FormData,
@@ -116,6 +119,7 @@ export async function createPlayer(
         nickname: formData.get("nickname") as string,
         birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
+        jersey_number: parseInt(formData.get("jersey_number") as string) || undefined,
       },
     };
   }
@@ -128,6 +132,7 @@ export async function createPlayer(
     nickname: (formData.get("nickname") as string) || undefined,
     birthday: formData.get("birthday") as string,
     position: formData.get("position") as string,
+    jersey_number: parseInt(formData.get("jersey_number") as string) || undefined,
   };
 
   const parsed = playerCreateSchema.safeParse(body);
@@ -183,8 +188,8 @@ export async function createPlayer(
 
     await env.DB.prepare(
       `
-      INSERT INTO players (team_id, profile_id, first_name, last_name, nickname, birthday, position, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO players (team_id, profile_id, first_name, last_name, nickname, birthday, position, jersey_number, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
       .bind(
@@ -195,6 +200,7 @@ export async function createPlayer(
         parsed.data.nickname || null,
         parsed.data.birthday,
         parsed.data.position,
+        parsed.data.jersey_number || null,
       )
       .run();
 
@@ -231,6 +237,7 @@ export async function updatePlayer(
       nickname?: string;
       birthday: string;
       position: string;
+      jersey_number?: number;
     };
   },
   formData: FormData,
@@ -250,6 +257,7 @@ export async function updatePlayer(
         nickname: formData.get("nickname") as string,
         birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
+        jersey_number: parseInt(formData.get("jersey_number") as string) || undefined,
       },
     };
   }
@@ -269,6 +277,7 @@ export async function updatePlayer(
         nickname: formData.get("nickname") as string,
         birthday: formData.get("birthday") as string,
         position: formData.get("position") as string,
+        jersey_number: parseInt(formData.get("jersey_number") as string) || undefined,
       },
     };
   }
@@ -282,6 +291,7 @@ export async function updatePlayer(
     nickname: (formData.get("nickname") as string) || undefined,
     birthday: formData.get("birthday") as string,
     position: formData.get("position") as string,
+    jersey_number: parseInt(formData.get("jersey_number") as string) || undefined,
   };
 
   const parsed = playerUpdateSchema.safeParse(body);
@@ -351,7 +361,7 @@ export async function updatePlayer(
     await env.DB.prepare(
       `
       UPDATE players 
-      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, position = ?, updated_at = CURRENT_TIMESTAMP
+      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, position = ?, jersey_number = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
     )
@@ -363,6 +373,7 @@ export async function updatePlayer(
         parsed.data.nickname || null,
         parsed.data.birthday,
         parsed.data.position,
+        parsed.data.jersey_number || null,
         parsed.data.id,
       )
       .run();
