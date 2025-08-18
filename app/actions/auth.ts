@@ -11,7 +11,13 @@ const profileSchema = z.object({
     .string()
     .min(1, "El nombre de usuario es requerido")
     .max(25, "El nombre de usuario no puede exceder los 25 caracteres"),
-  email: z.string().email().optional(),
+  email: z
+    .string()
+    .email("El correo debe ser válido")
+    .optional()
+    .refine((email) => email?.endsWith(".uc.cl") || email === null, {
+      message: "El correo debe ser de la UC",
+    }),
 });
 
 export async function getProfile(userData: UserData): Promise<Profile | null> {
@@ -87,62 +93,85 @@ export async function CreateProfile(
     body: {
       id: string;
       username: string;
-      email: string;
+      email: string | null;
     };
   },
   formData: FormData,
 ) {
-  const body = {
-    id: formData.get("userId") as string,
-    username: formData.get("username") as string,
-    email: formData.get("email") as string,
-  };
-
-  const parsed = profileSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return {
-      success: 0,
-      message: "Revisa los campos e inténtalo de nuevo.",
-      errors: 1,
-      body,
-    };
-  }
   try {
-    const context = getRequestContext();
+    const body = {
+      id: formData.get("userId") as string,
+      username: formData.get("username") as string,
+      email: formData.get("email") as string | null,
+    };
 
-    const collision = await context.env.DB.prepare("SELECT 1 FROM profiles WHERE username = ?")
-      .bind(parsed.data.username)
-      .first();
-    if (collision) {
+    const parsed = profileSchema.safeParse(body);
+
+    if (!parsed.success) {
       return {
         success: 0,
-        message: "Ese nombre de usuario ya está en uso.",
+        message: parsed.error.issues[0].message,
         errors: 1,
         body,
       };
     }
+    try {
+      const context = getRequestContext();
 
-    const userId = String(parsed.data.id);
-    await context.env.DB.prepare(
-      "INSERT INTO profiles (id, username, email, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-    )
-      .bind(userId, parsed.data.username, parsed.data.email ?? null)
-      .run();
+      const collision = await context.env.DB.prepare("SELECT 1 FROM profiles WHERE username = ?")
+        .bind(parsed.data.username)
+        .first();
+      if (collision) {
+        return {
+          success: 0,
+          message: "Ese nombre de usuario ya está en uso.",
+          errors: 1,
+          body,
+        };
+      }
 
-    return {
-      success: 1,
-      message: "Perfil creado con éxito 🎉",
-      errors: 0,
-      body,
-    };
+      const userId = String(parsed.data.id);
+      await context.env.DB.prepare(
+        "INSERT INTO profiles (id, username, email, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+      )
+        .bind(userId, parsed.data.username, parsed.data.email ?? null)
+        .run();
+
+      return {
+        success: 1,
+        message: "Perfil creado con éxito 🎉",
+        errors: 0,
+        body,
+      };
+    } catch (error) {
+      console.error("Error creating profile:", error);
+      return {
+        success: 0,
+        message: "Ocurrió un error en el servidor.",
+        errors: 1,
+        body,
+      };
+    }
   } catch (error) {
     console.error("Error creating profile:", error);
     return {
       success: 0,
       message: "Ocurrió un error en el servidor.",
       errors: 1,
-      body,
+      body: _prev.body,
     };
+  }
+}
+
+export async function isCaptain(profileId: string): Promise<boolean> {
+  try {
+    const context = getRequestContext();
+    const captain = await context.env.DB.prepare("SELECT id FROM teams WHERE captain_id = ?")
+      .bind(profileId)
+      .first<{ id: string }>();
+    return captain ? true : false;
+  } catch (error) {
+    console.error("Error checking if user is captain:", error);
+    return false;
   }
 }

@@ -64,3 +64,5 @@ shell.nix
 /migrations/logs/
 
 .dev.vars
+
+/.cursor/*

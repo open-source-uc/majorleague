@@ -1,66 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 
-import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
-import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
-import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
-import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceLogo.png";
-import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
-import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
-import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
-import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
+import { teams } from "@/lib/constants/teams";
 
 export const runtime = "edge";
-
-const teams = [
-  {
-    name: "Atletico Byte",
-    logo: AtleticoByteLogo,
-    departments: "Computación - Software",
-    alt: "Logo de Atletico Byte",
-  },
-  {
-    name: "Industrial FC",
-    logo: IndustrialFCLogo,
-    departments: "Investigación Operativa",
-    alt: "Logo de Industrial FC",
-  },
-  {
-    name: "Manchester Civil",
-    logo: ManchesterCivilLogo,
-    departments: "Civil - Transporte - Construcción",
-    alt: "Logo de Manchester Civil",
-  },
-  {
-    name: "Mathchester Science",
-    logo: MathchesterScienceLogo,
-    departments: "Química - Física - Matemática Biomédica - Biología",
-    alt: "Logo de Manchester Science",
-  },
-  {
-    name: "Minerham Forest",
-    logo: MinerhamForestLogo,
-    departments: "Minería - Ambiental - Hidráulica - Geociencias",
-    alt: "Logo de Minerham Forest",
-  },
-  {
-    name: "Naranja Mecanica",
-    logo: NaranjaMecanicaLogo,
-    departments: "Mecánica - Diseño e Innovación (IDI)",
-    alt: "Logo de Naranja Mecanica",
-  },
-  {
-    name: "New Boys",
-    logo: NewBoysLogo,
-    departments: "Novatos",
-    alt: "Logo de New Boys",
-  },
-  {
-    name: "Robovolt United",
-    logo: RobovoltUnitedLogo,
-    departments: "Eléctrica - Robótica",
-    alt: "Logo de Robovolt United",
-  },
-];
 
 export default function EquiposPage() {
   return (
@@ -73,24 +16,26 @@ export default function EquiposPage() {
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {teams.map((team, index) => (
-              <div
-                key={team.name}
-                className="bg-background border-border-header hover:border-primary/50 flex flex-col items-center rounded-lg border p-6 transition-all"
-              >
-                <div className="mb-4 flex h-24 w-24 items-center justify-center">
-                  <Image
-                    src={team.logo}
-                    alt={team.alt}
-                    className="h-full w-full object-contain"
-                    loading="lazy"
-                    sizes="96px"
-                    width={96}
-                    height={96}
-                  />
+              <Link href={`/equipos/${team.slug}`} key={team.name}>
+                <div
+                  key={team.name}
+                  className="bg-background border-border-header hover:border-primary/50 flex flex-col items-center rounded-lg border p-6 transition-all"
+                >
+                  <div className="mb-4 flex h-24 w-24 items-center justify-center">
+                    <Image
+                      src={team.logo}
+                      alt={team.alt}
+                      className="h-full w-full object-contain"
+                      loading="lazy"
+                      sizes="96px"
+                      width={96}
+                      height={96}
+                    />
+                  </div>
+                  <h3 className="text-primary mb-3 text-center text-xl font-bold">{team.name}</h3>
+                  <p className="text-ml-grey text-center text-sm leading-relaxed">{team.departments}</p>
                 </div>
-                <h3 className="text-primary mb-3 text-center text-xl font-bold">{team.name}</h3>
-                <p className="text-ml-grey text-center text-sm leading-relaxed">{team.departments}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

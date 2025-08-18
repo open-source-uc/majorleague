@@ -20,6 +20,8 @@ DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS preferences;
 DROP TABLE IF EXISTS user_favorite_matches;
 DROP TABLE IF EXISTS user_favorite_teams;
+DROP TABLE IF EXISTS team_pages;
+DROP TABLE IF EXISTS team_photos;
 -- DROP TABLE IF EXISTS profiles;
 
 -- Core Tables
@@ -297,6 +299,33 @@ CREATE TABLE audit_log (
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
 
+-- Team Pages
+CREATE TABLE team_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    team_id INTEGER NOT NULL UNIQUE,
+    description TEXT,
+    instagram_handle TEXT,
+    captain_email TEXT,
+    founded_year INTEGER,
+    achievements TEXT, -- JSON array of achievements
+    motto TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
+-- Team photos table
+CREATE TABLE team_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    team_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    caption TEXT,
+    order_index INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
 -- Indexes for performance optimization
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
@@ -333,3 +362,6 @@ CREATE INDEX IF NOT EXISTS idx_ma_match ON match_attendance(match_id);
 CREATE INDEX IF NOT EXISTS idx_audit_match ON audit_log(match_id);
 CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log(actor_profile_id);
 CREATE INDEX IF NOT EXISTS idx_events_match_team ON events(match_id, team_id, minute);
+CREATE INDEX IF NOT EXISTS idx_team_pages_team ON team_pages(team_id);
+CREATE INDEX IF NOT EXISTS idx_team_photos_team ON team_photos(team_id);
+CREATE INDEX IF NOT EXISTS idx_team_photos_order ON team_photos(team_id, order_index);

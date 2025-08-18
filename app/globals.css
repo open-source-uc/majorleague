@@ -1,13 +1,6 @@
 @import "tailwindcss";
 
-/* Preload critical fonts */
-@font-face {
-  font-family: "Albert Sans";
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url("https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&display=swap");
-}
+
 
 @theme {
   --color-primary: #e2d300;

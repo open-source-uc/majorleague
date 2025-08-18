@@ -95,7 +95,7 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
 
   const getAvailableTeams = () => {
     if (isNovato) {
-     return teams;
+      return teams;
     }
     if (!selectedMajor) {
       return [];
@@ -151,7 +151,8 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
             • <strong>Asignación automática:</strong> Tu equipo se determina según tu carrera/estado
           </li>
           <li>
-            • <strong>Novatos (2 últimos años):</strong> Pueden elegir cualquier equipo (incluyendo &quot;New Boys&quot;)
+            • <strong>Novatos (2 últimos años):</strong> Pueden elegir cualquier equipo (incluyendo &quot;New
+            Boys&quot;)
           </li>
           <li>
             • <strong>Solicitud única:</strong> Solo puedes tener una solicitud activa a la vez
@@ -253,8 +254,8 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
                     Acceso de Novato
                   </p>
                   <p className="mt-1 text-xs text-blue-300">
-                    Como estudiante de generación {generationYear}, puedes elegir cualquier equipo, incluyendo
-                    &quot;New Boys&quot;.
+                    Como estudiante de generación {generationYear}, puedes elegir cualquier equipo, incluyendo &quot;New
+                    Boys&quot;.
                   </p>
                 </div>
               ) : null}
@@ -270,10 +271,6 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
                   </p>
                 </div>
               ) : null}
-
-              
-
-              
 
               {!isNovato && !selectedMajor && (
                 <p className="text-ml-grey mt-1 text-xs">

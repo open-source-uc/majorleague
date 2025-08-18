@@ -76,7 +76,8 @@ function Footer() {
                       <Image
                         src={youtube}
                         alt="YouTube"
-                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
+                        width={32}
+                        className="transition-opacity duration-100 group-hover:opacity-80"
                         priority
                       />
                     </a>
@@ -88,7 +89,8 @@ function Footer() {
                       <Image
                         src={instagram}
                         alt="Instagram"
-                        className="size-8 transition-opacity duration-100 group-hover:opacity-80"
+                        width={32}
+                        className="transition-opacity duration-100 group-hover:opacity-80"
                         priority
                       />
                     </a>

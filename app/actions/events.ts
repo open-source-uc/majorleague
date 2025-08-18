@@ -467,18 +467,18 @@ export async function deleteEvent(
       };
     }
 
-    const hasEventPlayers = await env.DB.prepare(`SELECT COUNT(*) as count FROM event_players WHERE event_id = ?`)
-      .bind(parsed.data.id)
-      .first<{ count: number }>();
+    // const hasEventPlayers = await env.DB.prepare(`SELECT COUNT(*) as count FROM event_players WHERE event_id = ?`)
+    //   .bind(parsed.data.id)
+    //   .first<{ count: number }>();
 
-    if ((hasEventPlayers?.count ?? 0) > 0) {
-      return {
-        success: 0,
-        errors: 1,
-        message: "No se puede eliminar el evento porque tiene jugadores asociados",
-        body,
-      };
-    }
+    // if ((hasEventPlayers?.count ?? 0) > 0) {
+    //   return {
+    //     success: 0,
+    //     errors: 1,
+    //     message: "No se puede eliminar el evento porque tiene jugadores asociados",
+    //     body,
+    //   };
+    // }
 
     await env.DB.prepare(`DELETE FROM events WHERE id = ?`).bind(parsed.data.id).run();
 

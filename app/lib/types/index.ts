@@ -23,6 +23,19 @@ export interface Team {
   updated_at?: string;
 }
 
+export interface TeamPage {
+  id: number;
+  team_id: number;
+  description?: string;
+  instagram_handle?: string;
+  captain_email?: string;
+  founded_year?: number;
+  achievements?: string; // JSON array
+  motto?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Competition {
   id: number;
   name: string;
@@ -335,6 +348,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "last_name", label: "Apellido", type: "text" },
       { key: "team_name", label: "Equipo", type: "text" },
       { key: "profile_username", label: "Usuario", type: "text" },
+      { key: "nickname", label: "Apodo", type: "text" },
       { key: "position", label: "Posición", type: "badge" },
       { key: "birthday", label: "Fecha de Nacimiento", type: "date" },
       { key: "jersey_number", label: "Número de Camiseta", type: "number" },

@@ -174,23 +174,6 @@ INSERT INTO profiles (id, username, email) VALUES
 ('ru_player19', 'ru_player19', 'ru_player19@uc.cl'),
 ('ru_player20', 'ru_player20', 'ru_player20@uc.cl');
 
--- 2. COMPETITIONS - Single competition
-INSERT INTO competitions (name, year, semester, start_timestamp, end_timestamp) VALUES 
-('Segundo Semestre 2025', 2025, 2, '2025-08-01 00:00:00', '2025-12-31 23:59:59');
-
--- 3. TEAMS - All teams
--- TRIGGER: create_team_competition_record will auto-create team_competitions records
--- Initially, admin is captain of all teams
-INSERT INTO teams (name, captain_id, major) VALUES 
-('Atletico Byte', 'admin', 'Computacion - Software'),
-('Industrial FC', 'admin', 'Investigación Operativa'),
-('Manchester Civil', 'admin', 'Civil - Transporte - Construccion'),
-('Mathchester Science', 'admin', 'Química - Física - Matematica Biomedica - Biologia'),
-('Minerham Forest', 'admin', 'Mineria - Ambiental - Hidraulica - Geociencias'),
-('Naranja Mecanica', 'admin', 'Mecanica - Diseño e Innovación (IDI)'),
-('New Boys', 'admin', 'Novatos'),
-('Robovolt United', 'admin', 'Electrica - Robotica');
-
 -- 4. JOIN_TEAM_REQUESTS - Natural workflow: create pending requests (180 total)
 INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, birthday, preferred_position, status, notes, preferred_jersey_number) VALUES 
 -- Atletico Byte (Team 1) - 20 players
@@ -340,27 +323,27 @@ INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last
 (7, 'nb_player18', '2025-08-01 23:25:00', 'Gabriel', 'Rodríguez', '2001-06-09', 'FWD', 'pending', 'Jugador novato de Gabriel', 18),
 (7, 'nb_player19', '2025-08-01 23:30:00', 'Emilio', 'Flores', '2002-02-06', 'GK', 'pending', 'Jugador novato de Emilio', 19),
 (7, 'nb_player20', '2025-08-01 23:35:00', 'Martín', 'Campos', '2001-08-08', 'DEF', 'pending', 'Jugador novato de Martín', 20),
--- Robovolt United (Team 9) - 20 players
-(9, 'ru_player1', '2025-08-01 26:00:00', 'Fernando', 'Fernández', '2002-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 1),
-(9, 'ru_player2', '2025-08-01 26:05:00', 'Tomás', 'Navarro', '2001-07-07', 'GK', 'pending', 'Jugador de Robovolt United', 2),
-(9, 'ru_player3', '2025-08-01 26:10:00', 'Claudia', 'Martín', '2001-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 3),
-(9, 'ru_player4', '2025-08-01 26:15:00', 'Rodrigo', 'Rojas', '2002-08-09', 'GK', 'pending', 'Jugador de Robovolt United', 4),
-(9, 'ru_player5', '2025-08-01 26:20:00', 'Nicolás', 'Fuentes', '2002-04-22', 'GK', 'pending', 'Jugador de Robovolt United', 5),
-(9, 'ru_player6', '2025-08-01 26:25:00', 'Diego', 'Martín', '2001-06-20', 'FWD', 'pending', 'Jugador de Robovolt United', 6),
-(9, 'ru_player7', '2025-08-01 26:30:00', 'Diego', 'Sánchez', '2001-05-10', 'FWD', 'pending', 'Jugador de Robovolt United', 7),
-(9, 'ru_player8', '2025-08-01 26:35:00', 'Vicente', 'Vega', '2001-09-06', 'FWD', 'pending', 'Jugador de Robovolt United', 8),
-(9, 'ru_player9', '2025-08-01 26:40:00', 'Joaquín', 'Guerrero', '2001-02-24', 'DEF', 'pending', 'Jugador de Robovolt United', 9),
-(9, 'ru_player10', '2025-08-01 26:45:00', 'Joaquín', 'Torres', '2001-11-15', 'GK', 'pending', 'Jugador de Robovolt United', 10),
-(9, 'ru_player11', '2025-08-01 26:50:00', 'Ignacio', 'López', '2002-11-07', 'GK', 'pending', 'Jugador de Robovolt United', 11),
-(9, 'ru_player12', '2025-08-01 26:55:00', 'Gabriel', 'González', '2002-05-06', 'MID', 'pending', 'Jugador de Robovolt United', 12),
-(9, 'ru_player13', '2025-08-01 27:00:00', 'Gabriel', 'Cortés', '2001-04-12', 'MID', 'pending', 'Jugador de Robovolt United', 13),
-(9, 'ru_player14', '2025-08-01 27:05:00', 'Cristóbal', 'Jiménez', '2001-08-27', 'GK', 'pending', 'Jugador de Robovolt United', 14),
-(9, 'ru_player15', '2025-08-01 27:10:00', 'Claudio', 'González', '2001-10-23', 'GK', 'pending', 'Jugador de Robovolt United', 15),
-(9, 'ru_player16', '2025-08-01 27:15:00', 'Claudia', 'Guerrero', '2002-10-13', 'FWD', 'pending', 'Jugador de Robovolt United', 16),
-(9, 'ru_player17', '2025-08-01 27:20:00', 'Vicente', 'Vargas', '2002-10-02', 'FWD', 'pending', 'Jugador de Robovolt United', 17),
-(9, 'ru_player18', '2025-08-01 27:25:00', 'Isabel', 'García', '2002-03-15', 'GK', 'pending', 'Jugador de Robovolt United', 18),
-(9, 'ru_player19', '2025-08-01 27:30:00', 'Daniel', 'Torres', '2002-05-27', 'MID', 'pending', 'Jugador de Robovolt United', 19),
-(9, 'ru_player20', '2025-08-01 27:35:00', 'Gonzalo', 'Morales', '2002-07-06', 'FWD', 'pending', 'Jugador de Robovolt United', 20);
+-- Robovolt United (Team 8) - 20 players
+(8, 'ru_player1', '2025-08-01 26:00:00', 'Fernando', 'Fernández', '2002-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 1),
+(8, 'ru_player2', '2025-08-01 26:05:00', 'Tomás', 'Navarro', '2001-07-07', 'GK', 'pending', 'Jugador de Robovolt United', 2),
+(8, 'ru_player3', '2025-08-01 26:10:00', 'Claudia', 'Martín', '2001-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 3),
+(8, 'ru_player4', '2025-08-01 26:15:00', 'Rodrigo', 'Rojas', '2002-08-09', 'GK', 'pending', 'Jugador de Robovolt United', 4),
+(8, 'ru_player5', '2025-08-01 26:20:00', 'Nicolás', 'Fuentes', '2002-04-22', 'GK', 'pending', 'Jugador de Robovolt United', 5),
+(8, 'ru_player6', '2025-08-01 26:25:00', 'Diego', 'Martín', '2001-06-20', 'FWD', 'pending', 'Jugador de Robovolt United', 6),
+(8, 'ru_player7', '2025-08-01 26:30:00', 'Diego', 'Sánchez', '2001-05-10', 'FWD', 'pending', 'Jugador de Robovolt United', 7),
+(8, 'ru_player8', '2025-08-01 26:35:00', 'Vicente', 'Vega', '2001-09-06', 'FWD', 'pending', 'Jugador de Robovolt United', 8),
+(8, 'ru_player9', '2025-08-01 26:40:00', 'Joaquín', 'Guerrero', '2001-02-24', 'DEF', 'pending', 'Jugador de Robovolt United', 9),
+(8, 'ru_player10', '2025-08-01 26:45:00', 'Joaquín', 'Torres', '2001-11-15', 'GK', 'pending', 'Jugador de Robovolt United', 10),
+(8, 'ru_player11', '2025-08-01 26:50:00', 'Ignacio', 'López', '2002-11-07', 'GK', 'pending', 'Jugador de Robovolt United', 11),
+(8, 'ru_player12', '2025-08-01 26:55:00', 'Gabriel', 'González', '2002-05-06', 'MID', 'pending', 'Jugador de Robovolt United', 12),
+(8, 'ru_player13', '2025-08-01 27:00:00', 'Gabriel', 'Cortés', '2001-04-12', 'MID', 'pending', 'Jugador de Robovolt United', 13),
+(8, 'ru_player14', '2025-08-01 27:05:00', 'Cristóbal', 'Jiménez', '2001-08-27', 'GK', 'pending', 'Jugador de Robovolt United', 14),
+(8, 'ru_player15', '2025-08-01 27:10:00', 'Claudio', 'González', '2001-10-23', 'GK', 'pending', 'Jugador de Robovolt United', 15),
+(8, 'ru_player16', '2025-08-01 27:15:00', 'Claudia', 'Guerrero', '2002-10-13', 'FWD', 'pending', 'Jugador de Robovolt United', 16),
+(8, 'ru_player17', '2025-08-01 27:20:00', 'Vicente', 'Vargas', '2002-10-02', 'FWD', 'pending', 'Jugador de Robovolt United', 17),
+(8, 'ru_player18', '2025-08-01 27:25:00', 'Isabel', 'García', '2002-03-15', 'GK', 'pending', 'Jugador de Robovolt United', 18),
+(8, 'ru_player19', '2025-08-01 27:30:00', 'Daniel', 'Torres', '2002-05-27', 'MID', 'pending', 'Jugador de Robovolt United', 19),
+(8, 'ru_player20', '2025-08-01 27:35:00', 'Gonzalo', 'Morales', '2002-07-06', 'FWD', 'pending', 'Jugador de Robovolt United', 20);
 
 -- 5. APPROVE REQUESTS - Natural workflow: approve requests
 -- TRIGGER: create_player_on_approval will auto-create players records
@@ -373,8 +356,7 @@ INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, 
 (1, 2, 1, '2025-08-15 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
 (3, 4, 1, '2025-08-15 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
 (5, 6, 1, '2025-08-15 14:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(7, 8, 1, '2025-08-16 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(9, 1, 1, '2025-08-16 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+(8, 1, 1, '2025-08-16 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
 (2, 3, 1, '2025-08-16 14:00:00', 'Cancha UC', 0, 0, 'scheduled');
 
 -- 7. BASIC PREFERENCES (sample for admin and some players)
@@ -394,4 +376,4 @@ INSERT INTO user_favorite_teams (profile_id, team_id) VALUES
 ('mf_player1', 5),  -- mf_player1 likes Minerham Forest
 ('nm_player1', 6),  -- nm_player1 likes Naranja Mecanica
 ('nb_player1', 7),  -- nb_player1 likes New Boys
-('ru_player1', 9);  -- ru_player1 likes Robovolt Unite;
+('ru_player1', 8);  -- ru_player1 likes Robovolt Unite;
