@@ -40,6 +40,11 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
                 TABLA DE POSICIONES
               </NavLink>
             </li>
+            <li>
+              <NavLink href={`/transmisiones`} type="mobile" onClick={() => setIsMenuOpen(false)}>
+                TRANSMISIONES
+              </NavLink>
+            </li>
             {/* <li>
               <NavLink href="/acerca" type="mobile" onClick={() => setIsMenuOpen(false)}>
                 ACERCA

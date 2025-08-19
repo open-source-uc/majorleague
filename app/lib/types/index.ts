@@ -69,7 +69,7 @@ export interface Match {
   location?: string;
   local_score: number;
   visitor_score: number;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
   created_at?: string;
   updated_at?: string;
 }
@@ -79,16 +79,21 @@ export interface NextMatch {
   time: string;
   local_team_name: string;
   visitor_team_name: string;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
 }
 
 // New entity types
 export interface Stream {
   id: number;
-  match_id: number;
-  type: "youtube" | "twitch" | "other";
-  platform: string;
+  stream_date: string; // YYYY-MM-DD
   url: string;
+  youtube_video_id: string;
+  is_live_stream: boolean;
+  is_featured: boolean;
+  title?: string;
+  thumbnail_url?: string;
+  published_at?: string;
+  duration_seconds?: number;
   start_time?: string;
   end_time?: string;
   notes?: string;
@@ -178,6 +183,7 @@ export interface ObjectConfig {
   fields: FieldConfig[];
   displayColumns: DisplayColumn[];
   actions: ObjectAction[];
+  dynamicHelp?: string;
 }
 
 export interface FieldConfig {
@@ -188,12 +194,13 @@ export interface FieldConfig {
   required?: boolean;
   options?: { value: string; label: string }[];
   dataSource?: string; // For dynamic select options
+  helpText?: string;
 }
 
 export interface DisplayColumn {
   key: string;
   label: string;
-  type?: "text" | "date" | "datetime" | "badge" | "custom" | "number";
+  type?: "text" | "date" | "datetime" | "badge" | "custom" | "number" | "boolean";
   render?: (value: any, item: any) => string;
 }
 
@@ -490,13 +497,14 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
   },
   streams: {
     title: "Stream",
-    description: "Gestionar transmisiones en vivo",
-    displayField: "platform",
+    description: "Gestionar transmisiones de YouTube por fecha (una por día)",
+    displayField: "title",
     displayColumns: [
-      { key: "match_description", label: "Partido", type: "text" },
-      { key: "platform", label: "Plataforma", type: "text" },
-      { key: "type", label: "Tipo", type: "badge" },
-      { key: "url", label: "URL", type: "text" },
+      { key: "stream_date", label: "Fecha", type: "date" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "youtube_video_id", label: "Video ID", type: "text" },
+      { key: "is_live_stream", label: "Es Live", type: "boolean" },
+      { key: "is_featured", label: "Destacado", type: "boolean" },
       { key: "start_time", label: "Inicio", type: "date" },
     ],
     actions: [
@@ -506,36 +514,45 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
     ],
     fields: [
       {
-        name: "match_id",
-        label: "Partido",
-        type: "select",
+        name: "stream_date",
+        label: "Fecha de Transmisión",
+        type: "date",
         required: true,
-        dataSource: "matches",
       },
       {
-        name: "type",
-        label: "Tipo",
+        name: "title",
+        label: "Título",
+        type: "text",
+        placeholder: "Título de la transmisión",
+        required: true,
+      },
+      {
+        name: "youtube_url",
+        label: "URL de YouTube",
+        type: "text",
+        placeholder: "https://youtube.com/watch?v=...",
+        helpText: "Acepta formatos watch?v=, youtu.be/, embed/, shorts/ y live/",
+        required: true,
+      },
+      {
+        name: "is_live_stream",
+        label: "Es transmisión en vivo",
         type: "select",
         required: true,
         options: [
-          { value: "youtube", label: "YouTube" },
-          { value: "twitch", label: "Twitch" },
-          { value: "other", label: "Otro" },
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
         ],
       },
       {
-        name: "platform",
-        label: "Plataforma",
-        type: "text",
-        placeholder: "YouTube",
+        name: "is_featured",
+        label: "Destacado",
+        type: "select",
         required: true,
-      },
-      {
-        name: "url",
-        label: "URL",
-        type: "text",
-        placeholder: "https://youtube.com/watch?v=...",
-        required: true,
+        options: [
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
+        ],
       },
       {
         name: "start_time",
@@ -557,6 +574,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         required: false,
       },
     ],
+    dynamicHelp: "Ingresa una URL válida de YouTube. El sistema extraerá automáticamente el ID del video y los metadatos.",
   },
   notifications: {
     title: "Notificación",

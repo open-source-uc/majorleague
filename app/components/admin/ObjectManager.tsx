@@ -115,12 +115,23 @@ export default function ObjectManager({
               rows={3}
               className="border-border-header bg-background-header placeholder-foreground/50 text-foreground invalid:text-foreground/50 focus:border-primary focus:ring-primary w-full rounded-lg border-2 p-4 focus:ring-2 focus:outline-hidden"
             />
+            {field.helpText ? <span className="text-ml-grey text-xs">{field.helpText}</span> : null}
           </div>
         );
       case "datetime":
-        return <Input key={field.name} {...commonProps} type="datetime-local" placeholder={field.placeholder || ""} />;
+        return (
+          <div key={field.name} className="flex w-full flex-col space-y-2">
+            <Input {...commonProps} type="datetime-local" placeholder={field.placeholder || ""} />
+            {field.helpText ? <span className="text-ml-grey text-xs">{field.helpText}</span> : null}
+          </div>
+        );
       default:
-        return <Input key={field.name} {...commonProps} type={field.type} placeholder={field.placeholder || ""} />;
+        return (
+          <div key={field.name} className="flex w-full flex-col space-y-2">
+            <Input {...commonProps} type={field.type} placeholder={field.placeholder || ""} />
+            {field.helpText ? <span className="text-ml-grey text-xs">{field.helpText}</span> : null}
+          </div>
+        );
     }
   };
 
@@ -152,7 +163,18 @@ export default function ObjectManager({
       case "badge":
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-            {value}
+            {String(value)}
+          </span>
+        );
+      case "boolean":
+        return (
+          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+            style={{
+              backgroundColor: value ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
+              color: value ? "rgb(16,185,129)" : "rgb(239,68,68)",
+            }}
+          >
+            {value ? "Sí" : "No"}
           </span>
         );
       case "custom":
@@ -187,6 +209,9 @@ export default function ObjectManager({
         <div>
           <h1 className="text-foreground font-heading text-2xl font-bold">{config.title}</h1>
           <p className="text-ml-grey">{config.description}</p>
+          {config.dynamicHelp ? (
+            <p className="text-ml-grey mt-1 text-sm">{config.dynamicHelp}</p>
+          ) : null}
         </div>
         <button
           onClick={() => openModal("create")}

@@ -15,7 +15,7 @@ const profileSchema = z.object({
     .string()
     .email("El correo debe ser válido")
     .optional()
-    .refine((email) => email?.endsWith(".uc.cl") || email === null, {
+    .refine((email) => email?.endsWith(".uc.cl") || email?.endsWith("uc.cl") || email === null, {
       message: "El correo debe ser de la UC",
     }),
 });

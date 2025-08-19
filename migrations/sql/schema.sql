@@ -153,18 +153,21 @@ CREATE TABLE lineups (
     UNIQUE(team_id, match_id)
 );
 
--- Streams (Live streaming info)
 CREATE TABLE streams (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    match_id INTEGER NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('youtube', 'twitch', 'other')),
-    platform TEXT NOT NULL,
+    stream_date DATE NOT NULL,
     url TEXT NOT NULL,
+    youtube_video_id TEXT NOT NULL,
+    is_live_stream BOOLEAN NOT NULL DEFAULT 0,
+    is_featured BOOLEAN NOT NULL DEFAULT 0,
+    title TEXT,
+    thumbnail_url TEXT,
+    published_at DATETIME,
+    duration_seconds INTEGER,
     start_time DATETIME,
     end_time DATETIME,
     notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Join Team Requests
@@ -338,7 +341,10 @@ CREATE INDEX IF NOT EXISTS idx_matches_teams ON matches(local_team_id, visitor_t
 CREATE INDEX IF NOT EXISTS idx_events_match ON events(match_id);
 CREATE INDEX IF NOT EXISTS idx_events_team ON events(team_id);
 CREATE INDEX IF NOT EXISTS idx_lineups_match ON lineups(match_id);
-CREATE INDEX IF NOT EXISTS idx_streams_match ON streams(match_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_streams_date ON streams(stream_date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_streams_video_id ON streams(youtube_video_id);
+CREATE INDEX IF NOT EXISTS idx_streams_featured ON streams(is_featured);
+CREATE INDEX IF NOT EXISTS idx_streams_published ON streams(published_at);
 CREATE INDEX IF NOT EXISTS idx_requests_team ON join_team_requests(team_id);
 CREATE INDEX IF NOT EXISTS idx_requests_profile ON join_team_requests(profile_id);
 CREATE INDEX IF NOT EXISTS idx_requests_status ON join_team_requests(status);

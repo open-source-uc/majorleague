@@ -39,6 +39,11 @@ async function Navbar() {
               TABLA DE POSICIONES
             </NavLink>
           </li>
+          <li>
+            <NavLink href={`/transmisiones`} type="desktop">
+              TRANSMISIONES
+            </NavLink>
+          </li>
           {/* <li>
             <NavLink href="/acerca" type="desktop">
               ACERCA
