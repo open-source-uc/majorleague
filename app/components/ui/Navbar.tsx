@@ -6,6 +6,7 @@ import { memo } from "react";
 import logoMajor from "@/../public/assets/logo-horizontal.svg";
 import { getAuthStatus } from "@/lib/services/auth";
 
+import Button from "./Button";
 import NavbarClient from "./NavbarClient";
 import NavLink from "./NavLink";
 
@@ -18,34 +19,41 @@ async function Navbar() {
   const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
-    <header className="bg-background border-border-header z-1 flex h-32 items-center justify-between border-b p-10">
-      <Link className="border-foreground lg:border-r" href="/">
+    <header className="bg-background border-border border-b z-10 flex h-28 items-center justify-between p-10">
+      <Link 
+        className="border-foreground tablet:border-r focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-sm" 
+        href="/"
+        aria-label="Ir a la página principal"
+      >
         <Image
           src={logoMajor}
-          alt="Major League Logo"
+          alt="Major League - Logotipo principal"
           priority
           className="h-10 w-30 object-contain min-[470px]:h-14 min-[470px]:w-44"
         />
       </Link>
-      <nav className="hidden flex-1 px-6 lg:block">
-        <ul className="flex gap-6">
-          <li>
-            <NavLink href="/equipos" type="desktop">
+      <nav 
+        className="hidden flex-1 px-6 tablet:block"
+        aria-label="Navegación principal"
+      >
+        <ul className="flex gap-6" role="menubar">
+          <li role="none">
+            <NavLink href="/equipos" type="desktop" role="menuitem">
               EQUIPOS
             </NavLink>
           </li>
-          <li>
-            <NavLink href={`/posiciones/${year}/${semester}`} type="desktop">
+          <li role="none">
+            <NavLink href="/torneo" type="desktop" role="menuitem">
+              TORNEO
+            </NavLink>
+          </li>
+          <li role="none">
+            <NavLink href={`/posiciones/${year}/${semester}`} type="desktop" role="menuitem">
               TABLA DE POSICIONES
             </NavLink>
           </li>
-          <li>
-            <NavLink href={`/transmisiones`} type="desktop">
-              TRANSMISIONES
-            </NavLink>
-          </li>
-          {/* <li>
-            <NavLink href="/acerca" type="desktop">
+          {/* <li role="none">
+            <NavLink href="/acerca" type="desktop" role="menuitem">
               ACERCA
             </NavLink>
           </li> */}
@@ -54,19 +62,25 @@ async function Navbar() {
 
       {/* Desktop Auth Button */}
       {isAuthenticated ? (
-        <Link
+        <Button
           href="/perfil"
-          className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
+          variant="outline"
+          size="sm"
+          className="hidden tablet:inline-flex"
+          aria-label="Ir a tu perfil de usuario"
         >
           TU PERFIL
-        </Link>
+        </Button>
       ) : (
-        <Link
+        <Button
           href="/login"
-          className="text-primary-darken text-md border-primary-darken hover:text-primary hover:border-primary hidden rounded-md border-2 border-solid px-4 py-2 font-bold tracking-normal transition-colors lg:inline"
+          variant="outline"
+          size="sm"
+          className="hidden tablet:inline-flex"
+          aria-label="Iniciar sesión en tu cuenta"
         >
-          INGRESAR
-        </Link>
+          JUEGA POR LA LIGA
+        </Button>
       )}
 
       {/* Mobile Menu - Client Component */}

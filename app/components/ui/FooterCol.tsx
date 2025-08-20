@@ -8,10 +8,10 @@ interface FooterColProps {
 
 export default function FooterCol({ title, children, className = "" }: FooterColProps) {
   return (
-    <div
-      className={`[&>p:first-child]:text-md [&>p:first-child]:text-primary-darken flex flex-col items-start gap-3 [&>p:first-child]:pb-3 [&>p:first-child]:font-bold ${className}`}
-    >
-      <p>{title}</p>
+    <div className={`flex flex-col items-start gap-3 ${className}`}>
+      <h3 className="text-md text-primary-darken pb-3 font-bold">
+        {title}
+      </h3>
       {children}
     </div>
   );

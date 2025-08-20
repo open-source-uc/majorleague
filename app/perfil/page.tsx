@@ -45,247 +45,170 @@ export default async function Perfil() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 md:px-6 md:py-10">
-      <div className="mb-6 text-center md:mb-10">
-        <h1 className="text-foreground mb-3 text-2xl font-bold md:mb-4 md:text-4xl">
-          Mi <span className="text-primary-darken">Perfil</span>
-        </h1>
-        <p className="text-ml-grey px-2 text-base md:text-lg">
-          Gestiona tu información personal y configuraciones de Major League UC
-        </p>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-card to-background">
+      {/* Subtle background pattern - consistent with login */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-1/3 left-1/3 h-64 w-64 rounded-full bg-primary blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/3 h-64 w-64 rounded-full bg-accent blur-3xl"></div>
       </div>
-
-      <div className="bg-background-header border-border-header mb-6 rounded-lg border p-4 md:mb-8 md:p-8">
-        <div className="mb-4 md:mb-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3 md:gap-4">
-              <div className="bg-primary text-background flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold md:h-16 md:w-16 md:text-2xl">
-                {userProfile.username.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-primary text-xl font-bold break-words md:text-2xl">{userProfile.username}</h2>
-                <p className="text-ml-grey text-sm">
-                  Miembro desde {userProfile.created_at ? formatDate(userProfile.created_at) : "N/A"}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap justify-start gap-2 md:justify-end">
-              {isAdmin ? (
-                <span className="bg-primary-darken text-background rounded-full px-3 py-1 text-xs font-medium md:text-sm">
-                  Administrador
-                </span>
-              ) : null}
-              {playerInfo ? (
-                <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-xs font-medium md:text-sm">
-                  Jugador Registrado
-                </span>
-              ) : null}
-              {userIsCaptain ? (
-                <span className="bg-primary-darken text-background rounded-full px-3 py-1 text-xs font-medium md:text-sm">
-                  Capitán
-                </span>
-              ) : null}
-            </div>
+      
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          
+          {/* Clean Header - Matching Login Style */}
+          <div className="mb-8 text-center">
+            <div className="mb-6 text-6xl">⚽</div>
+            <h1 className="mb-4 text-3xl font-bold text-foreground tablet:text-4xl">
+              Hola, {userProfile.username}
+            </h1>
+            <p className="mb-2 text-lg text-muted-foreground">
+              Bienvenido a Major League UC
+            </p>
           </div>
-        </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <label className="text-foreground mb-2 block text-sm font-medium">Nombre de Usuario</label>
-            <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-              {userProfile.username}
-            </div>
-          </div>
-          <div>
-            <label className="text-foreground mb-2 block text-sm font-medium">Correo Electrónico</label>
-            <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-              {userProfile.email || <span className="text-ml-grey italic">No especificado</span>}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {playerInfo ? (
-        <div className="bg-background-header border-border-header mb-6 rounded-lg border p-4 md:mb-8 md:p-8">
-          <h3 className="text-foreground mb-4 flex items-center gap-2 text-lg font-semibold md:mb-6 md:text-xl">
-            <span className="text-primary text-xl md:text-2xl">⚽</span>
-            Información de Jugador
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-            <div className="space-y-3 md:space-y-4">
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Nombre Completo</label>
-                <div className="bg-background border-border-header text-foreground flex min-h-[48px] items-center rounded-md border p-3">
-                  <div className="break-words">
-                    {playerInfo.first_name} {playerInfo.last_name}
-                    {playerInfo.nickname ? (
-                      <span className="text-ml-grey ml-2 block md:inline">&quot;{playerInfo.nickname}&quot;</span>
-                    ) : null}
+          {/* Profile Summary Card - Simplified */}
+          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
+            <div className="mb-6 text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="relative">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-2xl font-bold text-primary-foreground shadow-lg">
+                    {userProfile.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 rounded-full bg-card p-1">
+                    <div className="h-3 w-3 rounded-full bg-green-500"></div>
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Posición</label>
-                <div className="bg-background border-border-header text-foreground flex min-h-[48px] items-center rounded-md border p-3">
-                  {getPositionName(playerInfo.position)}
-                </div>
+              
+              <div className="mb-4 flex flex-wrap justify-center gap-2">
+                {isAdmin && (
+                  <span className="rounded-full bg-gradient-to-r from-purple-500 to-purple-600 px-3 py-1 text-xs font-semibold text-white">
+                    ⚡ Administrador
+                  </span>
+                )}
+                {playerInfo && (
+                  <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                    ⚽ Jugador Activo
+                  </span>
+                )}
               </div>
             </div>
-            <div className="space-y-3 md:space-y-4">
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Equipo</label>
-                <div className="bg-background border-border-header text-foreground flex min-h-[48px] items-center rounded-md border p-3">
-                  {playerInfo.team_name || <span className="text-ml-grey italic">Sin equipo asignado</span>}
+
+            {/* Player Status Summary */}
+            {playerInfo ? (
+              <div className="mb-6 space-y-3">
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-foreground">
+                    {playerInfo.first_name} {playerInfo.last_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {getPositionName(playerInfo.position)} • {calculateAge(playerInfo.birthday)} años
+                  </p>
+                </div>
+                
+                <div className="rounded-lg border border-border/30 bg-muted/20 p-3 text-center">
+                  <span className="text-lg">🏆</span>
+                  {playerInfo.team_name ? (
+                    <p className="mt-1 font-medium text-foreground">{playerInfo.team_name}</p>
+                  ) : (
+                    <p className="mt-1 italic text-muted-foreground">Sin equipo asignado</p>
+                  )}
                 </div>
               </div>
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Edad</label>
-                <div className="bg-background border-border-header text-foreground flex min-h-[48px] items-center rounded-md border p-3">
-                  {calculateAge(playerInfo.birthday)} años
-                </div>
+            ) : (
+              <div className="mb-6 text-center">
+                <div className="mb-4 text-4xl">🚀</div>
+                <p className="text-muted-foreground">
+                  ¡Tu aventura futbolística está por comenzar!
+                </p>
               </div>
+            )}
+
+            {/* Primary Action */}
+            {!playerInfo && pendingRequests.length === 0 && (
+              <Link
+                href="/participa"
+                className="mb-4 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-4 font-bold text-primary-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                <span className="text-xl">⚽</span>
+                <span>Solicitar Participación</span>
+              </Link>
+            )}
+
+            {/* Quick Actions */}
+            <div className="space-y-3">
+              <Link
+                href={`/posiciones/${year}/${semester}`}
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">📊</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Ver Posiciones</span>
+              </Link>
+              
+              <Link
+                href="/equipos"
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">👥</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Ver Equipos</span>
+              </Link>
+              
+              <Link
+                href="/"
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">🏠</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Volver al Inicio</span>
+              </Link>
             </div>
           </div>
-        </div>
-      ) : null}
 
-      {!playerInfo && pendingRequests.length === 0 && (
-        <div className="bg-primary/10 border-primary/30 mb-6 rounded-lg border p-4 text-center md:mb-8 md:p-8">
-          <div className="text-primary mb-3 text-3xl md:mb-4 md:text-4xl">🚀</div>
-          <h3 className="text-foreground mb-2 text-lg font-semibold md:text-xl">¡Únete a la Liga!</h3>
-          <p className="text-ml-grey mb-4 px-2 text-sm md:mb-6 md:text-base">
-            ¿Listo para formar parte de Major League UC? Solicita unirte a un equipo y comienza tu aventura
-            futbolística.
-          </p>
-          <Link
-            href="/participa"
-            className="bg-primary-darken hover:bg-primary text-background inline-flex min-h-[44px] touch-manipulation items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors md:px-6 md:py-3 md:text-base"
-          >
-            <span>⚽</span>
-            Solicitar Participación
-          </Link>
-        </div>
-      )}
-
-      <div className="mb-6 md:mb-8">
-        <h3 className="text-foreground mb-3 text-lg font-semibold md:mb-4 md:text-xl">Acciones Rápidas</h3>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
-          <Link
-            href="/"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg border p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-          >
-            <div className="text-primary flex-shrink-0 text-xl md:text-2xl">🏠</div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium md:text-base">Inicio</div>
-              <div className="text-ml-grey text-xs md:text-sm">Volver al inicio</div>
+          {/* Additional Options */}
+          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
+            <h3 className="mb-4 text-center text-lg font-semibold text-foreground">Más Opciones</h3>
+            
+            <div className="space-y-3">
+              <Link
+                href="/participa/gracias"
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">📋</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Estado de Solicitud</span>
+              </Link>
+              
+              {isAdmin && (
+                <Link
+                  href="/dashboard"
+                  className="group flex w-full items-center gap-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3 transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/10"
+                >
+                  <span className="text-lg">⚙️</span>
+                  <span className="font-medium text-foreground group-hover:text-purple-600">Panel de Administración</span>
+                </Link>
+              )}
             </div>
-          </Link>
-
-          <Link
-            href={`/posiciones/${year}/${semester}`}
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg border p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-          >
-            <div className="text-primary flex-shrink-0 text-xl md:text-2xl">🏆</div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium md:text-base">Posiciones</div>
-              <div className="text-ml-grey text-xs md:text-sm">Ver tabla de posiciones</div>
-            </div>
-          </Link>
-
-          <Link
-            href="/equipos"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg border p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-          >
-            <div className="text-primary flex-shrink-0 text-xl md:text-2xl">⚽</div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium md:text-base">Equipos</div>
-              <div className="text-ml-grey text-xs md:text-sm">Conocer los equipos</div>
-            </div>
-          </Link>
-
-          <Link
-            href="/participa/gracias"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg border p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-          >
-            <div className="text-primary flex-shrink-0 text-xl md:text-2xl">📋</div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium md:text-base">Estado de Solicitud</div>
-              <div className="text-ml-grey text-xs md:text-sm">Ver estado de participación</div>
-            </div>
-          </Link>
-
-          {userIsPlanillero ? (
-            <Link
-              href="/planillero"
-              className="bg-primary-darken hover:bg-primary text-background flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-            >
-              <div className="flex-shrink-0 text-xl md:text-2xl">📝</div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium md:text-base">Planillero</div>
-                <div className="text-xs opacity-90 md:text-sm">Gestionar partidos asignados</div>
-              </div>
-            </Link>
-          ) : null}
-
-          {isAdmin ? (
-            <Link
-              href="/dashboard"
-              className="bg-primary-darken hover:bg-primary text-background flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-            >
-              <div className="flex-shrink-0 text-xl md:text-2xl">⚙️</div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium md:text-base">Panel Admin</div>
-                <div className="text-xs opacity-90 md:text-sm">Gestionar sistema</div>
-              </div>
-            </Link>
-          ) : null}
-
-          {userIsCaptain ? (
-            <Link
-              href="/capitan/dashboard"
-              className="bg-primary-darken hover:bg-primary text-background flex min-h-[64px] touch-manipulation items-center gap-3 rounded-lg p-4 transition-colors active:scale-[0.98] md:min-h-[68px]"
-            >
-              <div className="flex-shrink-0 text-xl md:text-2xl">🏆</div>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium md:text-base">Panel Capitán</div>
-                <div className="text-xs opacity-90 md:text-sm">Gestionar equipo</div>
-              </div>
-            </Link>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="bg-background-header border-border-header rounded-lg border p-4 md:p-8">
-        <h3 className="text-foreground mb-3 text-lg font-semibold md:mb-4 md:text-xl">Gestión de Cuenta</h3>
-        <div className="space-y-3 md:space-y-4">
-          <div className="border-border-header rounded-lg border p-3 md:p-4">
-            <h4 className="text-foreground mb-2 text-sm font-medium md:text-base">Autenticación OSUC</h4>
-            <p className="text-ml-grey mb-3 text-xs leading-relaxed md:mb-4 md:text-sm">
-              Tu cuenta está vinculada con el sistema de autenticación de OSUC. Para actualizar tu información personal
-              o cerrar sesión, utiliza el portal oficial.
-            </p>
-            <Link
-              href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
-              className="text-primary-darken hover:text-primary border-primary-darken hover:border-primary inline-flex min-h-[44px] touch-manipulation items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors active:scale-[0.98] md:px-4 md:py-2.5 md:text-sm"
-            >
-              <span>🔗</span>
-              Ir a Portal OSUC
-            </Link>
           </div>
 
-          <div className="border-border-header rounded-lg border p-3 md:p-4">
-            <h4 className="text-foreground mb-2 text-sm font-medium md:text-base">Soporte</h4>
-            <p className="text-ml-grey mb-3 text-xs leading-relaxed md:mb-4 md:text-sm">
-              ¿Tienes problemas con tu cuenta o necesitas ayuda? Contacta al equipo de soporte.
+          {/* Support Links - Matching Login Style */}
+          <div className="text-center">
+            <p className="mb-4 text-sm text-muted-foreground">
+              Tu cuenta está vinculada con OSUC
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
+              <Link
+                href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
+                className="group inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-all duration-200 hover:bg-primary/10"
+              >
+                <span>🔗</span>
+                <span>Portal OSUC</span>
+              </Link>
+              
               <Link
                 href="https://www.instagram.com/opensource_euc/"
                 target="_blank"
-                className="text-ml-grey hover:text-foreground inline-flex min-h-[44px] touch-manipulation items-center gap-2 rounded-md border border-transparent px-3 py-2 text-xs transition-colors active:scale-[0.98] md:px-4 md:py-2.5 md:text-sm"
+                className="group inline-flex items-center justify-center gap-2 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-sm font-medium text-accent transition-all duration-200 hover:bg-accent/10"
               >
                 <span>📧</span>
-                Contactanos
+                <span>Soporte</span>
               </Link>
             </div>
           </div>
