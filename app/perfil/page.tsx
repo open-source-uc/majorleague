@@ -48,24 +48,22 @@ export default async function Perfil() {
       </div>
       
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-md">
           
-          {/* Simplified Header */}
+          {/* Clean Header - Matching Login Style */}
           <div className="mb-8 text-center">
-            <div className="mb-4 text-6xl">⚽</div>
+            <div className="mb-6 text-6xl">⚽</div>
             <h1 className="mb-4 text-3xl font-bold text-foreground tablet:text-4xl">
               Hola, {userProfile.username}
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="mb-2 text-lg text-muted-foreground">
               Bienvenido a Major League UC
             </p>
           </div>
 
-          {/* Main Profile Card */}
-          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm tablet:p-8">
-            
-            {/* User Info Section */}
-            <div className="mb-8 text-center">
+          {/* Profile Summary Card - Simplified */}
+          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
+            <div className="mb-6 text-center">
               <div className="mb-4 flex justify-center">
                 <div className="relative">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-2xl font-bold text-primary-foreground shadow-lg">
@@ -85,90 +83,71 @@ export default async function Perfil() {
                 )}
                 {playerInfo && (
                   <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
-                    ⚽ Jugador
+                    ⚽ Jugador Activo
                   </span>
                 )}
               </div>
-              
-              <p className="text-sm text-muted-foreground">
-                Miembro desde {userProfile.created_at ? formatDate(userProfile.created_at) : "N/A"}
-              </p>
             </div>
 
-            {/* Player Info - Simplified */}
-            {playerInfo && (
-              <div className="mb-8 space-y-4">
-                <div className="rounded-lg border border-border/30 bg-muted/20 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🏷️</span>
-                      <span className="font-medium text-foreground">
-                        {playerInfo.first_name} {playerInfo.last_name}
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{calculateAge(playerInfo.birthday)} años</span>
-                  </div>
+            {/* Player Status Summary */}
+            {playerInfo ? (
+              <div className="mb-6 space-y-3">
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-foreground">
+                    {playerInfo.first_name} {playerInfo.last_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {getPositionName(playerInfo.position)} • {calculateAge(playerInfo.birthday)} años
+                  </p>
                 </div>
                 
-                <div className="grid gap-4 tablet:grid-cols-2">
-                  <div className="rounded-lg border border-border/30 bg-muted/20 p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🎯</span>
-                      <span className="font-medium text-foreground">{getPositionName(playerInfo.position)}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="rounded-lg border border-border/30 bg-muted/20 p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🏆</span>
-                      {playerInfo.team_name ? (
-                        <span className="font-medium text-foreground">{playerInfo.team_name}</span>
-                      ) : (
-                        <span className="italic text-muted-foreground">Sin equipo</span>
-                      )}
-                    </div>
-                  </div>
+                <div className="rounded-lg border border-border/30 bg-muted/20 p-3 text-center">
+                  <span className="text-lg">🏆</span>
+                  {playerInfo.team_name ? (
+                    <p className="mt-1 font-medium text-foreground">{playerInfo.team_name}</p>
+                  ) : (
+                    <p className="mt-1 italic text-muted-foreground">Sin equipo asignado</p>
+                  )}
                 </div>
+              </div>
+            ) : (
+              <div className="mb-6 text-center">
+                <div className="mb-4 text-4xl">🚀</div>
+                <p className="text-muted-foreground">
+                  ¡Tu aventura futbolística está por comenzar!
+                </p>
               </div>
             )}
 
-            {/* Primary Actions */}
-            <div className="space-y-4">
-              {!playerInfo && pendingRequests.length === 0 && (
-                <Link
-                  href="/participa"
-                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-4 font-bold text-primary-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                >
-                  <span className="text-xl">⚽</span>
-                  <span>Solicitar Participación</span>
-                </Link>
-              )}
-              
-              <div className="grid gap-3 tablet:grid-cols-2">
-                <Link
-                  href={`/posiciones/${year}/${semester}`}
-                  className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/50 p-4 transition-all duration-200 hover:scale-105 hover:border-primary/30 hover:shadow-md"
-                >
-                  <span className="text-xl">�</span>
-                  <span className="font-semibold text-foreground group-hover:text-primary">Ver Posiciones</span>
-                </Link>
-                
-                <Link
-                  href="/equipos"
-                  className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/50 p-4 transition-all duration-200 hover:scale-105 hover:border-primary/30 hover:shadow-md"
-                >
-                  <span className="text-xl">⚽</span>
-                  <span className="font-semibold text-foreground group-hover:text-primary">Ver Equipos</span>
-                </Link>
-              </div>
-            </div>
-          </div>
+            {/* Primary Action */}
+            {!playerInfo && pendingRequests.length === 0 && (
+              <Link
+                href="/participa"
+                className="mb-4 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-primary to-primary/90 px-6 py-4 font-bold text-primary-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                <span className="text-xl">⚽</span>
+                <span>Solicitar Participación</span>
+              </Link>
+            )}
 
-          {/* Secondary Actions */}
-          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
-            <h3 className="mb-4 text-center text-lg font-semibold text-foreground">Más Opciones</h3>
-            
+            {/* Quick Actions */}
             <div className="space-y-3">
+              <Link
+                href={`/posiciones/${year}/${semester}`}
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">📊</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Ver Posiciones</span>
+              </Link>
+              
+              <Link
+                href="/equipos"
+                className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <span className="text-lg">👥</span>
+                <span className="font-medium text-foreground group-hover:text-primary">Ver Equipos</span>
+              </Link>
+              
               <Link
                 href="/"
                 className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
@@ -176,7 +155,14 @@ export default async function Perfil() {
                 <span className="text-lg">🏠</span>
                 <span className="font-medium text-foreground group-hover:text-primary">Volver al Inicio</span>
               </Link>
-              
+            </div>
+          </div>
+
+          {/* Additional Options */}
+          <div className="mb-8 rounded-xl border border-border/50 bg-card/95 p-6 shadow-sm backdrop-blur-sm">
+            <h3 className="mb-4 text-center text-lg font-semibold text-foreground">Más Opciones</h3>
+            
+            <div className="space-y-3">
               <Link
                 href="/participa/gracias"
                 className="group flex w-full items-center gap-3 rounded-lg border border-border/30 bg-background/30 p-3 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
@@ -197,12 +183,12 @@ export default async function Perfil() {
             </div>
           </div>
 
-          {/* Account Info */}
+          {/* Support Links - Matching Login Style */}
           <div className="text-center">
             <p className="mb-4 text-sm text-muted-foreground">
               Tu cuenta está vinculada con OSUC
             </p>
-            <div className="flex flex-col gap-2 tablet:flex-row tablet:justify-center">
+            <div className="flex flex-col gap-2">
               <Link
                 href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
                 className="group inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-medium text-primary transition-all duration-200 hover:bg-primary/10"
