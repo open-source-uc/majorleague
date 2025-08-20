@@ -19,13 +19,9 @@ export default function PositionsTable({
   return (
     <div className="w-full px-4 py-8">
       {/* Simple Header */}
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold text-foreground">
-          Tabla de Posiciones
-        </h1>
-        <p className="text-sm text-accent-foreground">
-          ¡Revisa cómo le va a tu equipo favorito en esta temporada!
-        </p>
+      <div className="mb-12 text-center">
+        <h2 className="mb-4 text-3xl font-bold text-foreground">Tabla de Posiciones</h2>
+        <div className="mx-auto h-1 w-56 bg-gradient-to-r from-primary to-primary/50 rounded-full" />
       </div>
 
       {/* Mobile-First Cards */}
@@ -97,9 +93,9 @@ export default function PositionsTable({
         })}
       </div>
 
-      {/* Desktop Table (Responsive Enhancement) */}
+      {/* Desktop Table */}
       <div className="mt-12 hidden tablet:block">
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-lg border border-border bg-card">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-lg border border-border bg-card">
           {/* Table Header */}
           <div className="border-b border-border bg-muted/30 px-6 py-3">
             <div className="grid grid-cols-9 gap-4 text-sm font-medium text-muted-foreground">
