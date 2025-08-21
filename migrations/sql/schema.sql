@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS user_favorite_matches;
 DROP TABLE IF EXISTS user_favorite_teams;
 DROP TABLE IF EXISTS team_pages;
 DROP TABLE IF EXISTS team_photos;
--- DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS profiles;
 
 -- Core Tables
 
@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     id TEXT PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     email TEXT UNIQUE,
+    is_admin BOOLEAN NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

@@ -199,12 +199,16 @@ export async function getTeamUpcomingMatches(teamId: number, limit: number = 5):
     .all<any>();
 
   return (matches.results || []).map((match) => {
-    const matchDate = new Date(match.timestamp);
+    const rawTs = String(match.timestamp);
+    const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
+    const datePart = parts[0];
+    const timePartFull = parts[1] || "";
+    const timePart = timePartFull.slice(0, 5);
     return {
       id: match.id,
       opponent: match.opponent || "TBD",
-      date: matchDate.toISOString().split("T")[0],
-      time: matchDate.toTimeString().slice(0, 5),
+      date: datePart,
+      time: timePart,
       venue: match.location || "Por definir",
       type: match.type as "home" | "away",
       status: match.status as "scheduled" | "live" | "finished" | "cancelled",
@@ -292,12 +296,16 @@ export async function getAllTeamMatches(teamId: number): Promise<{ upcoming: Tea
     .all<any>();
 
   const allMatches = (matches.results || []).map((match) => {
-    const matchDate = new Date(match.timestamp);
+    const rawTs = String(match.timestamp);
+    const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
+    const datePart = parts[0];
+    const timePartFull = parts[1] || "";
+    const timePart = timePartFull.slice(0, 5);
     return {
       id: match.id,
       opponent: match.opponent || "TBD",
-      date: matchDate.toISOString().split("T")[0],
-      time: matchDate.toTimeString().slice(0, 5),
+      date: datePart,
+      time: timePart,
       venue: match.location || "Por definir",
       type: match.type as "home" | "away",
       status: match.status as "scheduled" | "live" | "finished" | "cancelled",

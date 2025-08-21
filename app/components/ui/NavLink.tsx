@@ -13,7 +13,7 @@ interface NavLinkProps {
 
 export default function NavLink({ href, children, className = "", type, onClick, role }: NavLinkProps) {
   const baseClasses = `text-md z-50 font-bold tracking-normal transition-all duration-200 ease-in-out hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-sm ${className}`;
-  
+
   // For desktop links (Server Component), no onClick handler
   if (type === "desktop") {
     return (
@@ -21,7 +21,7 @@ export default function NavLink({ href, children, className = "", type, onClick,
         href={href}
         className={baseClasses}
         role={role}
-        aria-label={typeof children === 'string' ? `Navegar a ${children.toLowerCase()}` : undefined}
+        aria-label={typeof children === "string" ? `Navegar a ${children.toLowerCase()}` : undefined}
       >
         {children}
       </Link>
@@ -39,7 +39,7 @@ export default function NavLink({ href, children, className = "", type, onClick,
           onClick();
         }
       }}
-      aria-label={typeof children === 'string' ? `Navegar a ${children.toLowerCase()}` : undefined}
+      aria-label={typeof children === "string" ? `Navegar a ${children.toLowerCase()}` : undefined}
     >
       {children}
     </Link>

@@ -78,8 +78,8 @@ if [ ! -f "migrations/sql/seed.sql" ]; then
     exit 1
 fi
 
-print_info "Aplicando datos de default..."
-if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/default.sql; then
+print_info "Aplicando datos de default (default-2025-02.sql)..."
+if npx wrangler d1 execute majorleague $DB_FLAG --file=migrations/sql/default-2025-02.sql; then
     print_success "Default aplicado correctamente"
 else
     print_error "Error al aplicar default"

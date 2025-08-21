@@ -8,6 +8,7 @@ export interface Profile {
   id: string;
   username: string;
   email?: string;
+  is_admin?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -189,7 +190,7 @@ export interface ObjectConfig {
 export interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "email" | "number" | "date" | "datetime" | "select" | "textarea";
+  type: "text" | "email" | "number" | "date" | "datetime" | "select" | "textarea" | "boolean";
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -221,6 +222,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "id", label: "ID", type: "text" },
       { key: "username", label: "Username", type: "text" },
       { key: "email", label: "Email", type: "text" },
+      { key: "is_admin", label: "Admin", type: "boolean" },
       { key: "created_at", label: "Creado", type: "date" },
     ],
     actions: [
@@ -249,6 +251,16 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         type: "email",
         placeholder: "Ej: juan.perez@uc.cl",
         required: false,
+      },
+      {
+        name: "is_admin",
+        label: "Admin",
+        type: "select",
+        required: false,
+        options: [
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
+        ],
       },
     ],
   },
@@ -574,7 +586,8 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         required: false,
       },
     ],
-    dynamicHelp: "Ingresa una URL válida de YouTube. El sistema extraerá automáticamente el ID del video y los metadatos.",
+    dynamicHelp:
+      "Ingresa una URL válida de YouTube. El sistema extraerá automáticamente el ID del video y los metadatos.",
   },
   notifications: {
     title: "Notificación",

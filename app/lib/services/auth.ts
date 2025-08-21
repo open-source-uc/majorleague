@@ -51,6 +51,7 @@ export async function getAuthStatus(): Promise<{
   userData: { message: string; permissions: string[]; id: string } | null;
   userProfile: any | null;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
 }> {
   try {
     const context = getRequestContext();
@@ -79,17 +80,33 @@ export async function getAuthStatus(): Promise<{
     //   updated_at: new Date(),
     // };
 
-    const isAdmin = userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true";
+    const isSuperAdmin = !!(
+      userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true"
+    );
+
+    let isAdmin = isSuperAdmin;
+    if (!isAdmin && userProfile) {
+      try {
+        const profileRow = await context.env.DB.prepare(`SELECT is_admin FROM profiles WHERE id = ?`)
+          .bind(userProfile.id)
+          .first<{ is_admin: number }>();
+        isAdmin = !!(profileRow && profileRow.is_admin === 1);
+      } catch (e) {
+        isAdmin = isSuperAdmin;
+      }
+    }
+
     const isAuthenticated = !!(userData || context.env.ADMIN_USER === "true");
 
     return {
       isAuthenticated,
       isAdmin,
+      isSuperAdmin,
       userData,
       userProfile,
     };
   } catch (error) {
     console.error("Error fetching auth status:", error);
-    return { isAuthenticated: false, userData: null, userProfile: null, isAdmin: false };
+    return { isAuthenticated: false, userData: null, userProfile: null, isAdmin: false, isSuperAdmin: false };
   }
 }

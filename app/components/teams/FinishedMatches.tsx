@@ -6,7 +6,8 @@ interface FinishedMatchesProps {
 
 export default function FinishedMatches({ matches }: FinishedMatchesProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const [y, m, d] = dateString.split("-").map((v) => parseInt(v, 10));
+    const date = new Date(y, (m || 1) - 1, d || 1);
     return date.toLocaleDateString("es-ES", {
       weekday: "short",
       day: "numeric",

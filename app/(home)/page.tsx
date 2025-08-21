@@ -15,7 +15,7 @@ export default function HomePage() {
       <Sponsors />
 
       {/* About Section */}
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 desktop:flex-row">
+      <section className="desktop:flex-row flex flex-col items-center justify-center gap-10 px-5 py-10">
         <div className="w-full max-w-[399px]">
           <Image
             src={image1}
@@ -40,7 +40,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 desktop:flex-row-reverse">
+      <section className="desktop:flex-row-reverse flex flex-col items-center justify-center gap-10 px-5 py-10">
         <div className="w-full max-w-[399px]">
           <Image
             src={image2}

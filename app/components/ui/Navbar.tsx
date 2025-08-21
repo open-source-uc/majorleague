@@ -19,9 +19,9 @@ async function Navbar() {
   const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
-    <header className="bg-background border-border border-b z-10 flex h-28 items-center justify-between p-10">
-      <Link 
-        className="border-foreground tablet:border-r focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-sm" 
+    <header className="bg-background border-border z-40 flex h-28 items-center justify-between border-b p-10">
+      <Link
+        className="border-foreground tablet:border-r focus:ring-ring focus:rounded-sm focus:ring-2 focus:outline-none"
         href="/"
         aria-label="Ir a la página principal"
       >
@@ -32,10 +32,7 @@ async function Navbar() {
           className="h-10 w-30 object-contain min-[470px]:h-14 min-[470px]:w-44"
         />
       </Link>
-      <nav 
-        className="hidden flex-1 px-6 tablet:block"
-        aria-label="Navegación principal"
-      >
+      <nav className="tablet:block hidden flex-1 px-6" aria-label="Navegación principal">
         <ul className="flex gap-6" role="menubar">
           <li role="none">
             <NavLink href="/equipos" type="desktop" role="menuitem">
@@ -45,6 +42,11 @@ async function Navbar() {
           <li role="none">
             <NavLink href="/torneo" type="desktop" role="menuitem">
               TORNEO
+            </NavLink>
+          </li>
+          <li role="none">
+            <NavLink href="/transmisiones" type="desktop" role="menuitem">
+              TRANSMISIONES
             </NavLink>
           </li>
           <li role="none">
@@ -66,7 +68,7 @@ async function Navbar() {
           href="/perfil"
           variant="outline"
           size="sm"
-          className="hidden tablet:inline-flex"
+          className="tablet:inline-flex hidden"
           aria-label="Ir a tu perfil de usuario"
         >
           TU PERFIL
@@ -76,7 +78,7 @@ async function Navbar() {
           href="/login"
           variant="outline"
           size="sm"
-          className="hidden tablet:inline-flex"
+          className="tablet:inline-flex hidden"
           aria-label="Iniciar sesión en tu cuenta"
         >
           JUEGA POR LA LIGA

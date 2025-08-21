@@ -173,14 +173,21 @@ export function PlanilleroManager({ matches, allMatches, profiles }: PlanilleroM
                       {match.local_team_name} vs {match.visitor_team_name}
                     </h3>
                     <p className="text-foreground md:text-md text-xs">
-                      {new Date(match.timestamp).toLocaleDateString("es-CL", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {(() => {
+                        const raw = String(match.timestamp);
+                        const [datePart, timePartFull = ""] = raw.includes("T") ? raw.split("T") : raw.split(" ");
+                        const [y, m, d] = datePart.split("-").map((v) => parseInt(v, 10));
+                        const [hh = "00", mm = "00"] = timePartFull.split(":");
+                        const dt = new Date(y, (m || 1) - 1, d || 1, parseInt(hh, 10) || 0, parseInt(mm, 10) || 0);
+                        return dt.toLocaleDateString("es-CL", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                      })()}
                     </p>
                     {match.location ? <p className="text-foreground text-xs md:text-sm">📍 {match.location}</p> : null}
                   </div>
@@ -460,14 +467,21 @@ export function PlanilleroManager({ matches, allMatches, profiles }: PlanilleroM
                       {match.local_team_name} vs {match.visitor_team_name}
                     </h3>
                     <p className="text-foreground md:text-md text-xs">
-                      {new Date(match.timestamp).toLocaleDateString("es-CL", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {(() => {
+                        const raw = String(match.timestamp);
+                        const [datePart, timePartFull = ""] = raw.includes("T") ? raw.split("T") : raw.split(" ");
+                        const [y, m, d] = datePart.split("-").map((v) => parseInt(v, 10));
+                        const [hh = "00", mm = "00"] = timePartFull.split(":");
+                        const dt = new Date(y, (m || 1) - 1, d || 1, parseInt(hh, 10) || 0, parseInt(mm, 10) || 0);
+                        return dt.toLocaleDateString("es-CL", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                      })()}
                     </p>
                     {match.location ? <p className="text-foreground text-xs md:text-sm">📍 {match.location}</p> : null}
                   </div>

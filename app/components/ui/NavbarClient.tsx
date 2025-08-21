@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -26,7 +25,7 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
   // Handle escape key and outside clicks
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isMenuOpen) {
+      if (event.key === "Escape" && isMenuOpen) {
         setIsMenuOpen(false);
         buttonRef.current?.focus();
       }
@@ -43,12 +42,12 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isMenuOpen]);
 
@@ -62,22 +61,22 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
 
   return (
     <>
-      <button 
+      <button
         ref={buttonRef}
-        onClick={toggleMenu} 
-        className="hover:bg-accent p-2 rounded-sm transition-colors duration-200 ease-in-out tablet:hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+        onClick={toggleMenu}
+        className="hover:bg-accent tablet:hidden focus:ring-ring focus:ring-offset-background rounded-sm p-2 transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none"
         aria-expanded={isMenuOpen}
         aria-controls="mobile-menu"
         aria-label={isMenuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
       >
         <Image src={menuIcon} alt="" className="size-8" />
       </button>
-      
+
       <div
         ref={menuRef}
         id="mobile-menu"
-        className={`bg-background border-border border-b absolute top-32 left-0 w-full transform flex-col items-center gap-6 py-6 text-lg duration-300 ease-in-out lg:hidden shadow-lg ${
-          isMenuOpen ? "flex opacity-100 translate-y-0" : "hidden opacity-0 -translate-y-2"
+        className={`bg-background border-border fixed top-28 left-0 z-[9999] w-full transform flex-col items-center gap-6 border-b py-6 text-lg shadow-lg duration-300 ease-in-out lg:hidden ${
+          isMenuOpen ? "flex translate-y-0 opacity-100" : "hidden -translate-y-2 opacity-0"
         }`}
         role="menu"
         aria-labelledby="mobile-menu-button"
@@ -85,32 +84,22 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
         <nav aria-label="Navegación móvil">
           <ul className="flex flex-col items-center gap-6" role="menubar">
             <li role="none">
-              <NavLink 
-                href="/equipos" 
-                type="mobile" 
-                onClick={closeMenu}
-                role="menuitem"
-              >
+              <NavLink href="/equipos" type="mobile" onClick={closeMenu} role="menuitem">
                 EQUIPOS
               </NavLink>
             </li>
             <li role="none">
-              <NavLink 
-                href="/torneo" 
-                type="mobile" 
-                onClick={closeMenu}
-                role="menuitem"
-              >
+              <NavLink href="/torneo" type="mobile" onClick={closeMenu} role="menuitem">
                 TORNEO
               </NavLink>
             </li>
             <li role="none">
-              <NavLink 
-                href={`/posiciones/${year}/${semester}`} 
-                type="mobile" 
-                onClick={closeMenu}
-                role="menuitem"
-              >
+              <NavLink href={`/transmisiones`} type="mobile" onClick={closeMenu} role="menuitem">
+                TRANSMISIONES
+              </NavLink>
+            </li>
+            <li role="none">
+              <NavLink href={`/posiciones/${year}/${semester}`} type="mobile" onClick={closeMenu} role="menuitem">
                 TABLA DE POSICIONES
               </NavLink>
             </li>

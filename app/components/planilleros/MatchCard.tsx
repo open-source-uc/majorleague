@@ -30,17 +30,21 @@ export function MatchCard({ match, prefetch, userProfile }: MatchCardProps) {
             {match.local_team_name} vs {match.visitor_team_name}
           </h3>
           <p className="text-foreground opacity-80">
-            {new Date(match.timestamp).toLocaleDateString("es-CL", {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            -
-            {new Date(match.timestamp).toLocaleTimeString("es-CL", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {(() => {
+              const raw = String(match.timestamp);
+              const [datePart, timePartFull = ""] = raw.includes("T") ? raw.split("T") : raw.split(" ");
+              const [y, m, d] = datePart.split("-").map((v) => parseInt(v, 10));
+              const [hh = "00", mm = "00"] = timePartFull.split(":");
+              const dt = new Date(y, (m || 1) - 1, d || 1, parseInt(hh, 10) || 0, parseInt(mm, 10) || 0);
+              const dateText = dt.toLocaleDateString("es-CL", {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              });
+              const timeText = dt.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+              return `${dateText} - ${timeText}`;
+            })()}
           </p>
           {match.location ? <p className="text-foreground text-sm opacity-70">📍 {match.location}</p> : null}
         </div>

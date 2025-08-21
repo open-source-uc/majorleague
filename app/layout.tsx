@@ -23,8 +23,6 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning={true} className={albert_sans.className}>
       <head>
-        <link rel="preload" href="/assets/hero.png" as="image" />
-        <link rel="preload" href="/assets/logo-horizontal.svg" as="image" type="image/svg+xml" />
       </head>
       <body className="relative grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Navbar />

@@ -24,21 +24,17 @@ export default function FormProfile({ userId }: { userId: string }) {
     <div className="space-y-6">
       {/* Success State - Show immediately when profile is created */}
       {state.success ? (
-        <div className="text-center space-y-6">
-          <div className="text-6xl mb-4">🎉</div>
+        <div className="space-y-6 text-center">
+          <div className="mb-4 text-6xl">🎉</div>
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-foreground">
-              ¡Tu perfil está listo!
-            </h3>
-            <p className="text-muted-foreground">
-              Ya tienes acceso completo a Major League UC
-            </p>
+            <h3 className="text-foreground text-2xl font-bold">¡Tu perfil está listo!</h3>
+            <p className="text-muted-foreground">Ya tienes acceso completo a Major League UC</p>
           </div>
-          
+
           <div className="pt-4">
             <a
               href="/perfil"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold transition-colors"
             >
               <span>👤</span>
               Ver Mi Perfil
@@ -63,7 +59,7 @@ export default function FormProfile({ userId }: { userId: string }) {
                   required
                   aria-describedby="username-help"
                 />
-                <p id="username-help" className="text-sm text-muted-foreground">
+                <p id="username-help" className="text-muted-foreground text-sm">
                   Será visible públicamente. No podrás cambiarlo después.
                 </p>
               </div>
@@ -78,7 +74,7 @@ export default function FormProfile({ userId }: { userId: string }) {
                   defaultValue=""
                   aria-describedby="email-help"
                 />
-                <p id="email-help" className="text-sm text-muted-foreground">
+                <p id="email-help" className="text-muted-foreground text-sm">
                   Para recibir notificaciones sobre partidos y eventos importantes.
                 </p>
               </div>
@@ -100,14 +96,12 @@ export default function FormProfile({ userId }: { userId: string }) {
                 className="w-full"
                 processing={
                   <span className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    <div className="border-primary-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                     Creando perfil...
                   </span>
                 }
               >
-                <span className="flex items-center text-background justify-center">
-                  Crear Mi Perfil
-                </span>
+                <span className="text-background flex items-center justify-center">Crear Mi Perfil</span>
               </ButtonSubmit>
             </div>
           </Form>

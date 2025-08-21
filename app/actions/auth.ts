@@ -25,7 +25,7 @@ export async function getProfile(userData: UserData): Promise<Profile | null> {
     const context = getRequestContext();
     const userId = String(userData.id);
     const profile = await context.env.DB.prepare(
-      "SELECT id, username, email, created_at, updated_at FROM profiles WHERE id = ?",
+      "SELECT id, username, email, is_admin, created_at, updated_at FROM profiles WHERE id = ?",
     )
       .bind(userId)
       .first<Profile>();
@@ -42,7 +42,7 @@ export async function getPlayerByProfileId(profileId: string): Promise<(Player &
     const context = getRequestContext();
     const player = await context.env.DB.prepare(
       `
-      SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.created_at, p.updated_at,
+      SELECT p.id, p.team_id, p.profile_id, p.first_name, p.last_name, p.nickname, p.birthday, p.position, p.jersey_number, p.created_at, p.updated_at,
              t.name as team_name
       FROM players p
       LEFT JOIN teams t ON p.team_id = t.id

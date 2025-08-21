@@ -48,9 +48,7 @@ export async function getStreams(): Promise<Stream[]> {
     FROM streams s
     ORDER BY COALESCE(s.start_time, s.stream_date, s.created_at) DESC
   `,
-  ).all<
-    (Stream & { youtube_url?: string })
-  >();
+  ).all<Stream & { youtube_url?: string }>();
 
   return streams.results || [];
 }
@@ -517,7 +515,7 @@ export async function featuredStream(): Promise<boolean> {
     SELECT s.is_featured
     FROM streams s
     WHERE s.is_featured = 1
-    `
+    `,
   ).first<Stream>();
   return stream?.is_featured || false;
 }

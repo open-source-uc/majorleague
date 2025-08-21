@@ -5,7 +5,6 @@ import { getStreams, createStream, updateStream, deleteStream } from "@/actions/
 import ObjectManager from "@/components/admin/ObjectManager";
 import { getAuthStatus } from "@/lib/services/auth";
 
-
 export const runtime = "edge";
 
 export default async function StreamsPage() {

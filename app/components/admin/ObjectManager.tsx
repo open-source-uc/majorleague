@@ -54,15 +54,6 @@ export default function ObjectManager({
     body: {},
   });
 
-  if (!config) {
-    return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4">
-        <h2 className="font-semibold text-red-800">Error</h2>
-        <p className="text-red-700">Tipo de objeto no válido: {objType}</p>
-      </div>
-    );
-  }
-
   const openModal = (type: ModalType, item?: any) => {
     setModalType(type);
     setSelectedItem(item || null);
@@ -102,6 +93,15 @@ export default function ObjectManager({
     };
   }, [modalType]);
 
+  if (!config) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4">
+        <h2 className="font-semibold text-red-800">Error</h2>
+        <p className="text-red-700">Tipo de objeto no válido: {objType}</p>
+      </div>
+    );
+  }
+
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       closeModal();
@@ -135,12 +135,30 @@ export default function ObjectManager({
             ? dynamicOptions[field.dataSource]
             : field.options || [];
         return <Select key={field.name} {...commonProps} options={options} />;
+      case "boolean":
+        return (
+          <div key={field.name} className="space-y-2">
+            <label htmlFor={field.name} className="text-foreground text-sm font-medium">
+              {field.label}
+              {field.required ? <span className="text-primary ml-1">*</span> : null}
+            </label>
+            <select
+              id={field.name}
+              name={field.name}
+              defaultValue={String(!!processedDefaultValue)}
+              className="border-border/50 bg-background/95 text-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border p-3 focus:ring-2 focus:outline-none"
+            >
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        );
       case "textarea":
         return (
           <div key={field.name} className="space-y-2">
-            <label htmlFor={field.name} className="text-sm font-medium text-foreground">
+            <label htmlFor={field.name} className="text-foreground text-sm font-medium">
               {field.label}
-              {field.required ? <span className="ml-1 text-primary">*</span> : null}
+              {field.required ? <span className="text-primary ml-1">*</span> : null}
             </label>
             <textarea
               id={field.name}
@@ -149,8 +167,15 @@ export default function ObjectManager({
               required={field.required}
               defaultValue={processedDefaultValue}
               rows={3}
-              className="w-full rounded-lg border border-border/50 bg-background/95 p-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="border-border/50 bg-background/95 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border p-3 focus:ring-2 focus:outline-none"
             />
+          </div>
+        );
+      case "datetime":
+        return (
+          <div key={field.name} className="flex w-full flex-col space-y-2">
+            <Input {...commonProps} type="datetime-local" placeholder={field.placeholder || ""} />
+            {field.helpText ? <span className="text-ml-grey text-xs">{field.helpText}</span> : null}
           </div>
         );
       default:
@@ -190,8 +215,19 @@ export default function ObjectManager({
         });
       case "badge":
         return (
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+          <span className="bg-primary/10 text-primary inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium">
             {value}
+          </span>
+        );
+      case "boolean":
+        return (
+          <span
+            className={
+              `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ` +
+              (value ? "bg-green-500/10 text-green-600" : "bg-destructive/10 text-destructive")
+            }
+          >
+            {value ? "Sí" : "No"}
           </span>
         );
       case "custom":
@@ -220,71 +256,74 @@ export default function ObjectManager({
           : null;
 
   return (
-    <div className="space-y-8 p-4 tablet:p-6 desktop:p-8">
+    <div className="tablet:p-6 desktop:p-8 space-y-8 p-4">
       {/* Clean Header Section */}
-      <div className="flex flex-col gap-4 tablet:flex-row tablet:items-center tablet:justify-between">
+      <div className="tablet:flex-row tablet:items-center tablet:justify-between flex flex-col gap-4">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-foreground tablet:text-3xl">{config.title}</h1>
+          <h1 className="text-foreground tablet:text-3xl text-2xl font-bold">{config.title}</h1>
           <p className="text-muted-foreground">{config.description}</p>
+          {config.dynamicHelp ? <p className="text-muted-foreground text-sm">{config.dynamicHelp}</p> : null}
         </div>
         <Button
           onClick={() => openModal("create")}
           size="lg"
-          className="group relative w-full overflow-hidden bg-gradient-to-r from-primary to-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg tablet:w-auto"
+          className="group from-primary to-primary/90 tablet:w-auto relative w-full overflow-hidden bg-gradient-to-r transition-all duration-300 hover:scale-105 hover:shadow-lg"
           aria-label={`Crear nuevo ${config.title.toLowerCase()}`}
         >
           <div className="flex items-center gap-2">
             <span className="text-xl transition-transform duration-300 group-hover:rotate-90">+</span>
             <span className="font-semibold">{config.actions.find((a) => a.type === "create")?.label}</span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+          <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-[100%]" />
         </Button>
       </div>
 
       {/* Clean Data Grid */}
-      <div className="overflow-hidden rounded-xl border border-border/50 bg-card/95 shadow-sm backdrop-blur-sm">
+      <div className="border-border/50 bg-card/95 overflow-hidden rounded-xl border shadow-sm backdrop-blur-sm">
         {data.length === 0 ? (
           <div className="p-12 text-center">
             <div className="mb-4 text-4xl">📊</div>
-            <h3 className="mb-2 text-lg font-semibold text-foreground">No hay {config.title.toLowerCase()} registrados</h3>
-            <p className="mb-6 text-muted-foreground">Comienza creando tu primer registro</p>
+            <h3 className="text-foreground mb-2 text-lg font-semibold">
+              No hay {config.title.toLowerCase()} registrados
+            </h3>
+            <p className="text-muted-foreground mb-6">Comienza creando tu primer registro</p>
             <Button
               onClick={() => openModal("create")}
               variant="outline"
               size="lg"
-              className="group relative overflow-hidden transition-all duration-300 hover:scale-105 hover:border-primary hover:shadow-lg"
+              className="group hover:border-primary relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg"
               aria-label={`Crear primer ${config.title.toLowerCase()}`}
             >
               <div className="flex items-center gap-2">
                 <span className="text-xl transition-transform duration-300 group-hover:rotate-180">✨</span>
                 <span className="font-semibold">Crear el primer {config.title.toLowerCase()}</span>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <div className="via-primary/10 absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent to-transparent transition-transform duration-700 group-hover:translate-x-[100%]" />
             </Button>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border/30">
+            <table className="divide-border/30 min-w-full divide-y">
               <thead className="bg-muted/30">
                 <tr>
                   {config.displayColumns.map((column) => (
                     <th
                       key={column.key}
-                      className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                      className="text-muted-foreground px-6 py-4 text-left text-xs font-semibold tracking-wider uppercase"
                     >
                       {column.label}
                     </th>
                   ))}
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="text-muted-foreground px-6 py-4 text-right text-xs font-semibold tracking-wider uppercase">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/20 bg-card/50">
+              <tbody className="divide-border/20 bg-card/50 divide-y">
                 {data.map((item, index) => (
                   <tr key={item.id || index} className="group hover:bg-muted/20 transition-colors">
                     {config.displayColumns.map((column) => (
-                      <td key={column.key} className="px-6 py-4 text-sm text-foreground whitespace-nowrap">
+                      <td key={column.key} className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
                         {renderCellValue(column, item)}
                       </td>
                     ))}
@@ -295,7 +334,7 @@ export default function ObjectManager({
                           variant="ghost"
                           size="sm"
                           className="group relative overflow-hidden transition-all duration-200 hover:scale-105 hover:shadow-md"
-                          aria-label={`Editar ${config.title.toLowerCase()}: ${item[config.displayField] || 'elemento'}`}
+                          aria-label={`Editar ${config.title.toLowerCase()}: ${item[config.displayField] || "elemento"}`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg transition-transform group-hover:scale-110">✏️</span>
@@ -306,8 +345,8 @@ export default function ObjectManager({
                           onClick={() => openModal("delete", item)}
                           variant="ghost"
                           size="sm"
-                          className="group relative overflow-hidden text-muted-foreground transition-all duration-200 hover:scale-105 hover:bg-destructive/10 hover:text-destructive hover:shadow-md"
-                          aria-label={`Eliminar ${config.title.toLowerCase()}: ${item[config.displayField] || 'elemento'}`}
+                          className="group text-muted-foreground hover:bg-destructive/10 hover:text-destructive relative overflow-hidden transition-all duration-200 hover:scale-105 hover:shadow-md"
+                          aria-label={`Eliminar ${config.title.toLowerCase()}: ${item[config.displayField] || "elemento"}`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-lg transition-transform group-hover:scale-110">🗑️</span>
@@ -325,29 +364,29 @@ export default function ObjectManager({
       </div>
 
       {/* Enhanced Modal */}
-      {modalType && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in-0 duration-300"
+      {modalType ? (
+        <div
+          className="animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center p-4 duration-300"
           onClick={handleBackdropClick}
         >
           {/* Enhanced Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          
+
           {/* Modal Container */}
           <div
-            className="relative w-full max-w-2xl animate-in zoom-in-95 duration-300"
+            className="animate-in zoom-in-95 relative w-full max-w-2xl duration-300"
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Subtle glow effect */}
-            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-primary/20 to-accent/20 opacity-60 blur-xl" />
-            
+            <div className="from-primary/20 to-accent/20 absolute -inset-4 rounded-2xl bg-gradient-to-r opacity-60 blur-xl" />
+
             {/* Modal Content */}
-            <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-card/98 shadow-2xl backdrop-blur-md">
+            <div className="border-border/30 bg-card/98 relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-md">
               {/* Header with gradient */}
-              <div className="relative border-b border-border/20 bg-gradient-to-r from-muted/50 to-muted/30 px-8 py-6">
+              <div className="border-border/20 from-muted/50 to-muted/30 relative border-b bg-gradient-to-r px-8 py-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">
@@ -355,21 +394,23 @@ export default function ObjectManager({
                       {modalType === "edit" && "✏️"}
                       {modalType === "delete" && "🗑️"}
                     </div>
-                    <h3 id="modal-title" className="text-xl font-bold text-foreground">
+                    <h3 id="modal-title" className="text-foreground text-xl font-bold">
                       {modalType === "create" && `Crear ${config.title}`}
                       {modalType === "edit" && `Editar ${config.title}`}
                       {modalType === "delete" && `Eliminar ${config.title}`}
                     </h3>
                   </div>
-                  
+
                   <Button
                     onClick={closeModal}
                     variant="ghost"
                     size="sm"
-                    className="group h-10 w-10 rounded-full p-0 transition-all duration-200 hover:bg-muted/60 hover:scale-110 hover:rotate-90"
+                    className="group hover:bg-muted/60 h-10 w-10 rounded-full p-0 transition-all duration-200 hover:scale-110 hover:rotate-90"
                     aria-label="Cerrar modal"
                   >
-                    <span className="text-xl font-light text-muted-foreground transition-colors group-hover:text-foreground">×</span>
+                    <span className="text-muted-foreground group-hover:text-foreground text-xl font-light transition-colors">
+                      ×
+                    </span>
                   </Button>
                 </div>
               </div>
@@ -379,37 +420,35 @@ export default function ObjectManager({
                 {modalType === "delete" ? (
                   <div className="space-y-6">
                     {/* Warning Section */}
-                    <div className="rounded-xl border border-muted bg-card p-6 text-center">
+                    <div className="border-muted bg-card rounded-xl border p-6 text-center">
                       <div className="mb-4 text-5xl">⚠️</div>
-                      <h4 className="mb-3 text-lg font-semibold text-foreground">
-                        Confirmar eliminación
-                      </h4>
+                      <h4 className="text-foreground mb-3 text-lg font-semibold">Confirmar eliminación</h4>
                       <p className="text-accent">
-                        ¿Estás seguro de que quieres eliminar este {config.title.toLowerCase()}? 
+                        ¿Estás seguro de que quieres eliminar este {config.title.toLowerCase()}?
                         <br />
                         <span className="font-semibold">Esta acción no se puede deshacer.</span>
                       </p>
                     </div>
 
                     {/* Item Preview */}
-                    {selectedItem && (
-                      <div className="rounded-xl border border-border/50 bg-muted/30 p-6">
+                    {selectedItem ? (
+                      <div className="border-border/50 bg-muted/30 rounded-xl border p-6">
                         <div className="text-center">
-                          <p className="text-sm font-medium text-muted-foreground mb-1">Se eliminará:</p>
-                          <p className="text-lg font-bold text-foreground">
+                          <p className="text-muted-foreground mb-1 text-sm font-medium">Se eliminará:</p>
+                          <p className="text-foreground text-lg font-bold">
                             {selectedItem[config.displayField] || "Item"}
                           </p>
                         </div>
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Form */}
-                    {currentAction && (
+                    {currentAction ? (
                       <Form action={currentAction} className="space-y-6">
                         <input type="hidden" name="id" value={selectedItem?.id} />
 
                         {/* Status Message */}
-                        {currentState?.message && (
+                        {currentState?.message ? (
                           <div
                             className={`rounded-xl border p-4 ${
                               currentState.success
@@ -422,16 +461,16 @@ export default function ObjectManager({
                               <span className="font-medium">{currentState.message}</span>
                             </div>
                           </div>
-                        )}
+                        ) : null}
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col-reverse gap-4 tablet:flex-row tablet:justify-end">
+                        <div className="tablet:flex-row tablet:justify-end flex flex-col-reverse gap-4">
                           <Button
                             type="button"
                             onClick={closeModal}
                             variant="outline"
                             size="lg"
-                            className="group relative w-full overflow-hidden transition-all duration-200 hover:scale-105 tablet:w-auto"
+                            className="group tablet:w-auto relative w-full overflow-hidden transition-all duration-200 hover:scale-105"
                             aria-label="Cancelar eliminación"
                           >
                             <div className="flex items-center gap-2">
@@ -442,22 +481,22 @@ export default function ObjectManager({
                           <ButtonSubmit
                             processing={
                               <span className="flex items-center justify-center gap-2">
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-destructive-foreground border-t-transparent" />
+                                <div className="border-destructive-foreground h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" />
                                 <span className="font-semibold">Eliminando...</span>
                               </span>
                             }
-                            className="group relative w-full overflow-hidden bg-destructive text-destructive-foreground transition-all duration-200 hover:scale-105 hover:bg-destructive/90 hover:shadow-lg tablet:w-auto h-12 px-8 text-lg"
+                            className="group bg-destructive text-destructive-foreground hover:bg-destructive/90 tablet:w-auto relative h-12 w-full overflow-hidden px-8 text-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
                             aria-label="Confirmar eliminación"
                           >
                             <div className="flex items-center gap-2">
                               <span className="text-lg transition-transform group-hover:scale-110">🗑️</span>
                               <span className="font-bold">Eliminar</span>
                             </div>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                            <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-[100%]" />
                           </ButtonSubmit>
                         </div>
                       </Form>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
                   currentAction && (
@@ -474,7 +513,7 @@ export default function ObjectManager({
                       </div>
 
                       {/* Status Message */}
-                      {currentState?.message && (
+                      {currentState?.message ? (
                         <div
                           className={`rounded-xl border p-4 ${
                             currentState.success
@@ -487,27 +526,27 @@ export default function ObjectManager({
                             <span className="font-medium">{currentState.message}</span>
                           </div>
                         </div>
-                      )}
+                      ) : null}
 
                       {/* Action Buttons */}
-                      <div className="flex flex-col-reverse gap-3 tablet:flex-row tablet:justify-end pt-4 border-t border-border/20">
+                      <div className="tablet:flex-row tablet:justify-end border-border/20 flex flex-col-reverse gap-3 border-t pt-4">
                         <Button
                           type="button"
                           onClick={closeModal}
                           variant="outline"
                           size="lg"
-                          className="w-full tablet:w-auto"
+                          className="tablet:w-auto w-full"
                         >
                           Cancelar
                         </Button>
                         <ButtonSubmit
                           processing={
                             <span className="flex items-center justify-center gap-2">
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                              <div className="border-primary-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                               {modalType === "create" ? "Creando..." : "Guardando..."}
                             </span>
                           }
-                          className="w-full tablet:w-auto h-12 px-6 text-lg"
+                          className="tablet:w-auto h-12 w-full px-6 text-lg"
                         >
                           <span className="mr-2">{modalType === "create" ? "✨" : "💾"}</span>
                           {modalType === "create" ? "Crear" : "Guardar"}
@@ -520,7 +559,7 @@ export default function ObjectManager({
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { useActionState, useEffect, useState } from "react";
 
 import { ActionParticipation } from "@/actions/participation";
@@ -95,7 +96,7 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
   const isNovato = selectedGeneration && generationYear >= currentYear - 1;
 
   const getAvailableTeams = () => {
-    if (isNovato) {
+    if (isNovato || selectedMajor === "Otra") {
       return teams;
     }
     if (!selectedMajor) {
@@ -134,12 +135,12 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
     <Form action={action} className="space-y-6">
       {/* Personal Information Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">�</span>
-          <h3 className="text-lg font-semibold text-foreground">Información Personal</h3>
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-2xl">👤</span>
+          <h3 className="text-foreground text-lg font-semibold">Información Personal</h3>
         </div>
-        
-        <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2">
+
+        <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
           <Input
             label="Nombre"
             name="firstName"
@@ -178,14 +179,14 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
 
       {/* Academic Information Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <span className="text-2xl">🎓</span>
-          <h3 className="text-lg font-semibold text-foreground">Información Académica</h3>
+          <h3 className="text-foreground text-lg font-semibold">Información Académica</h3>
         </div>
-        
-        <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2">
+
+        <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
           <Select
-            label="Carrera/Estado Académico"
+            label="Por que Major quieres jugar"
             name="major"
             options={majorOptions}
             defaultValue={selectedMajor}
@@ -206,18 +207,26 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
 
       {/* Football Information Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <span className="text-2xl">⚽</span>
-          <h3 className="text-lg font-semibold text-foreground">Información Futbolística</h3>
+          <h3 className="text-foreground text-lg font-semibold">Información Futbolística</h3>
         </div>
-        
-        <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2">
+
+        <div className="tablet:grid-cols-2 grid grid-cols-1 gap-4">
           <Select
             label="Posición Preferida"
             name="position"
             options={positionOptions}
             defaultValue={state.body.position}
             required
+          />
+
+          <Input
+            label="Número de Camiseta (Opcional)"
+            name="jerseyNumber"
+            type="number"
+            placeholder="10"
+            defaultValue={state.body.jerseyNumber || ""}
           />
 
           <div className="tablet:col-span-2">
@@ -231,50 +240,37 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
             />
 
             {/* Team Assignment Information */}
-            {isNovato && (
-              <div className="mt-3 rounded-lg border border-primary/30 bg-primary/10 p-3">
-                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+            {isNovato ? (
+              <div className="border-primary/30 bg-primary/10 mt-3 rounded-lg border p-3">
+                <p className="text-foreground flex items-center gap-2 text-sm font-medium">
                   <span>🆕</span>
-                  Equipo: New Boys
+                  Acceso de Novato
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Como estudiante reciente, formarás parte del equipo New Boys
-                </p>
-              </div>
-            )}
-
-            {!isNovato && selectedMajor === "Egresado" && (
-              <div className="mt-3 rounded-lg border border-accent/30 bg-accent/10 p-3">
-                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <span>�</span>
-                  Equipo: Old Boys
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Como egresado, formarás parte del equipo Old Boys
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Como estudiante reciente, puedes elegir cualquier equipo, incluyendo &quot;New Boys&quot;.
                 </p>
               </div>
-            )}
+            ) : null}
 
-            {!isNovato && selectedMajor && selectedMajor !== "Otra" && selectedMajor !== "Egresado" && (
-              <div className="mt-3 rounded-lg border border-success/30 bg-success/10 p-3">
-                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <span>�</span>
+            {!isNovato && selectedMajor && selectedMajor !== "Otra" ? (
+              <div className="border-success/30 bg-success/10 mt-3 rounded-lg border p-3">
+                <p className="text-foreground flex items-center gap-2 text-sm font-medium">
+                  <span>🎓</span>
                   Asignado por carrera
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Tu carrera determina automáticamente tu equipo
-                </p>
+                <p className="text-muted-foreground mt-1 text-xs">Tu carrera determina automáticamente tu equipo</p>
               </div>
-            )}
+            ) : null}
 
             {!isNovato && selectedMajor === "Otra" && (
-              <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
-                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <div className="border-warning/30 bg-warning/10 mt-3 rounded-lg border p-3">
+                <p className="text-foreground flex items-center gap-2 text-sm font-medium">
                   <span>🔄</span>
                   Selección libre
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Puedes elegir entre los equipos disponibles
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Puedes elegir entre todos los equipos disponibles. En los comentarios, indica en qué carrera/major
+                  estás para validar tu asignación.
                 </p>
               </div>
             )}
@@ -284,13 +280,13 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
 
       {/* Additional Information */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <span className="text-2xl">💭</span>
-          <h3 className="text-lg font-semibold text-foreground">Información Adicional</h3>
+          <h3 className="text-foreground text-lg font-semibold">Información Adicional</h3>
         </div>
-        
+
         <div>
-          <label htmlFor="notes" className="mb-2 block text-sm font-medium text-foreground">
+          <label htmlFor="notes" className="text-foreground mb-2 block text-sm font-medium">
             Comentarios (Opcional)
           </label>
           <textarea
@@ -299,13 +295,13 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
             rows={3}
             placeholder="Cuéntanos sobre tu experiencia futbolística o cualquier información relevante..."
             defaultValue={state.body.notes}
-            className="w-full rounded-lg border border-border/50 bg-background/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="border-border/50 bg-background/50 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Status Messages */}
-      {state.message && (
+      {state.message ? (
         <div
           className={`rounded-lg border p-4 ${
             state.success
@@ -318,20 +314,20 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
             <span className="font-medium">{state.message}</span>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Success State */}
       {state.success ? (
         <div className="space-y-4 text-center">
-          <div className="rounded-lg border border-primary/30 bg-primary/10 p-6">
+          <div className="border-primary/30 bg-primary/10 rounded-lg border p-6">
             <div className="mb-2 text-4xl">🎉</div>
-            <h3 className="mb-2 text-xl font-semibold text-foreground">¡Solicitud Enviada!</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <h3 className="text-foreground mb-2 text-xl font-semibold">¡Solicitud Enviada!</h3>
+            <p className="text-muted-foreground mb-4 text-sm">
               Tu solicitud ha sido recibida. Te contactaremos pronto con más información.
             </p>
             <Link
               href="/participa/gracias"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
             >
               <span>👍</span>
               Ver Estado de Solicitud
@@ -343,7 +339,7 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
           <ButtonSubmit
             processing={
               <span className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                <div className="border-primary-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                 Enviando solicitud...
               </span>
             }

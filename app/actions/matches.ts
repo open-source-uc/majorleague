@@ -50,13 +50,16 @@ export async function getNextMatches(): Promise<NextMatch[]> {
   ).all<Match & { local_team_name: string; visitor_team_name: string }>();
 
   const nextMatches = matches.results.map((match) => {
-    const timestamp = new Date(match.timestamp);
+    const rawTs = String(match.timestamp);
+    const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
+    const [y, m, d] = (parts[0] || "").split("-");
+    const [hh = "00", mm = "00"] = (parts[1] || "").split(":");
     return {
       local_team_name: match.local_team_name,
       visitor_team_name: match.visitor_team_name,
       status: match.status,
-      date: `${timestamp.getDate().toString().padStart(2, "0")}/${(timestamp.getMonth() + 1).toString().padStart(2, "0")}`,
-      time: `${timestamp.getHours().toString().padStart(2, "0")}:${timestamp.getMinutes().toString().padStart(2, "0")}`,
+      date: `${(d || "01").padStart(2, "0")}/${(m || "01").padStart(2, "0")}`,
+      time: `${hh.padStart(2, "0")}:${mm.padStart(2, "0")}`,
     };
   });
 

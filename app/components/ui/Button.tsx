@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { forwardRef, ReactNode } from "react";
 
 import { cn } from "@/lib/utils/cn";
@@ -57,7 +58,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
       buttonVariants[variant],
       // Size styles
       buttonSizes[size],
-      className
+      className,
     );
 
     if (props.href) {
@@ -89,7 +90,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

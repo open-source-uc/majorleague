@@ -352,12 +352,12 @@ SET status = 'approved'
 WHERE id BETWEEN 1 AND 180;
 
 -- 6. MATCHES - Sample matches between teams (future dates)
-INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, location, local_score, visitor_score, status) VALUES 
-(1, 2, 1, '2025-08-15 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(3, 4, 1, '2025-08-15 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(5, 6, 1, '2025-08-15 14:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(8, 1, 1, '2025-08-16 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
-(2, 3, 1, '2025-08-16 14:00:00', 'Cancha UC', 0, 0, 'scheduled');
+-- INSERT INTO matches (local_team_id, visitor_team_id, competition_id, timestamp, location, local_score, visitor_score, status) VALUES 
+-- (1, 2, 1, '2025-08-15 19:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+-- (3, 4, 1, '2025-08-15 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+-- (5, 6, 1, '2025-08-15 14:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+-- (8, 1, 1, '2025-08-16 16:00:00', 'Cancha UC', 0, 0, 'scheduled'),
+-- (2, 3, 1, '2025-08-16 14:00:00', 'Cancha UC', 0, 0, 'scheduled');
 
 -- 7. BASIC PREFERENCES (sample for admin and some players)
 INSERT INTO preferences (profile_id, type, channel, lead_time_minutes, is_enabled) VALUES 

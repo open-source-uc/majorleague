@@ -82,14 +82,21 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
               {planilleroInfo.local_team_name as string} vs {planilleroInfo.visitor_team_name as string}
             </h1>
             <p className="text-foreground mt-1">
-              {new Date(planilleroInfo.timestamp as string).toLocaleDateString("es-CL", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {(() => {
+                const raw = String(planilleroInfo.timestamp as string);
+                const [datePart, timePartFull = ""] = raw.includes("T") ? raw.split("T") : raw.split(" ");
+                const [y, m, d] = datePart.split("-").map((v) => parseInt(v, 10));
+                const [hh = "00", mm = "00"] = timePartFull.split(":");
+                const dt = new Date(y, (m || 1) - 1, d || 1, parseInt(hh, 10) || 0, parseInt(mm, 10) || 0);
+                return dt.toLocaleDateString("es-CL", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              })()}
             </p>
             {planilleroInfo.location ? (
               <p className="text-foreground mt-1">📍 {planilleroInfo.location as string}</p>
