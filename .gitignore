@@ -42,7 +42,6 @@ next-env.d.ts
 
 # Backup files - NEVER commit real backups to public repositories
 backups/
-*.sql
 *.log
 
 # Temporary files
@@ -64,3 +63,5 @@ shell.nix
 /migrations/logs/
 
 .dev.vars
+
+/.cursor/*

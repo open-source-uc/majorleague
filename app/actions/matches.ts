@@ -15,7 +15,7 @@ const matchCreateSchema = z.object({
   competition_id: z.number().min(1, "La competición es requerida"),
   timestamp: z.string().min(1, "La fecha y hora son requeridas"),
   location: z.string().optional(),
-  status: z.enum(["scheduled", "cancelled", "live", "in review"]).optional(),
+  status: z.enum(["scheduled", "cancelled", "live", "in_review"]).optional(),
 });
 
 const matchUpdateSchema = z.object({
@@ -27,7 +27,7 @@ const matchUpdateSchema = z.object({
   location: z.string().optional(),
   local_score: z.number().min(0, "El marcador local debe ser 0 o mayor").optional(),
   visitor_score: z.number().min(0, "El marcador visitante debe ser 0 o mayor").optional(),
-  status: z.enum(["scheduled", "live", "finished", "cancelled", "in review"]).optional(),
+  status: z.enum(["scheduled", "live", "finished", "cancelled", "in_review"]).optional(),
 });
 
 const matchDeleteSchema = z.object({
@@ -50,13 +50,16 @@ export async function getNextMatches(): Promise<NextMatch[]> {
   ).all<Match & { local_team_name: string; visitor_team_name: string }>();
 
   const nextMatches = matches.results.map((match) => {
-    const timestamp = new Date(match.timestamp);
+    const rawTs = String(match.timestamp);
+    const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
+    const [y, m, d] = (parts[0] || "").split("-");
+    const [hh = "00", mm = "00"] = (parts[1] || "").split(":");
     return {
       local_team_name: match.local_team_name,
       visitor_team_name: match.visitor_team_name,
       status: match.status,
-      date: `${timestamp.getDate().toString().padStart(2, "0")}/${(timestamp.getMonth() + 1).toString().padStart(2, "0")}`,
-      time: `${timestamp.getHours().toString().padStart(2, "0")}:${timestamp.getMinutes().toString().padStart(2, "0")}`,
+      date: `${(d || "01").padStart(2, "0")}/${(m || "01").padStart(2, "0")}`,
+      time: `${hh.padStart(2, "0")}:${mm.padStart(2, "0")}`,
     };
   });
 
@@ -343,7 +346,7 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "finished" && existingMatch.status !== "in review") {
+    if (parsed.data.status === "finished" && existingMatch.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -352,16 +355,16 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "live" && existingMatch.status !== "in review") {
+    if (parsed.data.status === "live" && existingMatch.status !== "scheduled") {
       return {
         success: 0,
         errors: 1,
-        message: "Un partido solo puede pasar a 'en vivo' desde 'en revisión'",
+        message: "Un partido solo puede pasar a 'en vivo' desde 'programado'",
         body,
       };
     }
 
-    if (existingMatch.status === "finished" && parsed.data.status !== "in review") {
+    if (existingMatch.status === "finished" && parsed.data.status !== "in_review") {
       return {
         success: 0,
         errors: 1,
@@ -522,22 +525,22 @@ export async function deleteMatch(
       };
     }
 
-    const hasEvents = await env.DB.prepare(`SELECT COUNT(*) as count FROM events WHERE match_id = ?`)
-      .bind(parsed.data.id)
-      .first<{ count: number }>();
+    // const hasEvents = await env.DB.prepare(`SELECT COUNT(*) as count FROM events WHERE match_id = ?`)
+    //   .bind(parsed.data.id)
+    //   .first<{ count: number }>();
 
-    const hasStreams = await env.DB.prepare(`SELECT COUNT(*) as count FROM streams WHERE match_id = ?`)
-      .bind(parsed.data.id)
-      .first<{ count: number }>();
+    // const hasStreams = await env.DB.prepare(`SELECT COUNT(*) as count FROM streams WHERE match_id = ?`)
+    //   .bind(parsed.data.id)
+    //   .first<{ count: number }>();
 
-    if ((hasEvents?.count ?? 0) > 0 || (hasStreams?.count ?? 0) > 0) {
-      return {
-        success: 0,
-        errors: 1,
-        message: "No se puede eliminar el partido porque tiene eventos o streams asociados",
-        body,
-      };
-    }
+    // if ((hasEvents?.count ?? 0) > 0 || (hasStreams?.count ?? 0) > 0) {
+    //   return {
+    //     success: 0,
+    //     errors: 1,
+    //     message: "No se puede eliminar el partido porque tiene eventos o streams asociados",
+    //     body,
+    //   };
+    // }
 
     await env.DB.prepare(`DELETE FROM matches WHERE id = ?`).bind(parsed.data.id).run();
 

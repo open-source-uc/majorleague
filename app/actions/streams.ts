@@ -7,13 +7,15 @@ import { z } from "zod";
 
 import { getAuthStatus } from "@/lib/services/auth";
 import type { Stream } from "@/lib/types";
+import { extractYouTubeVideoId, fetchYouTubeOEmbedByUrl } from "@/lib/utils/youtube";
 
-// Validation schemas
+// Validation schemas (YouTube-only, date-based)
 const streamCreateSchema = z.object({
-  match_id: z.number().min(1, "El ID del partido es requerido"),
-  type: z.enum(["youtube", "twitch", "other"]),
-  platform: z.string().min(1, "La plataforma es requerida").max(50, "La plataforma no puede exceder los 50 caracteres"),
-  url: z.string().url("Debe ser una URL válida"),
+  stream_date: z.string().min(1, "La fecha de transmisión es requerida"),
+  youtube_url: z.string().url("Debe ser una URL válida"),
+  title: z.string().min(1, "El título es requerido"),
+  is_live_stream: z.enum(["true", "false"]).optional(),
+  is_featured: z.enum(["true", "false"]).optional(),
   start_time: z.string().optional(),
   end_time: z.string().optional(),
   notes: z.string().optional(),
@@ -21,10 +23,11 @@ const streamCreateSchema = z.object({
 
 const streamUpdateSchema = z.object({
   id: z.number().min(1, "El ID del stream es requerido"),
-  match_id: z.number().min(1, "El ID del partido es requerido"),
-  type: z.enum(["youtube", "twitch", "other"]),
-  platform: z.string().min(1, "La plataforma es requerida").max(50, "La plataforma no puede exceder los 50 caracteres"),
-  url: z.string().url("Debe ser una URL válida"),
+  stream_date: z.string().min(1, "La fecha de transmisión es requerida"),
+  youtube_url: z.string().url("Debe ser una URL válida"),
+  title: z.string().min(1, "El título es requerido"),
+  is_live_stream: z.enum(["true", "false"]).optional(),
+  is_featured: z.enum(["true", "false"]).optional(),
   start_time: z.string().optional(),
   end_time: z.string().optional(),
   notes: z.string().optional(),
@@ -39,18 +42,13 @@ export async function getStreams(): Promise<Stream[]> {
   const { env } = getRequestContext();
   const streams = await env.DB.prepare(
     `
-    SELECT s.id, s.match_id, s.type, s.platform, s.url, s.start_time, s.end_time, s.notes, s.created_at,
-           m.timestamp as match_date, lt.name as local_team_name, vt.name as visitor_team_name,
-           (lt.name || ' vs ' || vt.name || ' - ' || m.timestamp) as match_description
+    SELECT 
+      s.id, s.stream_date, s.url, s.youtube_video_id, s.is_live_stream, s.is_featured, s.title, s.thumbnail_url, s.published_at, s.duration_seconds, s.start_time, s.end_time, s.notes, s.created_at,
+      s.url as youtube_url
     FROM streams s
-    LEFT JOIN matches m ON s.match_id = m.id
-    LEFT JOIN teams lt ON m.local_team_id = lt.id
-    LEFT JOIN teams vt ON m.visitor_team_id = vt.id
-    ORDER BY s.created_at DESC
+    ORDER BY COALESCE(s.start_time, s.stream_date, s.created_at) DESC
   `,
-  ).all<
-    Stream & { match_date?: string; local_team_name?: string; visitor_team_name?: string; match_description?: string }
-  >();
+  ).all<Stream & { youtube_url?: string }>();
 
   return streams.results || [];
 }
@@ -59,12 +57,9 @@ export async function getStreamById(id: number): Promise<Stream | null> {
   const { env } = getRequestContext();
   const stream = await env.DB.prepare(
     `
-    SELECT s.id, s.match_id, s.type, s.platform, s.url, s.start_time, s.end_time, s.notes, s.created_at,
-           m.timestamp as match_date, lt.name as local_team_name, vt.name as visitor_team_name
+    SELECT s.id, s.stream_date, s.url, s.youtube_video_id, s.is_live_stream, s.is_featured, s.title, s.thumbnail_url, s.published_at, s.duration_seconds, s.start_time, s.end_time, s.notes, s.created_at,
+           s.url as youtube_url
     FROM streams s
-    LEFT JOIN matches m ON s.match_id = m.id
-    LEFT JOIN teams lt ON m.local_team_id = lt.id
-    LEFT JOIN teams vt ON m.visitor_team_id = vt.id
     WHERE s.id = ?
   `,
   )
@@ -81,10 +76,11 @@ export async function createStream(
     success: number;
     message: string;
     body: {
-      match_id: number;
-      type: string;
-      platform: string;
-      url: string;
+      stream_date: string;
+      youtube_url: string;
+      title: string;
+      is_live_stream?: string;
+      is_featured?: string;
       start_time?: string;
       end_time?: string;
       notes?: string;
@@ -99,10 +95,11 @@ export async function createStream(
       errors: 1,
       message: "No tienes permisos para crear streams",
       body: {
-        match_id: parseInt(formData.get("match_id") as string) || 0,
-        type: formData.get("type") as string,
-        platform: formData.get("platform") as string,
-        url: formData.get("url") as string,
+        stream_date: (formData.get("stream_date") as string) || "",
+        youtube_url: formData.get("youtube_url") as string,
+        title: formData.get("title") as string,
+        is_live_stream: (formData.get("is_live_stream") as string) || "false",
+        is_featured: (formData.get("is_featured") as string) || "false",
         start_time: formData.get("start_time") as string,
         end_time: formData.get("end_time") as string,
         notes: formData.get("notes") as string,
@@ -118,10 +115,11 @@ export async function createStream(
   };
 
   const body = {
-    match_id: parseInt(formData.get("match_id") as string) || 0,
-    type: formData.get("type") as string,
-    platform: formData.get("platform") as string,
-    url: formData.get("url") as string,
+    stream_date: (formData.get("stream_date") as string) || "",
+    youtube_url: (formData.get("youtube_url") as string) || "",
+    title: (formData.get("title") as string) || "",
+    is_live_stream: ((formData.get("is_live_stream") as string) || "false") as "true" | "false",
+    is_featured: ((formData.get("is_featured") as string) || "false") as "true" | "false",
     start_time: convertDateTimeLocal(formData.get("start_time") as string),
     end_time: convertDateTimeLocal(formData.get("end_time") as string),
     notes: (formData.get("notes") as string) || undefined,
@@ -141,15 +139,8 @@ export async function createStream(
   const { env } = getRequestContext();
 
   try {
-    const match = await env.DB.prepare(`SELECT id FROM matches WHERE id = ?`).bind(parsed.data.match_id).first();
-
-    if (!match) {
-      return {
-        success: 0,
-        errors: 1,
-        message: "El partido no existe",
-        body,
-      };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.stream_date)) {
+      return { success: 0, errors: 1, message: "Fecha inválida (use YYYY-MM-DD)", body };
     }
 
     if (parsed.data.start_time && parsed.data.end_time) {
@@ -166,17 +157,37 @@ export async function createStream(
       }
     }
 
+    const videoId = extractYouTubeVideoId(parsed.data.youtube_url);
+    if (!videoId) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "No se pudo extraer el ID del video de YouTube. Verifica la URL.",
+        body,
+      };
+    }
+
+    const meta = await fetchYouTubeOEmbedByUrl(parsed.data.youtube_url);
+    const title = parsed.data.title || meta.title || null;
+    const isLive = parsed.data.is_live_stream === "true" ? 1 : 0;
+    const isFeatured = parsed.data.is_featured === "true" ? 1 : 0;
+
     await env.DB.prepare(
       `
-      INSERT INTO streams (match_id, type, platform, url, start_time, end_time, notes, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO streams (
+        stream_date, url, youtube_video_id, is_live_stream, is_featured, title, thumbnail_url, published_at, duration_seconds, start_time, end_time, notes, created_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, CURRENT_TIMESTAMP)
     `,
     )
       .bind(
-        parsed.data.match_id,
-        parsed.data.type,
-        parsed.data.platform,
-        parsed.data.url,
+        parsed.data.stream_date,
+        parsed.data.youtube_url,
+        videoId,
+        isLive,
+        isFeatured,
+        title,
+        meta.thumbnail_url || null,
         parsed.data.start_time || null,
         parsed.data.end_time || null,
         parsed.data.notes || null,
@@ -209,10 +220,11 @@ export async function updateStream(
     message: string;
     body: {
       id: number;
-      match_id: number;
-      type: string;
-      platform: string;
-      url: string;
+      stream_date: string;
+      youtube_url: string;
+      title: string;
+      is_live_stream?: string;
+      is_featured?: string;
       start_time?: string;
       end_time?: string;
       notes?: string;
@@ -228,10 +240,10 @@ export async function updateStream(
       message: "No tienes permisos para actualizar streams",
       body: {
         id: parseInt(formData.get("id") as string) || 0,
-        match_id: parseInt(formData.get("match_id") as string) || 0,
-        type: formData.get("type") as string,
-        platform: formData.get("platform") as string,
-        url: formData.get("url") as string,
+        stream_date: (formData.get("stream_date") as string) || "",
+        youtube_url: formData.get("youtube_url") as string,
+        is_live_stream: (formData.get("is_live_stream") as string) || "false",
+        is_featured: (formData.get("is_featured") as string) || "false",
         start_time: formData.get("start_time") as string,
         end_time: formData.get("end_time") as string,
         notes: formData.get("notes") as string,
@@ -267,10 +279,11 @@ export async function updateStream(
 
   const body = {
     id,
-    match_id: parseInt(formData.get("match_id") as string) || 0,
-    type: formData.get("type") as string,
-    platform: formData.get("platform") as string,
-    url: formData.get("url") as string,
+    stream_date: (formData.get("stream_date") as string) || "",
+    youtube_url: (formData.get("youtube_url") as string) || "",
+    title: (formData.get("title") as string) || "",
+    is_live_stream: ((formData.get("is_live_stream") as string) || "false") as "true" | "false",
+    is_featured: ((formData.get("is_featured") as string) || "false") as "true" | "false",
     start_time: convertDateTimeLocal(formData.get("start_time") as string),
     end_time: convertDateTimeLocal(formData.get("end_time") as string),
     notes: (formData.get("notes") as string) || undefined,
@@ -301,15 +314,8 @@ export async function updateStream(
       };
     }
 
-    const match = await env.DB.prepare(`SELECT id FROM matches WHERE id = ?`).bind(parsed.data.match_id).first();
-
-    if (!match) {
-      return {
-        success: 0,
-        errors: 1,
-        message: "El partido no existe",
-        body,
-      };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.stream_date)) {
+      return { success: 0, errors: 1, message: "Fecha inválida (use YYYY-MM-DD)", body };
     }
 
     if (parsed.data.start_time && parsed.data.end_time) {
@@ -326,18 +332,35 @@ export async function updateStream(
       }
     }
 
+    const videoId = extractYouTubeVideoId(parsed.data.youtube_url);
+    if (!videoId) {
+      return {
+        success: 0,
+        errors: 1,
+        message: "No se pudo extraer el ID del video de YouTube. Verifica la URL.",
+        body,
+      };
+    }
+
+    const meta = await fetchYouTubeOEmbedByUrl(parsed.data.youtube_url);
+    const isLive = parsed.data.is_live_stream === "true" ? 1 : 0;
+    const isFeatured = parsed.data.is_featured === "true" ? 1 : 0;
+
     await env.DB.prepare(
       `
       UPDATE streams 
-      SET match_id = ?, type = ?, platform = ?, url = ?, start_time = ?, end_time = ?, notes = ?
+      SET stream_date = ?, url = ?, youtube_video_id = ?, is_live_stream = ?, is_featured = ?, title = ?, thumbnail_url = ?, start_time = ?, end_time = ?, notes = ?
       WHERE id = ?
     `,
     )
       .bind(
-        parsed.data.match_id,
-        parsed.data.type,
-        parsed.data.platform,
-        parsed.data.url,
+        parsed.data.stream_date,
+        parsed.data.youtube_url,
+        videoId,
+        isLive,
+        isFeatured,
+        meta.title || null,
+        meta.thumbnail_url || null,
         parsed.data.start_time || null,
         parsed.data.end_time || null,
         parsed.data.notes || null,
@@ -417,9 +440,9 @@ export async function deleteStream(
   const { env } = getRequestContext();
 
   try {
-    const existingStream = await env.DB.prepare(`SELECT id, platform FROM streams WHERE id = ?`)
+    const existingStream = await env.DB.prepare(`SELECT id FROM streams WHERE id = ?`)
       .bind(parsed.data.id)
-      .first<{ id: number; platform: string }>();
+      .first<{ id: number }>();
 
     if (!existingStream) {
       return {
@@ -449,4 +472,50 @@ export async function deleteStream(
       body,
     };
   }
+}
+
+// Public site helpers
+export async function getMainStream(): Promise<Stream | null> {
+  const { env } = getRequestContext();
+
+  const main = await env.DB.prepare(
+    `
+    SELECT s.*
+    FROM streams s
+    WHERE s.is_featured = 1
+    ORDER BY COALESCE(s.start_time, s.stream_date, s.created_at) DESC
+    LIMIT 1
+  `,
+  ).first<Stream>();
+  if (main) return main;
+
+  return null;
+}
+
+export async function getPastStreams(limit = 12): Promise<Stream[]> {
+  const { env } = getRequestContext();
+  const past = await env.DB.prepare(
+    `
+    SELECT s.*
+    FROM streams s
+    WHERE date(s.stream_date) < date('now') OR (s.is_featured = 0 AND date(s.stream_date) = date('now'))
+    ORDER BY COALESCE(s.end_time, s.start_time, s.stream_date, s.created_at) DESC
+    LIMIT ?
+  `,
+  )
+    .bind(limit)
+    .all<Stream>();
+  return past.results || [];
+}
+
+export async function featuredStream(): Promise<boolean> {
+  const { env } = getRequestContext();
+  const stream = await env.DB.prepare(
+    `
+    SELECT s.is_featured
+    FROM streams s
+    WHERE s.is_featured = 1
+    `,
+  ).first<Stream>();
+  return stream?.is_featured || false;
 }

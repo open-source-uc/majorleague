@@ -8,15 +8,20 @@ interface NavLinkProps {
   className?: string;
   type?: "desktop" | "mobile";
   onClick?: () => void;
+  role?: string;
 }
 
-export default function NavLink({ href, children, className = "", type, onClick }: NavLinkProps) {
+export default function NavLink({ href, children, className = "", type, onClick, role }: NavLinkProps) {
+  const baseClasses = `text-md z-50 font-bold tracking-normal transition-all duration-200 ease-in-out hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-sm ${className}`;
+
   // For desktop links (Server Component), no onClick handler
   if (type === "desktop") {
     return (
       <Link
         href={href}
-        className={`text-md z-50 font-bold tracking-normal ${className} hover:text-primary-darken transition-colors duration-100`}
+        className={baseClasses}
+        role={role}
+        aria-label={typeof children === "string" ? `Navegar a ${children.toLowerCase()}` : undefined}
       >
         {children}
       </Link>
@@ -27,12 +32,14 @@ export default function NavLink({ href, children, className = "", type, onClick 
   return (
     <Link
       href={href}
-      className={`text-md z-50 font-bold tracking-normal ${className} hover:text-primary-darken transition-colors duration-100`}
+      className={baseClasses}
+      role={role}
       onClick={() => {
         if (type === "mobile" && onClick) {
           onClick();
         }
       }}
+      aria-label={typeof children === "string" ? `Navegar a ${children.toLowerCase()}` : undefined}
     >
       {children}
     </Link>

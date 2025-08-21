@@ -18,7 +18,7 @@ export async function getTeamCompetitionsByYearAndSemester(
     LEFT JOIN competitions c ON tc.competition_id = c.id
     WHERE c.year = ?
     AND c.semester = ?
-    ORDER BY tc.points DESC
+    ORDER BY tc.points DESC, tc.dg DESC
   `,
   )
     .bind(year, semester)

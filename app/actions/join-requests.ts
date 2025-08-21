@@ -15,7 +15,7 @@ const joinRequestCreateSchema = z.object({
   profile_id: z.string().min(1, "El ID del perfil es requerido"),
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
-  nickname: z.string().optional(),
+  nickname: z.string().max(50, "El apodo no puede exceder los 50 caracteres").optional(),
   birthday: z
     .string()
     .min(1, "La fecha de nacimiento es requerida")
@@ -25,6 +25,7 @@ const joinRequestCreateSchema = z.object({
       return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
     }, "La edad debe estar entre 15 y 50 años"),
   preferred_position: z.enum(["GK", "DEF", "MID", "FWD"]),
+  preferred_jersey_number: z.number().min(1).max(99).optional(),
   status: z.enum(["pending", "approved", "rejected"]).optional(),
   notes: z.string().optional(),
 });
@@ -35,7 +36,7 @@ const joinRequestUpdateSchema = z.object({
   profile_id: z.string().min(1, "El ID del perfil es requerido"),
   first_name: z.string().min(1, "El nombre es requerido").max(50, "El nombre no puede exceder los 50 caracteres"),
   last_name: z.string().min(1, "El apellido es requerido").max(50, "El apellido no puede exceder los 50 caracteres"),
-  nickname: z.string().optional(),
+  nickname: z.string().max(50, "El apodo no puede exceder los 50 caracteres").optional(),
   birthday: z
     .string()
     .min(1, "La fecha de nacimiento es requerida")
@@ -45,6 +46,7 @@ const joinRequestUpdateSchema = z.object({
       return !isNaN(birthDate.getTime()) && age >= 15 && age <= 50;
     }, "La edad debe estar entre 15 y 50 años"),
   preferred_position: z.enum(["GK", "DEF", "MID", "FWD"]),
+  preferred_jersey_number: z.number().min(1).max(99).optional(),
   status: z.enum(["pending", "approved", "rejected"]).optional(),
   notes: z.string().optional(),
 });
@@ -59,7 +61,7 @@ export async function getJoinTeamRequests(): Promise<JoinTeamRequest[]> {
   const requests = await env.DB.prepare(
     `
     SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
-           jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
+           jtr.preferred_position, jtr.preferred_jersey_number, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
     LEFT JOIN teams t ON jtr.team_id = t.id
@@ -75,8 +77,8 @@ export async function getJoinTeamRequestById(id: number): Promise<JoinTeamReques
   const { env } = getRequestContext();
   const request = await env.DB.prepare(
     `
-    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.birthday, 
-           jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
+    SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
+           jtr.preferred_position, jtr.preferred_jersey_number, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
            t.name as team_name, p.username as profile_username
     FROM join_team_requests jtr
     LEFT JOIN teams t ON jtr.team_id = t.id
@@ -101,8 +103,10 @@ export async function createJoinTeamRequest(
       profile_id: string;
       first_name: string;
       last_name: string;
+      nickname?: string;
       birthday: string;
       preferred_position: string;
+      preferred_jersey_number?: number;
       status?: string;
       notes?: string;
     };
@@ -120,8 +124,12 @@ export async function createJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
+        nickname: (formData.get("nickname") as string) || undefined,
         birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
+        preferred_jersey_number: formData.get("preferred_jersey_number")
+          ? parseInt(formData.get("preferred_jersey_number") as string)
+          : undefined,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
       },
@@ -133,8 +141,12 @@ export async function createJoinTeamRequest(
     profile_id: formData.get("profile_id") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
+    nickname: (formData.get("nickname") as string) || undefined,
     birthday: formData.get("birthday") as string,
     preferred_position: formData.get("preferred_position") as string,
+    preferred_jersey_number: formData.get("preferred_jersey_number")
+      ? parseInt(formData.get("preferred_jersey_number") as string)
+      : undefined,
     status: (formData.get("status") as string) || "pending",
     notes: (formData.get("notes") as string) || undefined,
   };
@@ -192,8 +204,8 @@ export async function createJoinTeamRequest(
 
     await env.DB.prepare(
       `
-      INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, nickname, birthday, preferred_position, status, notes, created_at, updated_at)
-      VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last_name, nickname, birthday, preferred_position, status, notes, created_at, updated_at, preferred_jersey_number)
+      VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
     `,
     )
       .bind(
@@ -206,6 +218,7 @@ export async function createJoinTeamRequest(
         parsed.data.preferred_position,
         parsed.data.status || "pending",
         parsed.data.notes || null,
+        parsed.data.preferred_jersey_number || null,
       )
       .run();
 
@@ -239,8 +252,10 @@ export async function updateJoinTeamRequest(
       profile_id: string;
       first_name: string;
       last_name: string;
+      nickname?: string;
       birthday: string;
       preferred_position: string;
+      preferred_jersey_number?: number;
       status?: string;
       notes?: string;
     };
@@ -259,8 +274,12 @@ export async function updateJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
+        nickname: (formData.get("nickname") as string) || undefined,
         birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
+        preferred_jersey_number: formData.get("preferred_jersey_number")
+          ? parseInt(formData.get("preferred_jersey_number") as string)
+          : undefined,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
       },
@@ -279,8 +298,12 @@ export async function updateJoinTeamRequest(
         profile_id: formData.get("profile_id") as string,
         first_name: formData.get("first_name") as string,
         last_name: formData.get("last_name") as string,
+        nickname: (formData.get("nickname") as string) || undefined,
         birthday: formData.get("birthday") as string,
         preferred_position: formData.get("preferred_position") as string,
+        preferred_jersey_number: formData.get("preferred_jersey_number")
+          ? parseInt(formData.get("preferred_jersey_number") as string)
+          : undefined,
         status: formData.get("status") as string,
         notes: formData.get("notes") as string,
       },
@@ -293,8 +316,12 @@ export async function updateJoinTeamRequest(
     profile_id: formData.get("profile_id") as string,
     first_name: formData.get("first_name") as string,
     last_name: formData.get("last_name") as string,
+    nickname: (formData.get("nickname") as string) || undefined,
     birthday: formData.get("birthday") as string,
     preferred_position: formData.get("preferred_position") as string,
+    preferred_jersey_number: formData.get("preferred_jersey_number")
+      ? parseInt(formData.get("preferred_jersey_number") as string)
+      : undefined,
     status: (formData.get("status") as string) || "pending",
     notes: (formData.get("notes") as string) || undefined,
   };
@@ -366,7 +393,7 @@ export async function updateJoinTeamRequest(
     await env.DB.prepare(
       `
       UPDATE join_team_requests 
-      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, preferred_position = ?, status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+      SET team_id = ?, profile_id = ?, first_name = ?, last_name = ?, nickname = ?, birthday = ?, preferred_position = ?, status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP, preferred_jersey_number = ?
       WHERE id = ?
     `,
     )
@@ -380,6 +407,7 @@ export async function updateJoinTeamRequest(
         parsed.data.preferred_position,
         parsed.data.status || "pending",
         parsed.data.notes || null,
+        parsed.data.preferred_jersey_number || null,
         parsed.data.id,
       )
       .run();

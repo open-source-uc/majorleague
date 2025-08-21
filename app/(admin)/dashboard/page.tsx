@@ -13,80 +13,146 @@ export default async function Dashboard() {
 
   const adminSections = [
     {
-      title: "GESTIÓN DE USUARIOS",
+      title: "Gestión de Usuarios",
+      icon: "👥",
       items: [
-        { name: "Perfiles", href: "/dashboard/profiles", description: "Gestionar perfiles de usuarios" },
-        { name: "Jugadores", href: "/dashboard/players", description: "Administrar jugadores registrados" },
+        { name: "Perfiles", href: "/dashboard/profiles", description: "Gestionar perfiles de usuarios", icon: "👤" },
+        { name: "Jugadores", href: "/dashboard/players", description: "Administrar jugadores registrados", icon: "⚽" },
         {
           name: "Solicitudes de Unión",
           href: "/dashboard/join-requests",
           description: "Revisar solicitudes de unión a equipos",
+          icon: "📝",
         },
       ],
     },
     {
-      title: "COMPETICIONES Y EQUIPOS",
+      title: "Competiciones y Equipos",
+      icon: "🏆",
       items: [
-        { name: "Equipos", href: "/dashboard/teams", description: "Administrar equipos y configuraciones" },
-        { name: "Competiciones", href: "/dashboard/competitions", description: "Gestionar competiciones y torneos" },
-        { name: "Partidos", href: "/dashboard/matches", description: "Programar y gestionar partidos" },
+        { name: "Equipos", href: "/dashboard/teams", description: "Administrar equipos y configuraciones", icon: "⚽" },
+        {
+          name: "Competiciones",
+          href: "/dashboard/competitions",
+          description: "Gestionar competiciones y torneos",
+          icon: "🏆",
+        },
+        { name: "Partidos", href: "/dashboard/matches", description: "Programar y gestionar partidos", icon: "📅" },
+        {
+          name: "Planilleros",
+          href: "/dashboard/planilleros",
+          description: "Gestionar planilleros de partidos",
+          icon: "📋",
+        },
       ],
     },
     {
-      title: "EVENTOS Y MEDIOS",
+      title: "Eventos y Medios",
+      icon: "📺",
       items: [
-        { name: "Streams", href: "/dashboard/streams", description: "Gestionar transmisiones en vivo" },
-        { name: "Eventos", href: "/dashboard/events", description: "Administrar eventos del partido" },
-        { name: "Lineups", href: "/dashboard/lineups", description: "Configurar alineaciones de equipos" },
+        { name: "Streams", href: "/dashboard/streams", description: "Gestionar transmisiones en vivo", icon: "📡" },
+        { name: "Eventos", href: "/dashboard/events", description: "Administrar eventos del partido", icon: "⚡" },
+        { name: "Lineups", href: "/dashboard/lineups", description: "Configurar alineaciones de equipos", icon: "📋" },
       ],
     },
     {
-      title: "COMUNICACIONES",
+      title: "Comunicaciones",
+      icon: "💬",
       items: [
         {
           name: "Notificaciones",
           href: "/dashboard/notifications",
           description: "Gestionar notificaciones del sistema",
+          icon: "🔔",
         },
-        { name: "Preferencias", href: "/dashboard/preferences", description: "Configurar preferencias de usuarios" },
+        {
+          name: "Preferencias",
+          href: "/dashboard/preferences",
+          description: "Configurar preferencias de usuarios",
+          icon: "⚙️",
+        },
       ],
     },
   ];
 
   return (
-    <section className="mx-10 mt-8 flex flex-col">
-      <div className="mb-10">
-        <h1 className="text-2xl font-bold">Panel de Administración</h1>
-        <p className="text-ml-grey mt-2">
-          Administra la <span className="text-primary-darken">Major League</span>
-        </p>
+    <div className="from-background via-card to-background relative min-h-screen overflow-hidden bg-gradient-to-br">
+      {/* Subtle background pattern - consistent with login */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="bg-primary absolute top-1/4 left-1/4 h-64 w-64 rounded-full blur-3xl" />
+        <div className="bg-accent absolute right-1/4 bottom-1/4 h-64 w-64 rounded-full blur-3xl" />
       </div>
 
-      <div className="space-y-10">
-        {adminSections.map((section, sectionIndex) => (
-          <div key={sectionIndex}>
-            <h2 className="text-foreground mb-6 text-xl font-bold">{section.title}</h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {section.items.map((item, itemIndex) => (
-                <Link
-                  key={itemIndex}
-                  href={item.href}
-                  className="group border-border-header bg-background-header hover:border-primary-darken hover:bg-background-header/80 flex flex-col gap-2 rounded-lg border p-6 transition-all"
-                >
-                  <h3 className="text-foreground group-hover:text-primary-darken text-lg font-bold">{item.name}</h3>
-                  <p className="text-ml-grey text-sm">{item.description}</p>
-                </Link>
-              ))}
+      <div className="tablet:px-8 desktop:px-12 relative z-10 px-4 py-16">
+        <div className="mx-auto max-w-7xl">
+          {/* Clean Header Section */}
+          <div className="mb-12 text-center">
+            <h1 className="text-foreground tablet:text-4xl mb-4 text-3xl font-bold">Panel de Administración</h1>
+            <p className="text-muted-foreground mb-6 text-lg">Gestiona Major League UC desde un solo lugar</p>
+          </div>
+
+          {/* Clean Sections Grid */}
+          <div className="space-y-12">
+            {adminSections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="space-y-6">
+                {/* Section Header */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{section.icon}</span>
+                  <h2 className="text-foreground text-xl font-semibold">{section.title}</h2>
+                </div>
+
+                {/* Cards Grid */}
+                <div className="tablet:grid-cols-2 desktop:grid-cols-3 grid gap-4">
+                  {section.items.map((item, itemIndex) => (
+                    <Link key={itemIndex} href={item.href} className="group relative">
+                      {/* Hover Effect Background */}
+                      <div className="from-primary/20 to-accent/20 absolute -inset-1 rounded-xl bg-gradient-to-r opacity-0 blur transition-opacity duration-300 group-hover:opacity-100" />
+
+                      {/* Card Content */}
+                      <div className="border-border/50 bg-card/95 group-hover:border-primary/30 relative rounded-xl border p-6 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:scale-105">
+                        <div className="flex items-start gap-4">
+                          <div className="text-2xl transition-transform duration-300 group-hover:scale-110">
+                            {item.icon}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <h3 className="text-foreground group-hover:text-primary font-semibold transition-colors duration-300">
+                              {item.name}
+                            </h3>
+                            <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
+                          </div>
+                        </div>
+
+                        {/* Arrow Indicator */}
+                        <div className="mt-4 flex justify-end">
+                          <div className="bg-primary/10 group-hover:bg-primary/20 rounded-full p-2 transition-colors duration-300">
+                            <svg className="text-primary h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer Info */}
+          <div className="mt-16 text-center">
+            <div className="border-border/30 bg-card/50 rounded-xl border p-6 backdrop-blur-sm">
+              <p className="text-muted-foreground mb-2 text-sm">¿Necesitas ayuda con la administración?</p>
+              <Link
+                href="https://www.instagram.com/opensource_euc/"
+                target="_blank"
+                className="text-primary hover:text-primary/80 font-medium underline transition-colors"
+              >
+                Contacta al equipo técnico
+              </Link>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-
-      <div className="mt-10 flex justify-center">
-        <p className="text-ml-grey text-sm">
-          {adminSections.reduce((total, section) => total + section.items.length, 0)} módulos de gestión disponibles
-        </p>
-      </div>
-    </section>
+    </div>
   );
 }

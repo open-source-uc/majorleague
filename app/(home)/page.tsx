@@ -7,15 +7,15 @@ import image2 from "@/../public/assets/image2.png";
 
 import Hero from "../components/home/Hero";
 import Sponsors from "../components/home/Sponsors";
-import TextBar from "../components/home/TextBar";
 
 export default function HomePage() {
   return (
     <>
-      <TextBar />
       <Hero />
       <Sponsors />
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row">
+
+      {/* About Section */}
+      <section className="desktop:flex-row flex flex-col items-center justify-center gap-10 px-5 py-10">
         <div className="w-full max-w-[399px]">
           <Image
             src={image1}
@@ -40,7 +40,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-      <section className="flex flex-col items-center justify-center gap-10 px-5 py-10 lg:flex-row-reverse">
+      <section className="desktop:flex-row-reverse flex flex-col items-center justify-center gap-10 px-5 py-10">
         <div className="w-full max-w-[399px]">
           <Image
             src={image2}

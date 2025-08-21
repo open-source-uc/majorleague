@@ -16,6 +16,7 @@ const participationSchema = z.object({
   firstName: z.string().min(1, "Nombre es requerido"),
   lastName: z.string().min(1, "Apellido es requerido"),
   nickname: z.string().optional(),
+  jerseyNumber: z.number().min(1).max(99).optional(),
 });
 
 export async function ActionParticipation(
@@ -33,6 +34,7 @@ export async function ActionParticipation(
       firstName: string;
       lastName: string;
       nickname: string;
+      jerseyNumber: number | undefined;
     };
   },
   formData: FormData,
@@ -54,6 +56,7 @@ export async function ActionParticipation(
         firstName: "",
         lastName: "",
         nickname: "",
+        jerseyNumber: undefined,
       },
     };
   }
@@ -68,6 +71,7 @@ export async function ActionParticipation(
     firstName: (formData.get("firstName") as string)?.trim() || "",
     lastName: (formData.get("lastName") as string)?.trim() || "",
     nickname: (formData.get("nickname") as string)?.trim() || "",
+    jerseyNumber: formData.get("jerseyNumber") ? parseInt((formData.get("jerseyNumber") as string)?.trim()) : undefined,
   };
 
   const birthDate = new Date(body.birthdate);
@@ -148,8 +152,8 @@ export async function ActionParticipation(
       `
       INSERT INTO join_team_requests (
         team_id, profile_id, timestamp, first_name, last_name, nickname, birthday, 
-        preferred_position, status, notes, created_at, updated_at
-      ) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        preferred_position, status, notes, created_at, updated_at, preferred_jersey_number
+      ) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, 'pending', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
     `,
     )
       .bind(
@@ -161,6 +165,7 @@ export async function ActionParticipation(
         parsed.data.birthdate, // Birthday field
         parsed.data.position,
         parsed.data.notes || null,
+        parsed.data.jerseyNumber || null,
       )
       .run();
 
@@ -203,7 +208,7 @@ export async function getParticipation(profileId: string): Promise<(JoinTeamRequ
     const request = await context.env.DB.prepare(
       `
       SELECT jtr.id, jtr.team_id, jtr.profile_id, jtr.timestamp, jtr.first_name, jtr.last_name, jtr.nickname, jtr.birthday, 
-             jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at,
+             jtr.preferred_position, jtr.status, jtr.notes, jtr.created_at, jtr.updated_at, jtr.preferred_jersey_number,
              t.name as team_name
       FROM join_team_requests jtr
       LEFT JOIN teams t ON jtr.team_id = t.id

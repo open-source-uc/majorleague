@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getPlayerByProfileId, getJoinRequestsByProfileId } from "@/actions/auth";
+import { getPlayerByProfileId, getJoinRequestsByProfileId, isCaptain } from "@/actions/auth";
+import { isPlanillero } from "@/actions/planilleros";
 import { getAuthStatus } from "@/lib/services/auth";
 import { calculateAge } from "@/lib/utils/cn";
 
@@ -12,14 +13,18 @@ export default async function Perfil() {
   const year = date.getFullYear();
   const semester = date.getMonth() < 7 ? 1 : 2;
 
-  const { isAdmin, isAuthenticated, userProfile } = await getAuthStatus();
+  const { isAdmin, isAuthenticated, userProfile, isSuperAdmin } = await getAuthStatus();
 
   if (!isAuthenticated || !userProfile) {
     return redirect("/login");
   }
 
-  const playerInfo = await getPlayerByProfileId(userProfile.id);
-  const pendingRequests = await getJoinRequestsByProfileId(userProfile.id);
+  const [playerInfo, pendingRequests, userIsPlanillero, userIsCaptain] = await Promise.all([
+    getPlayerByProfileId(userProfile.id),
+    getJoinRequestsByProfileId(userProfile.id),
+    isPlanillero(userProfile.id),
+    isCaptain(userProfile.id),
+  ]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-CL", {
@@ -40,210 +45,199 @@ export default async function Perfil() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-10 text-center">
-        <h1 className="text-foreground mb-4 text-4xl font-bold">
-          Mi <span className="text-primary-darken">Perfil</span>
-        </h1>
-        <p className="text-ml-grey text-lg">Gestiona tu información personal y configuraciones de Major League UC</p>
+    <div className="from-background via-card to-background relative min-h-screen overflow-hidden bg-gradient-to-br">
+      {/* Subtle background pattern - consistent with login */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="bg-primary absolute top-1/3 left-1/3 h-64 w-64 rounded-full blur-3xl" />
+        <div className="bg-accent absolute right-1/3 bottom-1/3 h-64 w-64 rounded-full blur-3xl" />
       </div>
 
-      <div className="bg-background-header border-border-header mb-8 rounded-lg border p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-primary text-background flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold">
-              {userProfile.username.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-primary text-2xl font-bold">{userProfile.username}</h2>
-              <p className="text-ml-grey text-sm">
-                Miembro desde {userProfile.created_at ? formatDate(userProfile.created_at) : "N/A"}
-              </p>
-            </div>
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          {/* Clean Header - Matching Login Style */}
+          <div className="mb-8 text-center">
+            <div className="mb-6 text-6xl">⚽</div>
+            <h1 className="text-foreground tablet:text-4xl mb-4 text-3xl font-bold">Hola, {userProfile.username}</h1>
+            <p className="text-muted-foreground mb-2 text-lg">Bienvenido a Major League UC</p>
           </div>
-          <div className="flex gap-2">
-            {isAdmin ? (
-              <span className="bg-primary-darken text-background rounded-full px-3 py-1 text-sm font-medium">
-                Administrador
-              </span>
-            ) : null}
+
+          {/* Profile Summary Card - Simplified */}
+          <div className="border-border/50 bg-card/95 mb-8 rounded-xl border p-6 shadow-sm backdrop-blur-sm">
+            <div className="mb-6 text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="relative">
+                  <div className="from-primary to-accent text-primary-foreground flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-bold shadow-lg">
+                    {userProfile.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="bg-card absolute -right-1 -bottom-1 rounded-full p-1">
+                    <div className="h-3 w-3 rounded-full bg-green-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4 flex flex-wrap justify-center gap-2">
+                {isSuperAdmin ? (
+                  <span className="rounded-full bg-gradient-to-r from-purple-500 to-purple-600 px-3 py-1 text-xs font-semibold text-white">
+                    ⚡ Super Administrador
+                  </span>
+                ) : isAdmin ? (
+                  <span className="rounded-full bg-gradient-to-r from-purple-500 to-purple-600 px-3 py-1 text-xs font-semibold text-white">
+                    ⚡ Administrador
+                  </span>
+                ) : null}
+                {playerInfo ? (
+                  <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-xs font-semibold">
+                    ⚽ Jugador Activo
+                  </span>
+                ) : null}
+                {userIsCaptain ? (
+                  <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-xs font-semibold">
+                    👑 Capitán
+                  </span>
+                ) : null}
+                {userIsPlanillero ? (
+                  <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-xs font-semibold">
+                    📋 Planillero
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Player Status Summary */}
             {playerInfo ? (
-              <span className="bg-primary/20 text-primary rounded-full px-3 py-1 text-sm font-medium">
-                Jugador Registrado
-              </span>
-            ) : null}
-          </div>
-        </div>
+              <div className="mb-6 space-y-3">
+                <div className="text-center">
+                  <p className="text-foreground text-lg font-semibold">
+                    {playerInfo.first_name} {playerInfo.last_name}{" "}
+                    <span className="text-muted-foreground text-sm">
+                      {playerInfo.nickname ? `• "${playerInfo.nickname}"` : ""}
+                    </span>
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {getPositionName(playerInfo.position)} • {calculateAge(playerInfo.birthday)} años{" "}
+                    {playerInfo.jersey_number ? `• #${playerInfo.jersey_number}` : "•"}
+                  </p>
+                </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <label className="text-foreground mb-2 block text-sm font-medium">Nombre de Usuario</label>
-            <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-              {userProfile.username}
-            </div>
-          </div>
-          <div>
-            <label className="text-foreground mb-2 block text-sm font-medium">Correo Electrónico</label>
-            <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-              {userProfile.email || <span className="text-ml-grey italic">No especificado</span>}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {playerInfo ? (
-        <div className="bg-background-header border-border-header mb-8 rounded-lg border p-8">
-          <h3 className="text-foreground mb-6 flex items-center gap-2 text-xl font-semibold">
-            <span className="text-primary text-2xl">⚽</span>
-            Información de Jugador
-          </h3>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-4">
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Nombre Completo</label>
-                <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                  {playerInfo.first_name} {playerInfo.last_name}
-                  {playerInfo.nickname ? (
-                    <span className="text-ml-grey ml-2">&quot;{playerInfo.nickname}&quot;</span>
-                  ) : null}
+                <div className="border-border/30 bg-muted/20 rounded-lg border p-3 text-center">
+                  <span className="text-lg">🏆</span>
+                  {playerInfo.team_name ? (
+                    <p className="text-foreground mt-1 font-medium">{playerInfo.team_name}</p>
+                  ) : (
+                    <p className="text-muted-foreground mt-1 italic">Sin equipo asignado</p>
+                  )}
                 </div>
               </div>
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Posición</label>
-                <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                  {getPositionName(playerInfo.position)}
-                </div>
+            ) : (
+              <div className="mb-6 text-center">
+                <div className="mb-4 text-4xl">🚀</div>
+                <p className="text-muted-foreground">¡Tu aventura futbolística está por comenzar!</p>
               </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Equipo</label>
-                <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                  {playerInfo.team_name || <span className="text-ml-grey italic">Sin equipo asignado</span>}
-                </div>
-              </div>
-              <div>
-                <label className="text-foreground mb-2 block text-sm font-medium">Edad</label>
-                <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                  {calculateAge(playerInfo.birthday)} años
-                </div>
-              </div>
+            )}
+
+            {/* Primary Action */}
+            {!playerInfo && pendingRequests.length === 0 && (
+              <Link
+                href="/participa"
+                className="from-primary to-primary/90 text-primary-foreground mb-4 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r px-6 py-4 font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                <span className="text-xl">⚽</span>
+                <span>Solicitar Participación</span>
+              </Link>
+            )}
+
+            {/* Quick Actions */}
+            <div className="space-y-3">
+              <Link
+                href={`/posiciones/${year}/${semester}`}
+                className="group border-border/30 bg-background/30 hover:border-primary/30 hover:bg-primary/5 flex w-full items-center gap-3 rounded-lg border p-3 transition-all duration-200"
+              >
+                <span className="text-lg">📊</span>
+                <span className="text-foreground group-hover:text-primary font-medium">Ver Posiciones</span>
+              </Link>
+
+              <Link
+                href="/equipos"
+                className="group border-border/30 bg-background/30 hover:border-primary/30 hover:bg-primary/5 flex w-full items-center gap-3 rounded-lg border p-3 transition-all duration-200"
+              >
+                <span className="text-lg">👥</span>
+                <span className="text-foreground group-hover:text-primary font-medium">Ver Equipos</span>
+              </Link>
+
+              <Link
+                href="/"
+                className="group border-border/30 bg-background/30 hover:border-primary/30 hover:bg-primary/5 flex w-full items-center gap-3 rounded-lg border p-3 transition-all duration-200"
+              >
+                <span className="text-lg">🏠</span>
+                <span className="text-foreground group-hover:text-primary font-medium">Volver al Inicio</span>
+              </Link>
             </div>
           </div>
-        </div>
-      ) : null}
 
-      {!playerInfo && pendingRequests.length === 0 && (
-        <div className="bg-primary/10 border-primary/30 mb-8 rounded-lg border p-8 text-center">
-          <div className="text-primary mb-4 text-4xl">🚀</div>
-          <h3 className="text-foreground mb-2 text-xl font-semibold">¡Únete a la Liga!</h3>
-          <p className="text-ml-grey mb-6">
-            ¿Listo para formar parte de Major League UC? Solicita unirte a un equipo y comienza tu aventura
-            futbolística.
-          </p>
-          <Link
-            href="/participa"
-            className="bg-primary-darken hover:bg-primary text-background inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
-          >
-            <span>⚽</span>
-            Solicitar Participación
-          </Link>
-        </div>
-      )}
+          {/* Additional Options */}
+          <div className="border-border/50 bg-card/95 mb-8 rounded-xl border p-6 shadow-sm backdrop-blur-sm">
+            <h3 className="text-foreground mb-4 text-center text-lg font-semibold">Más Opciones</h3>
 
-      <div className="mb-8">
-        <h3 className="text-foreground mb-4 text-xl font-semibold">Acciones Rápidas</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Link
-            href="/"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
-          >
-            <div className="text-primary text-xl">🏠</div>
-            <div>
-              <div className="font-medium">Inicio</div>
-              <div className="text-ml-grey text-sm">Volver al inicio</div>
+            <div className="space-y-3">
+              <Link
+                href="/participa/gracias"
+                className="group border-border/30 bg-background/30 hover:border-primary/30 hover:bg-primary/5 flex w-full items-center gap-3 rounded-lg border p-3 transition-all duration-200"
+              >
+                <span className="text-lg">📋</span>
+                <span className="text-foreground group-hover:text-primary font-medium">Estado de Solicitud</span>
+              </Link>
+
+              {isAdmin ? (
+                <Link
+                  href="/dashboard"
+                  className="group flex w-full items-center gap-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3 transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/10"
+                >
+                  <span className="text-lg">⚙️</span>
+                  <span className="text-foreground font-medium group-hover:text-purple-600">
+                    Panel de Administración
+                  </span>
+                </Link>
+              ) : null}
+              {userIsCaptain ? (
+                <Link
+                  href="/capitan/dashboard"
+                  className="group flex w-full items-center gap-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3 transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/10"
+                >
+                  <span className="text-lg">👑</span>
+                  <span className="text-foreground font-medium group-hover:text-purple-600">Panel de Capitan</span>
+                </Link>
+              ) : null}
+              {userIsPlanillero ? (
+                <Link
+                  href="/planillero"
+                  className="group flex w-full items-center gap-3 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3 transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/10"
+                >
+                  <span className="text-lg">📋</span>
+                  <span className="text-foreground font-medium group-hover:text-purple-600">Panel de Planilleros</span>
+                </Link>
+              ) : null}
             </div>
-          </Link>
-
-          <Link
-            href={`/posiciones/${year}/${semester}`}
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
-          >
-            <div className="text-primary text-xl">🏆</div>
-            <div>
-              <div className="font-medium">Posiciones</div>
-              <div className="text-ml-grey text-sm">Ver tabla de posiciones</div>
-            </div>
-          </Link>
-
-          <Link
-            href="/equipos"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
-          >
-            <div className="text-primary text-xl">⚽</div>
-            <div>
-              <div className="font-medium">Equipos</div>
-              <div className="text-ml-grey text-sm">Conocer los equipos</div>
-            </div>
-          </Link>
-
-          <Link
-            href="/participa/gracias"
-            className="bg-background-header border-border-header hover:border-primary/50 text-foreground hover:text-primary flex items-center gap-3 rounded-lg border p-4 transition-colors"
-          >
-            <div className="text-primary text-xl">📋</div>
-            <div>
-              <div className="font-medium">Estado de Solicitud</div>
-              <div className="text-ml-grey text-sm">Ver estado de participación</div>
-            </div>
-          </Link>
-
-          {isAdmin ? (
-            <Link
-              href="/dashboard"
-              className="bg-primary-darken hover:bg-primary text-background flex items-center gap-3 rounded-lg p-4 transition-colors"
-            >
-              <div className="text-xl">⚙️</div>
-              <div>
-                <div className="font-medium">Panel Admin</div>
-                <div className="text-sm opacity-90">Gestionar sistema</div>
-              </div>
-            </Link>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="bg-background-header border-border-header rounded-lg border p-8">
-        <h3 className="text-foreground mb-4 text-xl font-semibold">Gestión de Cuenta</h3>
-        <div className="space-y-4">
-          <div className="border-border-header rounded-lg border p-4">
-            <h4 className="text-foreground mb-2 font-medium">Autenticación OSUC</h4>
-            <p className="text-ml-grey mb-4 text-sm">
-              Tu cuenta está vinculada con el sistema de autenticación de OSUC. Para actualizar tu información personal
-              o cerrar sesión, utiliza el portal oficial.
-            </p>
-            <Link
-              href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
-              className="text-primary-darken hover:text-primary border-primary-darken hover:border-primary inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors"
-            >
-              <span>🔗</span>
-              Ir a Portal OSUC
-            </Link>
           </div>
 
-          <div className="border-border-header rounded-lg border p-4">
-            <h4 className="text-foreground mb-2 font-medium">Soporte</h4>
-            <p className="text-ml-grey mb-4 text-sm">
-              ¿Tienes problemas con tu cuenta o necesitas ayuda? Contacta al equipo de soporte.
-            </p>
-            <div className="flex gap-2">
+          {/* Support Links - Matching Login Style */}
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4 text-sm">Tu cuenta está vinculada con OSUC</p>
+            <div className="flex flex-col gap-2">
+              <Link
+                href={`https://auth.osuc.dev/?ref=${typeof window !== "undefined" ? new URL(window.location.href).toString() : ""}`}
+                className="group border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200"
+              >
+                <span>🔗</span>
+                <span>Portal OSUC</span>
+              </Link>
+
               <Link
                 href="https://www.instagram.com/opensource_euc/"
                 target="_blank"
-                className="text-ml-grey hover:text-foreground inline-flex items-center gap-2 rounded-md border border-transparent px-4 py-2 text-sm transition-colors"
+                className="group border-accent/30 bg-accent/5 text-accent hover:bg-accent/10 inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200"
               >
                 <span>📧</span>
-                Contactanos
+                <span>Soporte</span>
               </Link>
             </div>
           </div>

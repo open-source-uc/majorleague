@@ -15,14 +15,6 @@ export default async function GraciasPage() {
 
   const participation = await getParticipation(userProfile.id);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CL", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "pending":
@@ -85,7 +77,7 @@ export default async function GraciasPage() {
             </p>
             <Link
               href="/participa"
-              className="bg-primary-darken hover:bg-primary text-background inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
+              className="from-primary to-primary/90 text-primary-foreground mb-4 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r px-6 py-4 font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
               <span>⚽</span>
               Solicitar Participación
@@ -112,7 +104,7 @@ export default async function GraciasPage() {
 
           <Link
             href="/"
-            className="bg-primary-darken hover:bg-primary text-background flex items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors"
+            className="bg-primary hover:bg-primary-darken text-background flex items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors"
           >
             <span>🏠</span>
             Volver al Inicio
@@ -186,9 +178,16 @@ export default async function GraciasPage() {
             </div>
 
             <div>
-              <label className="text-foreground mb-2 block text-sm font-medium">Posición Preferida</label>
+              <label className="text-foreground mb-2 block text-sm font-medium">Posición</label>
               <div className="bg-background border-border-header text-foreground rounded-md border p-3">
                 {getPositionName(participation.preferred_position)}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-foreground mb-2 block text-sm font-medium">Número de Camiseta</label>
+              <div className="bg-background border-border-header text-foreground rounded-md border p-3">
+                {participation.preferred_jersey_number}
               </div>
             </div>
           </div>
@@ -197,16 +196,16 @@ export default async function GraciasPage() {
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Fecha de Nacimiento</label>
               <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                {participation.birthday ? formatDate(participation.birthday) : "No disponible"}
+                {participation.birthday}
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Fecha de Solicitud</label>
               <div className="bg-background border-border-header text-foreground rounded-md border p-3">
-                {participation.created_at ? formatDate(participation.created_at) : "No disponible"}
+                {participation.created_at}
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="text-foreground mb-2 block text-sm font-medium">Estado Actual</label>
@@ -288,7 +287,7 @@ export default async function GraciasPage() {
 
           <Link
             href="/"
-            className="bg-primary-darken hover:bg-primary text-background flex items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors"
+            className="bg-primary hover:bg-primary-darken text-background flex items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors"
           >
             <span>🏠</span>
             Volver al Inicio

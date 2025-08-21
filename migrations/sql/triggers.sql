@@ -16,6 +16,10 @@ DROP TRIGGER IF EXISTS validate_event_minute;
 DROP TRIGGER IF EXISTS cleanup_join_request_on_player_deletion;
 DROP TRIGGER IF EXISTS prevent_duplicate_pending_requests;
 DROP TRIGGER IF EXISTS prevent_request_if_already_player;
+DROP TRIGGER IF EXISTS update_match_planilleros_ts;
+DROP TRIGGER IF EXISTS update_attendance_ts;
+DROP TRIGGER IF EXISTS check_match_completion;
+DROP TRIGGER IF EXISTS update_scores_and_competition_points_on_delete;
 
 
 -- 1. Update timestamps on profile changes
@@ -92,6 +96,7 @@ CREATE TRIGGER create_player_on_approval
             nickname,
             birthday, 
             position,
+            jersey_number,
             created_at,
             updated_at
         ) VALUES (
@@ -102,6 +107,7 @@ CREATE TRIGGER create_player_on_approval
             NEW.nickname,
             NEW.birthday,
             NEW.preferred_position,
+            NEW.preferred_jersey_number,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         );
@@ -121,6 +127,7 @@ CREATE TRIGGER create_player_on_instant_approval
             nickname,
             birthday, 
             position,
+            jersey_number,
             created_at,
             updated_at
         ) VALUES (
@@ -131,6 +138,7 @@ CREATE TRIGGER create_player_on_instant_approval
             NEW.nickname,
             NEW.birthday,
             NEW.preferred_position,
+            NEW.preferred_jersey_number,
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         );
@@ -158,7 +166,7 @@ CREATE TRIGGER prevent_captain_removal
         SELECT RAISE(ABORT, 'Cannot remove team captain from team. Transfer captaincy first.');
     END;
 
--- 10. Auto-update match scores and competition points when match finishes
+-- 10.a. Auto-update match scores and competition points when match finishes
 CREATE TRIGGER update_scores_and_competition_points
     AFTER UPDATE ON matches
     FOR EACH ROW
@@ -301,6 +309,148 @@ CREATE TRIGGER update_scores_and_competition_points
         WHERE competition_id = NEW.competition_id;
     END;
 
+-- 10.b. Auto-update match scores and competition points when match is deleted
+CREATE TRIGGER update_scores_and_competition_points_on_delete
+    AFTER DELETE ON matches
+    FOR EACH ROW
+    BEGIN
+        -- First, recalculate match scores from goal events
+        UPDATE matches 
+        SET local_score = (
+                SELECT COALESCE(COUNT(*), 0)
+                FROM events 
+                WHERE match_id = OLD.id 
+                  AND type = 'goal' 
+                  AND team_id = OLD.local_team_id
+            ),
+            visitor_score = (
+                SELECT COALESCE(COUNT(*), 0)
+                FROM events 
+                WHERE match_id = OLD.id 
+                  AND type = 'goal' 
+                  AND team_id = OLD.visitor_team_id
+            ),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = OLD.id;
+        
+        -- Then, recalculate all statistics for all teams in this competition from scratch
+        -- This prevents race conditions by not accumulating values
+        UPDATE team_competitions 
+        SET 
+            -- Points calculation
+            points = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        -- When team is local team
+                        WHEN m.local_team_id = team_competitions.team_id THEN
+                            CASE 
+                                WHEN m.local_score > m.visitor_score THEN 3  -- Win
+                                WHEN m.local_score = m.visitor_score THEN 1  -- Draw
+                                ELSE 0  -- Loss
+                            END
+                        -- When team is visitor team
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN
+                            CASE 
+                                WHEN m.visitor_score > m.local_score THEN 3  -- Win
+                                WHEN m.visitor_score = m.local_score THEN 1  -- Draw
+                                ELSE 0  -- Loss
+                            END
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- PJ - Partidos Jugados (Played Games)
+            pj = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- G - Ganados (Wins)
+            g = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (
+                    (m.local_team_id = team_competitions.team_id AND m.local_score > m.visitor_score) OR
+                    (m.visitor_team_id = team_competitions.team_id AND m.visitor_score > m.local_score)
+                  )
+            ),
+            -- E - Empatados (Draws)
+            e = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND m.local_score = m.visitor_score
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- P - Perdidos (Losses)
+            p = (
+                SELECT COUNT(*)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (
+                    (m.local_team_id = team_competitions.team_id AND m.local_score < m.visitor_score) OR
+                    (m.visitor_team_id = team_competitions.team_id AND m.visitor_score < m.local_score)
+                  )
+            ),
+            -- GF - Goles a Favor (Goals For)
+            gf = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        WHEN m.local_team_id = team_competitions.team_id THEN m.local_score
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN m.visitor_score
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            ),
+            -- GC - Goles en Contra (Goals Against)
+            gc = (
+                SELECT COALESCE(SUM(
+                    CASE 
+                        WHEN m.local_team_id = team_competitions.team_id THEN m.visitor_score
+                        WHEN m.visitor_team_id = team_competitions.team_id THEN m.local_score
+                        ELSE 0
+                    END
+                ), 0)
+                FROM matches m
+                WHERE m.competition_id = OLD.competition_id
+                  AND m.status = 'finished'
+                  AND (m.local_team_id = team_competitions.team_id OR m.visitor_team_id = team_competitions.team_id)
+            )
+        WHERE competition_id = OLD.competition_id;
+        
+        -- Update DG - Diferencia de Goles (Goal Difference) = GF - GC
+        UPDATE team_competitions 
+        SET dg = gf - gc
+        WHERE competition_id = OLD.competition_id;
+        
+        -- Recalculate positions for this competition (Points first, then Goal Difference as tiebreaker)
+        UPDATE team_competitions 
+        SET position = (
+            SELECT COUNT(*) + 1 
+            FROM team_competitions tc2 
+            WHERE tc2.competition_id = OLD.competition_id 
+              AND (
+                tc2.points > team_competitions.points OR 
+                (tc2.points = team_competitions.points AND tc2.dg > team_competitions.dg)
+              )
+        )
+        WHERE competition_id = OLD.competition_id;
+    END;
+
 -- 11. Prevent overlapping matches for same team
 CREATE TRIGGER prevent_overlapping_matches
     BEFORE INSERT ON matches
@@ -396,4 +546,57 @@ CREATE TRIGGER prevent_request_if_already_player
     )
     BEGIN
         SELECT RAISE(ABORT, 'Ya eres miembro de este equipo.');
+    END;
+
+-- 17. Auto-update timestamps for match_planilleros
+CREATE TRIGGER update_match_planilleros_ts
+    BEFORE UPDATE ON match_planilleros
+    FOR EACH ROW
+    BEGIN
+        UPDATE match_planilleros 
+        SET updated_at = CURRENT_TIMESTAMP 
+        WHERE id = NEW.id;
+    END;
+
+-- 18. Auto-update timestamps for match_attendance
+CREATE TRIGGER update_attendance_ts
+    BEFORE UPDATE ON match_attendance
+    FOR EACH ROW
+    BEGIN
+        UPDATE match_attendance 
+        SET updated_at = CURRENT_TIMESTAMP 
+        WHERE id = NEW.id;
+    END;
+
+-- 19. Auto-complete match when both scorecards are validated
+CREATE TRIGGER check_match_completion
+    AFTER UPDATE ON scorecard_validations
+    FOR EACH ROW
+    WHEN NEW.status = 'approved'
+    BEGIN
+        -- Only finish if both teams were validated by the corresponding rival planillero
+        UPDATE matches 
+        SET status = 'finished'
+        WHERE id = NEW.match_id
+          AND status = 'in_review'
+          AND EXISTS (
+            -- Validation of local team by visitor planillero
+            SELECT 1 FROM scorecard_validations sv1
+            JOIN match_planilleros mp1 ON sv1.validator_profile_id = mp1.profile_id
+            JOIN matches m1 ON sv1.match_id = m1.id
+            WHERE sv1.match_id = NEW.match_id
+              AND sv1.validated_team_id = m1.local_team_id
+              AND mp1.team_id = m1.visitor_team_id
+              AND sv1.status = 'approved'
+          )
+          AND EXISTS (
+            -- Validation of visitor team by local planillero  
+            SELECT 1 FROM scorecard_validations sv2
+            JOIN match_planilleros mp2 ON sv2.validator_profile_id = mp2.profile_id
+            JOIN matches m2 ON sv2.match_id = m2.id
+            WHERE sv2.match_id = NEW.match_id
+              AND sv2.validated_team_id = m2.visitor_team_id
+              AND mp2.team_id = m2.local_team_id
+              AND sv2.status = 'approved'
+          );
     END;

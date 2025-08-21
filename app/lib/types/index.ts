@@ -8,6 +8,7 @@ export interface Profile {
   id: string;
   username: string;
   email?: string;
+  is_admin?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +20,19 @@ export interface Team {
   captain_id: string;
   captain_username?: string;
   major?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TeamPage {
+  id: number;
+  team_id: number;
+  description?: string;
+  instagram_handle?: string;
+  captain_email?: string;
+  founded_year?: number;
+  achievements?: string; // JSON array
+  motto?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -40,6 +54,7 @@ export interface Player {
   first_name: string;
   last_name: string;
   nickname?: string;
+  jersey_number?: number;
   birthday: string;
   position: "GK" | "DEF" | "MID" | "FWD";
   created_at?: string;
@@ -55,7 +70,7 @@ export interface Match {
   location?: string;
   local_score: number;
   visitor_score: number;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
   created_at?: string;
   updated_at?: string;
 }
@@ -65,16 +80,21 @@ export interface NextMatch {
   time: string;
   local_team_name: string;
   visitor_team_name: string;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
 }
 
 // New entity types
 export interface Stream {
   id: number;
-  match_id: number;
-  type: "youtube" | "twitch" | "other";
-  platform: string;
+  stream_date: string; // YYYY-MM-DD
   url: string;
+  youtube_video_id: string;
+  is_live_stream: boolean;
+  is_featured: boolean;
+  title?: string;
+  thumbnail_url?: string;
+  published_at?: string;
+  duration_seconds?: number;
   start_time?: string;
   end_time?: string;
   notes?: string;
@@ -114,6 +134,7 @@ export interface JoinTeamRequest {
   nickname?: string;
   birthday: string;
   preferred_position: "GK" | "DEF" | "MID" | "FWD";
+  preferred_jersey_number?: number;
   status: "pending" | "approved" | "rejected";
   notes?: string;
   created_at?: string;
@@ -163,22 +184,24 @@ export interface ObjectConfig {
   fields: FieldConfig[];
   displayColumns: DisplayColumn[];
   actions: ObjectAction[];
+  dynamicHelp?: string;
 }
 
 export interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "email" | "number" | "date" | "datetime-local" | "select" | "textarea";
+  type: "text" | "email" | "number" | "date" | "datetime" | "select" | "textarea" | "boolean";
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
   dataSource?: string; // For dynamic select options
+  helpText?: string;
 }
 
 export interface DisplayColumn {
   key: string;
   label: string;
-  type?: "text" | "date" | "badge" | "custom";
+  type?: "text" | "date" | "datetime" | "badge" | "custom" | "number" | "boolean";
   render?: (value: any, item: any) => string;
 }
 
@@ -199,6 +222,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "id", label: "ID", type: "text" },
       { key: "username", label: "Username", type: "text" },
       { key: "email", label: "Email", type: "text" },
+      { key: "is_admin", label: "Admin", type: "boolean" },
       { key: "created_at", label: "Creado", type: "date" },
     ],
     actions: [
@@ -227,6 +251,16 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         type: "email",
         placeholder: "Ej: juan.perez@uc.cl",
         required: false,
+      },
+      {
+        name: "is_admin",
+        label: "Admin",
+        type: "select",
+        required: false,
+        options: [
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
+        ],
       },
     ],
   },
@@ -313,13 +347,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "start_timestamp",
         label: "Fecha y Hora de Inicio",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {
         name: "end_timestamp",
         label: "Fecha y Hora de Fin",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
     ],
@@ -333,8 +367,10 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "last_name", label: "Apellido", type: "text" },
       { key: "team_name", label: "Equipo", type: "text" },
       { key: "profile_username", label: "Usuario", type: "text" },
+      { key: "nickname", label: "Apodo", type: "text" },
       { key: "position", label: "Posición", type: "badge" },
       { key: "birthday", label: "Fecha de Nacimiento", type: "date" },
+      { key: "jersey_number", label: "Número de Camiseta", type: "number" },
     ],
     actions: [
       { type: "create", label: "Crear Jugador", variant: "primary" },
@@ -395,6 +431,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "FWD", label: "Delantero (FWD)" },
         ],
       },
+      {
+        name: "jersey_number",
+        label: "Número de Camiseta",
+        type: "number",
+        placeholder: "10",
+        required: false,
+      },
     ],
   },
   matches: {
@@ -402,7 +445,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
     description: "Gestionar partidos programados",
     displayField: "timestamp",
     displayColumns: [
-      { key: "timestamp", label: "Fecha y Hora", type: "date" },
+      { key: "timestamp", label: "Fecha y Hora", type: "datetime" },
       { key: "local_team_name", label: "Local", type: "text" },
       { key: "visitor_team_name", label: "Visitante", type: "text" },
       { key: "competition_name", label: "Competición", type: "text" },
@@ -439,7 +482,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "timestamp",
         label: "Fecha y Hora del Partido",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {
@@ -459,20 +502,21 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "live", label: "En Vivo" },
           { value: "finished", label: "Terminado" },
           { value: "cancelled", label: "Cancelado" },
-          { value: "in review", label: "En Revisión" },
+          { value: "in_review", label: "En Revisión" },
         ],
       },
     ],
   },
   streams: {
     title: "Stream",
-    description: "Gestionar transmisiones en vivo",
-    displayField: "platform",
+    description: "Gestionar transmisiones de YouTube por fecha (una por día)",
+    displayField: "title",
     displayColumns: [
-      { key: "match_description", label: "Partido", type: "text" },
-      { key: "platform", label: "Plataforma", type: "text" },
-      { key: "type", label: "Tipo", type: "badge" },
-      { key: "url", label: "URL", type: "text" },
+      { key: "stream_date", label: "Fecha", type: "date" },
+      { key: "title", label: "Título", type: "text" },
+      { key: "youtube_video_id", label: "Video ID", type: "text" },
+      { key: "is_live_stream", label: "Es Live", type: "boolean" },
+      { key: "is_featured", label: "Destacado", type: "boolean" },
       { key: "start_time", label: "Inicio", type: "date" },
     ],
     actions: [
@@ -482,47 +526,56 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
     ],
     fields: [
       {
-        name: "match_id",
-        label: "Partido",
-        type: "select",
+        name: "stream_date",
+        label: "Fecha de Transmisión",
+        type: "date",
         required: true,
-        dataSource: "matches",
       },
       {
-        name: "type",
-        label: "Tipo",
+        name: "title",
+        label: "Título",
+        type: "text",
+        placeholder: "Título de la transmisión",
+        required: true,
+      },
+      {
+        name: "youtube_url",
+        label: "URL de YouTube",
+        type: "text",
+        placeholder: "https://youtube.com/watch?v=...",
+        helpText: "Acepta formatos watch?v=, youtu.be/, embed/, shorts/ y live/",
+        required: true,
+      },
+      {
+        name: "is_live_stream",
+        label: "Es transmisión en vivo",
         type: "select",
         required: true,
         options: [
-          { value: "youtube", label: "YouTube" },
-          { value: "twitch", label: "Twitch" },
-          { value: "other", label: "Otro" },
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
         ],
       },
       {
-        name: "platform",
-        label: "Plataforma",
-        type: "text",
-        placeholder: "YouTube",
+        name: "is_featured",
+        label: "Destacado",
+        type: "select",
         required: true,
-      },
-      {
-        name: "url",
-        label: "URL",
-        type: "text",
-        placeholder: "https://youtube.com/watch?v=...",
-        required: true,
+        options: [
+          { value: "true", label: "Sí" },
+          { value: "false", label: "No" },
+        ],
       },
       {
         name: "start_time",
         label: "Hora de Inicio",
-        type: "datetime-local",
+        type: "datetime",
         required: false,
       },
       {
         name: "end_time",
         label: "Hora de Fin",
-        type: "datetime-local",
+        type: "datetime",
         required: false,
       },
       {
@@ -533,6 +586,8 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         required: false,
       },
     ],
+    dynamicHelp:
+      "Ingresa una URL válida de YouTube. El sistema extraerá automáticamente el ID del video y los metadatos.",
   },
   notifications: {
     title: "Notificación",
@@ -729,6 +784,13 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
         ],
       },
       {
+        name: "preferred_jersey_number",
+        label: "Número de Camiseta",
+        type: "number",
+        placeholder: "10",
+        required: false,
+      },
+      {
         name: "status",
         label: "Estado",
         type: "select",
@@ -781,7 +843,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "timestamp",
         label: "Fecha y Hora",
-        type: "datetime-local",
+        type: "datetime",
         required: true,
       },
       {

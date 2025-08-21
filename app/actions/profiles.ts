@@ -16,12 +16,14 @@ const profileCreateSchema = z.object({
     .max(50, "El ID del usuario no puede exceder los 50 caracteres"),
   username: z.string().min(1, "El username es requerido").max(25, "El username no puede exceder los 25 caracteres"),
   email: z.string().email("El email debe tener un formato válido").optional(),
+  is_admin: z.union([z.literal("true"), z.literal("false")]).optional(),
 });
 
 const profileUpdateSchema = z.object({
   id: z.string().min(1, "El ID del usuario es requerido"),
   username: z.string().min(1, "El username es requerido").max(25, "El username no puede exceder los 25 caracteres"),
   email: z.string().email("El email debe tener un formato válido").optional(),
+  is_admin: z.union([z.literal("true"), z.literal("false")]).optional(),
 });
 
 const profileDeleteSchema = z.object({
@@ -33,7 +35,7 @@ export async function getProfiles(): Promise<Profile[]> {
   const { env } = getRequestContext();
   const profiles = await env.DB.prepare(
     `
-    SELECT id, username, email, created_at, updated_at 
+    SELECT id, username, email, is_admin, created_at, updated_at 
     FROM profiles 
     ORDER BY created_at DESC
   `,
@@ -46,7 +48,7 @@ export async function getProfileById(id: string): Promise<Profile | null> {
   const { env } = getRequestContext();
   const profile = await env.DB.prepare(
     `
-    SELECT id, username, email, created_at, updated_at 
+    SELECT id, username, email, is_admin, created_at, updated_at 
     FROM profiles 
     WHERE id = ?
   `,
@@ -67,6 +69,7 @@ export async function createProfile(
       id: string;
       username: string;
       email?: string;
+      is_admin?: string;
     };
   },
   formData: FormData,
@@ -89,6 +92,7 @@ export async function createProfile(
     id: formData.get("id") as string,
     username: formData.get("username") as string,
     email: (formData.get("email") as string) || undefined,
+    is_admin: (formData.get("is_admin") as string) || undefined,
   };
 
   const parsed = profileCreateSchema.safeParse(body);
@@ -103,6 +107,7 @@ export async function createProfile(
   }
 
   const { env } = getRequestContext();
+  const { isSuperAdmin } = await getAuthStatus();
 
   try {
     const existingProfile = await env.DB.prepare(
@@ -158,13 +163,14 @@ export async function createProfile(
       }
     }
 
+    const adminFlag = parsed.data.is_admin === "true" ? 1 : 0;
     await env.DB.prepare(
       `
-      INSERT INTO profiles (id, username, email, created_at, updated_at)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      INSERT INTO profiles (id, username, email, is_admin, created_at, updated_at)
+      VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `,
     )
-      .bind(parsed.data.id, parsed.data.username, parsed.data.email || null)
+      .bind(parsed.data.id, parsed.data.username, parsed.data.email || null, isSuperAdmin ? adminFlag : 0)
       .run();
 
     revalidatePath("/admin/dashboard/profiles");
@@ -195,6 +201,7 @@ export async function updateProfile(
       id: string;
       username: string;
       email?: string;
+      is_admin?: string;
     };
   },
   formData: FormData,
@@ -209,6 +216,7 @@ export async function updateProfile(
         id: formData.get("id") as string,
         username: formData.get("username") as string,
         email: formData.get("email") as string,
+        is_admin: formData.get("is_admin") as string,
       },
     };
   }
@@ -217,6 +225,7 @@ export async function updateProfile(
     id: formData.get("id") as string,
     username: formData.get("username") as string,
     email: (formData.get("email") as string) || undefined,
+    is_admin: (formData.get("is_admin") as string) || undefined,
   };
 
   const parsed = profileUpdateSchema.safeParse(body);
@@ -231,6 +240,7 @@ export async function updateProfile(
   }
 
   const { env } = getRequestContext();
+  const { isSuperAdmin } = await getAuthStatus();
 
   try {
     const existingProfile = await env.DB.prepare(
@@ -286,15 +296,27 @@ export async function updateProfile(
       }
     }
 
-    await env.DB.prepare(
-      `
-      UPDATE profiles 
-      SET username = ?, email = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `,
-    )
-      .bind(parsed.data.username, parsed.data.email || null, parsed.data.id)
-      .run();
+    if (isSuperAdmin && typeof parsed.data.is_admin !== "undefined") {
+      await env.DB.prepare(
+        `
+        UPDATE profiles
+        SET username = ?, email = ?, is_admin = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+      )
+        .bind(parsed.data.username, parsed.data.email || null, parsed.data.is_admin === "true" ? 1 : 0, parsed.data.id)
+        .run();
+    } else {
+      await env.DB.prepare(
+        `
+        UPDATE profiles
+        SET username = ?, email = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+      )
+        .bind(parsed.data.username, parsed.data.email || null, parsed.data.id)
+        .run();
+    }
 
     revalidatePath("/admin/dashboard/profiles");
 

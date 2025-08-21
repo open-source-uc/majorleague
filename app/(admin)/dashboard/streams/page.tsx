@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getStreams, createStream, updateStream, deleteStream } from "@/actions/streams";
 import ObjectManager from "@/components/admin/ObjectManager";
 import { getAuthStatus } from "@/lib/services/auth";
-import { getMatchOptions } from "@/lib/utils/admin-options";
 
 export const runtime = "edge";
 
@@ -14,7 +13,7 @@ export default async function StreamsPage() {
     redirect("/");
   }
 
-  const [streams, matchOptions] = await Promise.all([getStreams(), getMatchOptions()]);
+  const [streams] = await Promise.all([getStreams()]);
 
   return (
     <section className="mx-10 mt-8">
@@ -30,9 +29,6 @@ export default async function StreamsPage() {
         createAction={createStream}
         updateAction={updateStream}
         deleteAction={deleteStream}
-        dynamicOptions={{
-          matches: matchOptions,
-        }}
       />
     </section>
   );
