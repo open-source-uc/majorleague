@@ -22,8 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning={true} className={albert_sans.className}>
-      <head>
-      </head>
+      <head />
       <body className="relative grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Navbar />
         <main>{children}</main>
