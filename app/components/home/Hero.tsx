@@ -57,6 +57,9 @@ export default function Hero() {
                   src={hero}
                   alt="Major League UC - Comunidad de fútbol"
                   className="desktop:h-80 h-96 object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority
+                  placeholder="blur"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
