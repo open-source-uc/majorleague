@@ -64,7 +64,7 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className="hover:bg-accent tablet:hidden focus:ring-ring focus:ring-offset-background rounded-sm p-2 transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-offset-2 focus:outline-none"
+        className="hover:bg-accent tablet:hidden rounded-sm p-2 transition-colors duration-200 ease-in-out focus:outline-none"
         aria-expanded={isMenuOpen}
         aria-controls="mobile-menu"
         aria-label={isMenuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}

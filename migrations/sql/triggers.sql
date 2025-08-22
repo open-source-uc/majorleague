@@ -18,7 +18,12 @@ DROP TRIGGER IF EXISTS prevent_duplicate_pending_requests;
 DROP TRIGGER IF EXISTS prevent_request_if_already_player;
 DROP TRIGGER IF EXISTS update_match_planilleros_ts;
 DROP TRIGGER IF EXISTS update_attendance_ts;
+DROP TRIGGER IF EXISTS update_attendance_drafts_ts;
+DROP TRIGGER IF EXISTS update_event_drafts_ts;
 DROP TRIGGER IF EXISTS check_match_completion;
+DROP TRIGGER IF EXISTS check_planillero_agreement;
+DROP TRIGGER IF EXISTS check_admin_approval;
+DROP TRIGGER IF EXISTS validate_event_drafts_minute;
 DROP TRIGGER IF EXISTS update_scores_and_competition_points_on_delete;
 
 
@@ -568,35 +573,103 @@ CREATE TRIGGER update_attendance_ts
         WHERE id = NEW.id;
     END;
 
--- 19. Auto-complete match when both scorecards are validated
+-- 18b. Auto-update timestamps for match_attendance_drafts
+CREATE TRIGGER update_attendance_drafts_ts
+    BEFORE UPDATE ON match_attendance_drafts
+    FOR EACH ROW
+    BEGIN
+        UPDATE match_attendance_drafts
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE id = NEW.id;
+    END;
+
+-- 19. Handle when planillero completes their work (SIMPLIFIED)
 CREATE TRIGGER check_match_completion
-    AFTER UPDATE ON scorecard_validations
+    AFTER UPDATE ON match_planilleros
+    FOR EACH ROW
+    WHEN NEW.status = 'completed' AND OLD.status != 'completed'
+    BEGIN
+        -- If both planilleros completed, go directly to admin_review
+        UPDATE matches 
+        SET status = 'admin_review'
+        WHERE id = NEW.match_id
+          AND status = 'live'
+          AND (
+            SELECT COUNT(*) 
+            FROM match_planilleros 
+            WHERE match_id = NEW.match_id AND status = 'completed'
+          ) = 2;
+          
+        -- Update planilleros status to admin_review when both complete
+        UPDATE match_planilleros
+        SET status = 'admin_review'
+        WHERE match_id = NEW.match_id
+          AND status = 'completed'
+          AND EXISTS (SELECT 1 FROM matches WHERE id = NEW.match_id AND status = 'admin_review');
+    END;
+
+-- 20. Handle admin final approval (SIMPLIFIED)  
+-- Note: Planillero validation workflow removed - admins now handle all final decisions
+
+-- 21. Handle admin final approval (ENHANCED)
+CREATE TRIGGER check_admin_approval
+    AFTER UPDATE ON match_admin_validations
     FOR EACH ROW
     WHEN NEW.status = 'approved'
     BEGIN
-        -- Only finish if both teams were validated by the corresponding rival planillero
+        -- Promote one planillero's drafts to final tables (use first profile_id alphabetically for consistency)
+        INSERT OR REPLACE INTO match_attendance (match_id, player_id, status, jersey_number, created_at)
+        SELECT mad.match_id, mad.player_id, mad.status, mad.jersey_number, CURRENT_TIMESTAMP
+        FROM match_attendance_drafts mad
+        WHERE mad.match_id = NEW.match_id 
+          AND mad.profile_id = (
+            SELECT MIN(profile_id) FROM match_planilleros WHERE match_id = NEW.match_id
+          );
+          
+        -- Promote events to final tables
+        INSERT INTO events (match_id, team_id, type, minute, description, created_at)
+        SELECT ed.match_id, ed.team_id, ed.type, ed.minute, ed.description, CURRENT_TIMESTAMP
+        FROM event_drafts ed
+        WHERE ed.match_id = NEW.match_id 
+          AND ed.profile_id = (
+            SELECT MIN(profile_id) FROM match_planilleros WHERE match_id = NEW.match_id
+          );
+          
+        -- Create event_players entries
+        INSERT INTO event_players (event_id, player_id, role, created_at)
+        SELECT e.id, ed.player_id, 'main', CURRENT_TIMESTAMP
+        FROM events e
+        JOIN event_drafts ed ON ed.match_id = e.match_id AND ed.team_id = e.team_id AND ed.type = e.type AND ed.minute = e.minute
+        WHERE e.match_id = NEW.match_id
+          AND ed.profile_id = (
+            SELECT MIN(profile_id) FROM match_planilleros WHERE match_id = NEW.match_id
+          )
+          AND NOT EXISTS (SELECT 1 FROM event_players WHERE event_id = e.id);
+        
+        -- Finish match when admin approves
         UPDATE matches 
         SET status = 'finished'
-        WHERE id = NEW.match_id
-          AND status = 'in_review'
-          AND EXISTS (
-            -- Validation of local team by visitor planillero
-            SELECT 1 FROM scorecard_validations sv1
-            JOIN match_planilleros mp1 ON sv1.validator_profile_id = mp1.profile_id
-            JOIN matches m1 ON sv1.match_id = m1.id
-            WHERE sv1.match_id = NEW.match_id
-              AND sv1.validated_team_id = m1.local_team_id
-              AND mp1.team_id = m1.visitor_team_id
-              AND sv1.status = 'approved'
-          )
-          AND EXISTS (
-            -- Validation of visitor team by local planillero  
-            SELECT 1 FROM scorecard_validations sv2
-            JOIN match_planilleros mp2 ON sv2.validator_profile_id = mp2.profile_id
-            JOIN matches m2 ON sv2.match_id = m2.id
-            WHERE sv2.match_id = NEW.match_id
-              AND sv2.validated_team_id = m2.visitor_team_id
-              AND mp2.team_id = m2.local_team_id
-              AND sv2.status = 'approved'
-          );
+        WHERE id = NEW.match_id AND status = 'admin_review';
+    END;
+
+-- Trigger 22 removed - admin rejection no longer exists
+-- Admins always finalize matches by approving with consolidated data
+
+-- 23. Validate event_drafts minute is within reasonable match duration
+CREATE TRIGGER validate_event_drafts_minute
+    BEFORE INSERT ON event_drafts
+    FOR EACH ROW
+    WHEN NEW.minute > 120
+    BEGIN
+        SELECT RAISE(ABORT, 'Event minute cannot exceed 120 minutes.');
+    END;
+
+-- 24. Auto-update timestamps for event_drafts
+CREATE TRIGGER update_event_drafts_ts
+    BEFORE UPDATE ON event_drafts
+    FOR EACH ROW
+    BEGIN
+        UPDATE event_drafts
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE id = NEW.id;
     END;

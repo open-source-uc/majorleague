@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import heroImage from "@/../public/assets/images/hero.webp";
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
@@ -12,6 +14,28 @@ import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
 import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const runtime = "edge";
+
+export const metadata: Metadata = {
+  title: "Equipos de Major League UC",
+  description:
+    "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United, descubre las carreras y departamentos que representan.",
+  keywords:
+    "equipos, carreras, departamentos, Atletico Byte, Industrial FC, Manchester Civil, fútbol universitario, UC",
+  openGraph: {
+    title: "Equipos de Major League UC",
+    description:
+      "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United.",
+    url: "https://majorleague.uc.cl/equipos",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Equipos de Major League UC",
+      },
+    ],
+  },
+};
 
 const teams = [
   {
@@ -93,73 +117,26 @@ export default function EquiposPage() {
     <>
       {/* Teams Grid */}
       <section className="relative px-5 py-16" aria-label="Equipos participantes del torneo">
-        {/* Floating Images */}
+        {/* Floating Images - Optimized with CSS masks to reuse single image */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {/* Top Left */}
-          <div className="absolute -top-10 -left-10 h-32 w-32 rotate-12 transform animate-pulse opacity-10">
+          <div className="absolute inset-0 opacity-10">
             <Image
               src={heroImage}
               alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
+              fill
+              className="object-cover blur-[1px]"
               loading="lazy"
-              sizes="128px"
+              sizes="(max-width: 768px) 100vw, 1200px"
             />
           </div>
 
-          {/* Top Right */}
-          <div className="absolute -top-16 -right-8 h-40 w-40 -rotate-6 transform animate-pulse opacity-8 delay-1000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-lg object-cover blur-[1px]"
-              loading="lazy"
-              sizes="160px"
-            />
-          </div>
-
-          {/* Middle Left */}
-          <div className="absolute top-1/2 -left-12 h-28 w-28 rotate-45 transform animate-pulse opacity-12 delay-2000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
-              loading="lazy"
-              sizes="112px"
-            />
-          </div>
-
-          {/* Middle Right */}
-          <div className="absolute top-1/3 -right-16 h-36 w-36 -rotate-12 transform animate-pulse opacity-10 delay-3000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-xl object-cover blur-[1px]"
-              loading="lazy"
-              sizes="144px"
-            />
-          </div>
-
-          {/* Bottom Left */}
-          <div className="absolute -bottom-8 -left-6 h-24 w-24 rotate-30 transform animate-pulse opacity-15 delay-4000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-lg object-cover blur-[1px]"
-              loading="lazy"
-              sizes="96px"
-            />
-          </div>
-
-          {/* Bottom Right */}
-          <div className="absolute -right-10 -bottom-12 h-32 w-32 -rotate-20 transform animate-pulse opacity-8 delay-500">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
-              loading="lazy"
-              sizes="128px"
-            />
-          </div>
+          {/* Floating mask overlays for visual effects */}
+          <div className="absolute -top-10 -left-10 h-32 w-32 rotate-12 transform animate-pulse rounded-full bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm delay-0" />
+          <div className="absolute -top-16 -right-8 h-40 w-40 -rotate-6 transform animate-pulse rounded-lg bg-gradient-to-bl from-white/3 to-transparent backdrop-blur-sm delay-1000" />
+          <div className="absolute top-1/2 -left-12 h-28 w-28 rotate-45 transform animate-pulse rounded-full bg-gradient-to-tr from-white/4 to-transparent backdrop-blur-sm delay-2000" />
+          <div className="absolute top-1/3 -right-16 h-36 w-36 -rotate-12 transform animate-pulse rounded-xl bg-gradient-to-tl from-white/3 to-transparent backdrop-blur-sm delay-3000" />
+          <div className="absolute -bottom-8 -left-6 h-24 w-24 rotate-30 transform animate-pulse rounded-lg bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm delay-4000" />
+          <div className="absolute -right-10 -bottom-12 h-32 w-32 -rotate-20 transform animate-pulse rounded-full bg-gradient-to-bl from-white/3 to-transparent backdrop-blur-sm delay-500" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl">
@@ -169,87 +146,99 @@ export default function EquiposPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {teams.map((team) => (
-              <article
-                key={team.name}
-                className="group border-border bg-card hover:border-primary/50 hover:shadow-primary/20 focus-within:border-primary focus-within:outline-ring relative overflow-hidden rounded-2xl border transition-all duration-500 focus-within:outline focus-within:outline-2 hover:shadow-2xl"
-                tabIndex={0}
-                role="button"
-                aria-label={`Perfil del equipo ${team.name}`}
-                style={{
-                  background: `linear-gradient(135deg, ${team.colors[0]}08 0%, ${team.colors[1]}05 100%)`,
-                }}
-              >
-                <Link
-                  href={`/equipos/${team.slug}`}
-                  aria-label={`Ir al equipo ${team.name}`}
-                  className="absolute inset-0 z-10"
-                >
-                  <span className="sr-only">{`Ir al equipo ${team.name}`}</span>
-                </Link>
+            {teams.map((team, index) => {
+              // First 6 teams are likely above-the-fold and should load with priority
+              const isPriority = index < 6;
 
-                <div className="pointer-events-none absolute top-3 right-3 z-20">
-                  <span
-                    className="block h-2.5 w-2.5 rounded-full shadow-sm"
-                    style={{ background: `linear-gradient(90deg, ${team.colors[0]}, ${team.colors[1]})` }}
-                  />
-                </div>
-                {/* Team Colors Strip */}
-                <div
-                  className="h-2 w-full"
+              return (
+                <article
+                  key={team.name}
+                  className="group border-border bg-card hover:border-primary/50 hover:shadow-primary/20 focus-within:border-primary focus-within:outline-ring relative overflow-hidden rounded-2xl border transition-all duration-500 focus-within:outline-2 hover:shadow-2xl"
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Perfil del equipo ${team.name}`}
                   style={{
-                    background: `linear-gradient(90deg, ${team.colors[0]} 0%, ${team.colors[1]} 100%)`,
+                    background: `linear-gradient(135deg, ${team.colors[0]}08 0%, ${team.colors[1]}05 100%)`,
                   }}
-                />
+                >
+                  <Link
+                    href={`/equipos/${team.slug}`}
+                    aria-label={`Ir al equipo ${team.name}`}
+                    className="absolute inset-0 z-10"
+                  >
+                    <span className="sr-only">{`Ir al equipo ${team.name}`}</span>
+                  </Link>
 
-                {/* Card Content */}
-                <div className="p-6">
-                  {/* Header with Logo and Basic Info */}
-                  <div className="mb-6 flex items-start gap-4">
-                    <div className="relative">
-                      <div
-                        className="absolute -inset-1 rounded-full opacity-20 transition-opacity duration-300 group-hover:opacity-40"
-                        style={{ backgroundColor: team.colors[0] }}
-                      />
-                      <div className="bg-background/80 relative flex h-16 w-16 items-center justify-center rounded-full backdrop-blur-sm">
-                        <Image
-                          src={team.logo}
-                          alt={team.alt}
-                          className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110"
-                          loading="lazy"
-                          sizes="48px"
-                          width={48}
-                          height={48}
+                  <div className="pointer-events-none absolute top-4 right-3 z-20">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-300 group-hover:scale-110">
+                      <svg
+                        className="h-4 w-4 text-white/80 transition-transform duration-300 group-hover:translate-x-0.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  {/* Team Colors Strip */}
+                  <div
+                    className="h-2 w-full"
+                    style={{
+                      background: `linear-gradient(90deg, ${team.colors[0]} 0%, ${team.colors[1]} 100%)`,
+                    }}
+                  />
+
+                  {/* Card Content */}
+                  <div className="p-6">
+                    {/* Header with Logo and Basic Info */}
+                    <div className="mb-6 flex items-start gap-4">
+                      <div className="relative">
+                        <div
+                          className="absolute -inset-1 rounded-full opacity-20 transition-opacity duration-300 group-hover:opacity-40"
+                          style={{ backgroundColor: team.colors[0] }}
                         />
+                        <div className="bg-background/80 relative flex h-16 w-16 items-center justify-center rounded-full backdrop-blur-sm">
+                          <Image
+                            src={team.logo}
+                            alt={team.alt}
+                            className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110"
+                            priority={isPriority}
+                            loading={isPriority ? undefined : "lazy"}
+                            sizes="(max-width: 768px) 48px, (max-width: 1024px) 48px, 48px"
+                            width={48}
+                            height={48}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex-1">
+                        <h3 className="text-foreground group-hover:text-primary mb-1 text-xl font-bold transition-colors">
+                          {team.name}
+                        </h3>
+                        <p className="text-accent-foreground text-sm">Est. {team.founded}</p>
                       </div>
                     </div>
 
-                    <div className="flex-1">
-                      <h3 className="text-foreground group-hover:text-primary mb-1 text-xl font-bold transition-colors">
-                        {team.name}
-                      </h3>
-                      <p className="text-accent-foreground text-sm">Est. {team.founded}</p>
+                    {/* Departments */}
+                    <div className="border-border/50 bg-background/30 rounded-lg border p-3">
+                      <h4 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
+                        Majors Representados
+                      </h4>
+                      <p className="text-foreground text-sm leading-relaxed">{team.departments}</p>
                     </div>
                   </div>
 
-                  {/* Departments */}
-                  <div className="border-border/50 bg-background/30 rounded-lg border p-3">
-                    <h4 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
-                      Majors Representados
-                    </h4>
-                    <p className="text-foreground text-sm leading-relaxed">{team.departments}</p>
-                  </div>
-                </div>
-
-                {/* Hover Effect Overlay */}
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-10"
-                  style={{
-                    background: `radial-gradient(circle at center, ${team.colors[0]} 0%, transparent 70%)`,
-                  }}
-                />
-              </article>
-            ))}
+                  {/* Hover Effect Overlay */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-10"
+                    style={{
+                      background: `radial-gradient(circle at center, ${team.colors[0]} 0%, transparent 70%)`,
+                    }}
+                  />
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>

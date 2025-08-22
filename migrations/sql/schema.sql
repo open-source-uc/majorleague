@@ -4,8 +4,11 @@
 -- Drop existing tables in correct order (foreign keys first)
 DROP TABLE IF EXISTS audit_log;
 DROP TABLE IF EXISTS match_attendance;
+DROP TABLE IF EXISTS match_attendance_drafts;
+DROP TABLE IF EXISTS match_admin_validations;
 DROP TABLE IF EXISTS scorecard_validations;
 DROP TABLE IF EXISTS match_planilleros;
+DROP TABLE IF EXISTS event_drafts;
 DROP TABLE IF EXISTS streams;
 DROP TABLE IF EXISTS lineups;
 DROP TABLE IF EXISTS event_players;
@@ -107,7 +110,7 @@ CREATE TABLE matches (
     location TEXT,
     local_score INTEGER DEFAULT 0,
     visitor_score INTEGER DEFAULT 0,
-    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'in_review', 'finished', 'cancelled')),
+    status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'admin_review', 'finished', 'cancelled')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (local_team_id) REFERENCES teams(id) ON DELETE RESTRICT,
@@ -127,6 +130,24 @@ CREATE TABLE events (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
+-- Draft Events (per-planillero independent logging before consensus)
+CREATE TABLE event_drafts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    team_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('goal', 'yellow_card', 'red_card', 'substitution', 'other')),
+    minute INTEGER NOT NULL CHECK (minute >= 0 AND minute <= 120),
+    description TEXT,
+    profile_id TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- Event Players (Many-to-many: Events can involve multiple players)
@@ -243,36 +264,31 @@ CREATE TABLE user_favorite_matches (
     UNIQUE(profile_id, match_id)
 );
 
--- Match Planilleros (Scorecard keepers)
+-- Match Planilleros (Scorecard keepers) - Both planilleros manage both teams
 CREATE TABLE match_planilleros (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     match_id INTEGER NOT NULL,
-    team_id INTEGER NOT NULL,
     profile_id TEXT NOT NULL,
-    status TEXT DEFAULT 'assigned' CHECK (status IN ('assigned', 'in_progress', 'completed')),
+    status TEXT DEFAULT 'assigned' CHECK (status IN ('assigned', 'in_progress', 'completed', 'admin_review')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
-    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
     FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    UNIQUE(match_id, team_id),
     UNIQUE(match_id, profile_id)
 );
 
--- Scorecard Validations (Cross-validation between planilleros)
+-- Scorecard Validations (Agreement between planilleros on match data)
 CREATE TABLE scorecard_validations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     match_id INTEGER NOT NULL,
     validator_profile_id TEXT NOT NULL,
-    validated_team_id INTEGER NOT NULL,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     comments TEXT,
     validated_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (validator_profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    FOREIGN KEY (validated_team_id) REFERENCES teams(id) ON DELETE CASCADE,
-    UNIQUE(match_id, validator_profile_id, validated_team_id)
+    UNIQUE(match_id, validator_profile_id)
 );
 
 -- Match Attendance (Player presence and jersey numbers for each match)
@@ -287,6 +303,36 @@ CREATE TABLE match_attendance (
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
     UNIQUE(match_id, player_id)
+);
+
+-- Draft Attendance (per-planillero independent attendance before consensus)
+CREATE TABLE match_attendance_drafts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    profile_id TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('present', 'absent', 'substitute')),
+    jersey_number INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    UNIQUE(match_id, player_id, profile_id)
+);
+
+-- Match Admin Validations (Final admin approval after planilleros agree)
+CREATE TABLE match_admin_validations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    admin_profile_id TEXT NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    comments TEXT,
+    validated_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    UNIQUE(match_id)
 );
 
 -- Audit Log (Track all important actions)
@@ -341,6 +387,9 @@ CREATE INDEX IF NOT EXISTS idx_matches_timestamp ON matches(timestamp);
 CREATE INDEX IF NOT EXISTS idx_matches_teams ON matches(local_team_id, visitor_team_id);
 CREATE INDEX IF NOT EXISTS idx_events_match ON events(match_id);
 CREATE INDEX IF NOT EXISTS idx_events_team ON events(team_id);
+CREATE INDEX IF NOT EXISTS idx_event_drafts_match ON event_drafts(match_id);
+CREATE INDEX IF NOT EXISTS idx_event_drafts_match_profile ON event_drafts(match_id, profile_id);
+CREATE INDEX IF NOT EXISTS idx_event_drafts_team ON event_drafts(match_id, team_id);
 CREATE INDEX IF NOT EXISTS idx_lineups_match ON lineups(match_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_streams_date ON streams(stream_date);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_streams_video_id ON streams(youtube_video_id);
@@ -363,9 +412,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_match_jersey_unique
 ON match_attendance(match_id, jersey_number)
 WHERE jersey_number IS NOT NULL;
 
+CREATE INDEX IF NOT EXISTS idx_attendance_drafts_match_profile ON match_attendance_drafts(match_id, profile_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_drafts_player ON match_attendance_drafts(match_id, player_id, profile_id);
+
 CREATE INDEX IF NOT EXISTS idx_mp_match ON match_planilleros(match_id);
 CREATE INDEX IF NOT EXISTS idx_sv_match ON scorecard_validations(match_id);
 CREATE INDEX IF NOT EXISTS idx_ma_match ON match_attendance(match_id);
+CREATE INDEX IF NOT EXISTS idx_mad_match ON match_attendance_drafts(match_id);
+CREATE INDEX IF NOT EXISTS idx_admin_validations_match ON match_admin_validations(match_id);
 CREATE INDEX IF NOT EXISTS idx_audit_match ON audit_log(match_id);
 CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log(actor_profile_id);
 CREATE INDEX IF NOT EXISTS idx_events_match_team ON events(match_id, team_id, minute);

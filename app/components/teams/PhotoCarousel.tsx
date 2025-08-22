@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { TeamPhoto } from "@/actions/team-data";
 
@@ -12,6 +12,7 @@ interface PhotoCarouselProps {
 
 export default function PhotoCarousel({ photos }: PhotoCarouselProps) {
   const [currentPhoto, setCurrentPhoto] = useState(0);
+  const [preloadedImages, setPreloadedImages] = useState<Set<number>>(new Set([0]));
 
   const nextPhoto = () => {
     setCurrentPhoto((prev) => (prev + 1) % photos.length);
@@ -20,6 +21,16 @@ export default function PhotoCarousel({ photos }: PhotoCarouselProps) {
   const prevPhoto = () => {
     setCurrentPhoto((prev) => (prev - 1 + photos.length) % photos.length);
   };
+
+  // Preload adjacent images for smooth navigation
+  useEffect(() => {
+    if (photos.length <= 1) return;
+
+    const nextIndex = (currentPhoto + 1) % photos.length;
+    const prevIndex = (currentPhoto - 1 + photos.length) % photos.length;
+
+    setPreloadedImages((prev) => new Set([...prev, currentPhoto, nextIndex, prevIndex]));
+  }, [currentPhoto, photos.length]);
 
   if (photos.length === 0) {
     return (
@@ -41,9 +52,21 @@ export default function PhotoCarousel({ photos }: PhotoCarouselProps) {
             fill
             className="object-cover transition-all duration-700 ease-in-out group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={currentPhoto === 0}
+            loading={currentPhoto === 0 ? undefined : "lazy"}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </div>
+
+        {/* Preload adjacent images */}
+        {photos.length > 1 && (
+          <div className="hidden">
+            {photos.map((photo, index) => {
+              if (index === currentPhoto || !preloadedImages.has(index)) return null;
+              return <Image key={index} src={photo.url} alt="" width={1} height={1} loading="lazy" />;
+            })}
+          </div>
+        )}
 
         {photos.length > 1 && (
           <>

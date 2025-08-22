@@ -49,6 +49,8 @@ export default function PositionsTable({
                     className="h-7 w-7 object-contain"
                     width={28}
                     height={28}
+                    loading="lazy"
+                    sizes="28px"
                   />
                 </div>
                 <div className="flex-1">
@@ -134,6 +136,8 @@ export default function PositionsTable({
                         className="h-7 w-7 object-contain"
                         width={28}
                         height={28}
+                        loading="lazy"
+                        sizes="28px"
                       />
                     </div>
                     <span className="text-foreground font-medium">{team.name}</span>

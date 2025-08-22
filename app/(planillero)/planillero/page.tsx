@@ -16,7 +16,7 @@ export default async function PlanilleroPage() {
 
   const matches = await getPlanilleroMatchesGroupedByStatus(userProfile.id);
 
-  const totalMatches = matches.live.length + matches.in_review.length + matches.scheduled.length;
+  const totalMatches = matches.live.length + matches.admin_review.length + matches.scheduled.length;
 
   return (
     <div className="space-y-8">
@@ -55,15 +55,15 @@ export default async function PlanilleroPage() {
         </section>
       )}
 
-      {/* Partidos En Revisión */}
-      {matches.in_review.length > 0 && (
+      {/* Partidos En Revisión Administrativa */}
+      {matches.admin_review.length > 0 && (
         <section>
           <h3 className="text-foreground mb-4 flex items-center gap-2 text-xl font-semibold">
-            <span className="text-blue-500">📋</span>
-            En Revisión ({matches.in_review.length})
+            <span className="text-purple-500">⚖️</span>
+            Revisión Administrativa ({matches.admin_review.length})
           </h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {matches.in_review.map((match) => (
+            {matches.admin_review.map((match) => (
               <MatchCard prefetch={true} key={match.id} match={match} userProfile={userProfile} />
             ))}
           </div>

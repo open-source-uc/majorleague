@@ -12,7 +12,7 @@ interface NavLinkProps {
 }
 
 export default function NavLink({ href, children, className = "", type, onClick, role }: NavLinkProps) {
-  const baseClasses = `text-md z-50 font-bold tracking-normal transition-all duration-200 ease-in-out hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-sm ${className}`;
+  const baseClasses = `text-md z-50 font-bold tracking-normal transition-all duration-200 ease-in-out hover:text-primary focus:outline-none ${className}`;
 
   // For desktop links (Server Component), no onClick handler
   if (type === "desktop") {

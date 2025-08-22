@@ -1,11 +1,35 @@
 import Image from "next/image";
 
+import type { Metadata } from "next";
+
 import image1 from "@/../public/assets/image1.png";
 import image2 from "@/../public/assets/image2.png";
 
 export const runtime = "edge";
 
+export const metadata: Metadata = {
+  title: "Acerca de Major League UC",
+  description:
+    "Conoce la historia y misión de Major League UC, la liga de fútbol más emocionante de la Universidad Católica. Una comunidad que une estudiantes a través del deporte.",
+  keywords: "acerca de, historia, Major League UC, fútbol universitario, misión, comunidad estudiantil",
+  openGraph: {
+    title: "Acerca de Major League UC",
+    description:
+      "Conoce la historia y misión de Major League UC, la liga de fútbol más emocionante de la Universidad Católica.",
+    url: "https://majorleague.uc.cl/acerca",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Acerca de Major League UC",
+      },
+    ],
+  },
+};
+
 export default function AcercaDePage() {
+  return;
   return (
     <>
       <h1 className="text-primary-darken mt-10 text-center text-4xl font-bold">Acerca De</h1>

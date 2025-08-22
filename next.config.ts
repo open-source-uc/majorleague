@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   output: "standalone",
+  generateEtags: true,
+  trailingSlash: false,
+  
   images: {
     formats: ["image/webp", "image/avif"],
     minimumCacheTTL: 60,
@@ -27,6 +30,55 @@ const nextConfig: NextConfig = {
         pathname: "/vi/**",
       },
     ],
+  },
+
+  // SEO and Security Headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400',
+          },
+        ],
+      },
+      {
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400',
+          },
+        ],
+      },
+    ];
   },
 };
 

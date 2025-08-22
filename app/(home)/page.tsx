@@ -1,6 +1,36 @@
+import Image from "next/image";
+
+import type { Metadata } from "next";
+
 export const runtime = "edge";
 
-import Image from "next/image";
+export const metadata: Metadata = {
+  title: "Inicio",
+  description:
+    "Major League UC - La liga de fútbol más emocionante de la Universidad Católica. Descubre equipos, partidos, estadísticas y toda la acción del fútbol universitario.",
+  keywords: "fútbol universitario, UC, Major League, partidos, equipos, estudiantes, deportes, universidad católica",
+  openGraph: {
+    title: "Major League UC - Fútbol Universitario",
+    description:
+      "La liga de fútbol más emocionante de la Universidad Católica. Descubre equipos, partidos y estadísticas.",
+    url: "https://majorleague.uc.cl",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Major League UC - Fútbol Universitario",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Major League UC - Fútbol Universitario",
+    description:
+      "La liga de fútbol más emocionante de la Universidad Católica. Descubre equipos, partidos y estadísticas.",
+    images: ["/assets/logo-horizontal.svg"],
+  },
+};
 
 import image1 from "@/../public/assets/image1.png";
 import image2 from "@/../public/assets/image2.png";

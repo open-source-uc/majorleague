@@ -70,7 +70,7 @@ export interface Match {
   location?: string;
   local_score: number;
   visitor_score: number;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "admin_review";
   created_at?: string;
   updated_at?: string;
 }
@@ -80,7 +80,7 @@ export interface NextMatch {
   time: string;
   local_team_name: string;
   visitor_team_name: string;
-  status: "scheduled" | "live" | "finished" | "cancelled" | "in_review";
+  status: "scheduled" | "live" | "finished" | "cancelled" | "admin_review";
 }
 
 // New entity types
@@ -502,7 +502,7 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
           { value: "live", label: "En Vivo" },
           { value: "finished", label: "Terminado" },
           { value: "cancelled", label: "Cancelado" },
-          { value: "in_review", label: "En Revisión" },
+          { value: "admin_review", label: "Revisión Admin" },
         ],
       },
     ],
