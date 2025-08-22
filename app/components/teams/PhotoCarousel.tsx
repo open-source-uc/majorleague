@@ -28,8 +28,8 @@ export default function PhotoCarousel({ photos }: PhotoCarouselProps) {
 
     const nextIndex = (currentPhoto + 1) % photos.length;
     const prevIndex = (currentPhoto - 1 + photos.length) % photos.length;
-    
-    setPreloadedImages(prev => new Set([...prev, currentPhoto, nextIndex, prevIndex]));
+
+    setPreloadedImages((prev) => new Set([...prev, currentPhoto, nextIndex, prevIndex]));
   }, [currentPhoto, photos.length]);
 
   if (photos.length === 0) {
@@ -63,16 +63,7 @@ export default function PhotoCarousel({ photos }: PhotoCarouselProps) {
           <div className="hidden">
             {photos.map((photo, index) => {
               if (index === currentPhoto || !preloadedImages.has(index)) return null;
-              return (
-                <Image
-                  key={index}
-                  src={photo.url}
-                  alt=""
-                  width={1}
-                  height={1}
-                  loading="lazy"
-                />
-              );
+              return <Image key={index} src={photo.url} alt="" width={1} height={1} loading="lazy" />;
             })}
           </div>
         )}

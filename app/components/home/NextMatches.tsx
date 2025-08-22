@@ -46,11 +46,11 @@ export default async function NextMatches() {
 
                   {/* Teams section */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                    <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                       {/* Local team */}
-                      <div className="text-center flex-shrink-0">
-                        <div className="from-primary to-primary/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5 mx-auto">
-                          <div className="bg-white rounded-full h-full w-full flex items-center justify-center">
+                      <div className="flex-shrink-0 text-center">
+                        <div className="from-primary to-primary/70 mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
+                          <div className="flex h-full w-full items-center justify-center rounded-full bg-white">
                             <Image
                               src={teamNameToLogoUrl(match.local_team_name)}
                               alt={`Logo ${match.local_team_name}`}
@@ -62,19 +62,21 @@ export default async function NextMatches() {
                             />
                           </div>
                         </div>
-                        <p className="text-xs sm:text-sm font-bold text-white leading-tight min-w-0 break-words max-w-[100px] sm:max-w-[120px]">{match.local_team_name}</p>
+                        <p className="max-w-[100px] min-w-0 text-xs leading-tight font-bold break-words text-white sm:max-w-[120px] sm:text-sm">
+                          {match.local_team_name}
+                        </p>
                       </div>
 
                       {/* VS indicator */}
-                      <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="flex flex-shrink-0 flex-col items-center">
                         <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">vs</span>
-                        <div className="via-primary mt-1 h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-transparent" />
+                        <div className="via-primary mt-1 h-px w-6 bg-gradient-to-r from-transparent to-transparent sm:w-8" />
                       </div>
 
                       {/* Visitor team */}
-                      <div className="text-center flex-shrink-0">
-                        <div className="from-accent to-accent/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5 mx-auto">
-                          <div className="bg-white rounded-full h-full w-full flex items-center justify-center">
+                      <div className="flex-shrink-0 text-center">
+                        <div className="from-accent to-accent/70 mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
+                          <div className="flex h-full w-full items-center justify-center rounded-full bg-white">
                             <Image
                               src={teamNameToLogoUrl(match.visitor_team_name)}
                               alt={`Logo ${match.visitor_team_name}`}
@@ -86,12 +88,14 @@ export default async function NextMatches() {
                             />
                           </div>
                         </div>
-                        <p className="text-xs sm:text-sm font-bold text-white leading-tight min-w-0 break-words max-w-[100px] sm:max-w-[120px]">{match.visitor_team_name}</p>
+                        <p className="max-w-[100px] min-w-0 text-xs leading-tight font-bold break-words text-white sm:max-w-[120px] sm:text-sm">
+                          {match.visitor_team_name}
+                        </p>
                       </div>
                     </div>
 
                     {/* Match details */}
-                    <div className="space-y-1 text-right flex-shrink-0">
+                    <div className="flex-shrink-0 space-y-1 text-right">
                       <p className="text-xs font-medium text-gray-300">{match.date}</p>
                       <p className="text-primary text-sm font-bold">{match.time}</p>
                     </div>
