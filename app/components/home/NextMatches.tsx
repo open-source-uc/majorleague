@@ -45,11 +45,11 @@ export default async function NextMatches() {
                   )}
 
                   {/* Teams section */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 items-center justify-center gap-3 sm:gap-6">
                       {/* Local team */}
-                      <div className="flex-shrink-0 text-center">
-                        <div className="from-primary to-primary/70 mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
+                      <div className="flex w-24 flex-col items-center text-center sm:w-28">
+                        <div className="from-primary to-primary/70 mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
                           <div className="flex h-full w-full items-center justify-center rounded-full bg-white">
                             <Image
                               src={teamNameToLogoUrl(match.local_team_name)}
@@ -62,20 +62,20 @@ export default async function NextMatches() {
                             />
                           </div>
                         </div>
-                        <p className="max-w-[100px] min-w-0 text-xs leading-tight font-bold break-words text-white sm:max-w-[120px] sm:text-sm">
+                        <p className="line-clamp-2 flex min-h-[2.5rem] items-center text-xs leading-tight font-bold text-white sm:text-sm">
                           {match.local_team_name}
                         </p>
                       </div>
 
                       {/* VS indicator */}
-                      <div className="flex flex-shrink-0 flex-col items-center">
+                      <div className="flex flex-shrink-0 flex-col items-center px-2">
                         <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">vs</span>
                         <div className="via-primary mt-1 h-px w-6 bg-gradient-to-r from-transparent to-transparent sm:w-8" />
                       </div>
 
                       {/* Visitor team */}
-                      <div className="flex-shrink-0 text-center">
-                        <div className="from-accent to-accent/70 mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
+                      <div className="flex w-24 flex-col items-center text-center sm:w-28">
+                        <div className="from-accent to-accent/70 mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5">
                           <div className="flex h-full w-full items-center justify-center rounded-full bg-white">
                             <Image
                               src={teamNameToLogoUrl(match.visitor_team_name)}
@@ -88,7 +88,7 @@ export default async function NextMatches() {
                             />
                           </div>
                         </div>
-                        <p className="max-w-[100px] min-w-0 text-xs leading-tight font-bold break-words text-white sm:max-w-[120px] sm:text-sm">
+                        <p className="line-clamp-2 flex min-h-[2.5rem] items-center text-xs leading-tight font-bold text-white sm:text-sm">
                           {match.visitor_team_name}
                         </p>
                       </div>
