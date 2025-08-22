@@ -93,73 +93,26 @@ export default function EquiposPage() {
     <>
       {/* Teams Grid */}
       <section className="relative px-5 py-16" aria-label="Equipos participantes del torneo">
-        {/* Floating Images */}
+        {/* Floating Images - Optimized with CSS masks to reuse single image */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {/* Top Left */}
-          <div className="absolute -top-10 -left-10 h-32 w-32 rotate-12 transform animate-pulse opacity-10">
+          <div className="absolute inset-0 opacity-10">
             <Image
               src={heroImage}
               alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
+              fill
+              className="object-cover blur-[1px]"
               loading="lazy"
-              sizes="128px"
+              sizes="(max-width: 768px) 100vw, 1200px"
             />
           </div>
-
-          {/* Top Right */}
-          <div className="absolute -top-16 -right-8 h-40 w-40 -rotate-6 transform animate-pulse opacity-8 delay-1000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-lg object-cover blur-[1px]"
-              loading="lazy"
-              sizes="160px"
-            />
-          </div>
-
-          {/* Middle Left */}
-          <div className="absolute top-1/2 -left-12 h-28 w-28 rotate-45 transform animate-pulse opacity-12 delay-2000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
-              loading="lazy"
-              sizes="112px"
-            />
-          </div>
-
-          {/* Middle Right */}
-          <div className="absolute top-1/3 -right-16 h-36 w-36 -rotate-12 transform animate-pulse opacity-10 delay-3000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-xl object-cover blur-[1px]"
-              loading="lazy"
-              sizes="144px"
-            />
-          </div>
-
-          {/* Bottom Left */}
-          <div className="absolute -bottom-8 -left-6 h-24 w-24 rotate-30 transform animate-pulse opacity-15 delay-4000">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-lg object-cover blur-[1px]"
-              loading="lazy"
-              sizes="96px"
-            />
-          </div>
-
-          {/* Bottom Right */}
-          <div className="absolute -right-10 -bottom-12 h-32 w-32 -rotate-20 transform animate-pulse opacity-8 delay-500">
-            <Image
-              src={heroImage}
-              alt=""
-              className="h-full w-full rounded-full object-cover blur-[1px]"
-              loading="lazy"
-              sizes="128px"
-            />
-          </div>
+          
+          {/* Floating mask overlays for visual effects */}
+          <div className="absolute -top-10 -left-10 h-32 w-32 rotate-12 transform animate-pulse rounded-full bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm delay-0" />
+          <div className="absolute -top-16 -right-8 h-40 w-40 -rotate-6 transform animate-pulse rounded-lg bg-gradient-to-bl from-white/3 to-transparent backdrop-blur-sm delay-1000" />
+          <div className="absolute top-1/2 -left-12 h-28 w-28 rotate-45 transform animate-pulse rounded-full bg-gradient-to-tr from-white/4 to-transparent backdrop-blur-sm delay-2000" />
+          <div className="absolute top-1/3 -right-16 h-36 w-36 -rotate-12 transform animate-pulse rounded-xl bg-gradient-to-tl from-white/3 to-transparent backdrop-blur-sm delay-3000" />
+          <div className="absolute -bottom-8 -left-6 h-24 w-24 rotate-30 transform animate-pulse rounded-lg bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm delay-4000" />
+          <div className="absolute -right-10 -bottom-12 h-32 w-32 -rotate-20 transform animate-pulse rounded-full bg-gradient-to-bl from-white/3 to-transparent backdrop-blur-sm delay-500" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl">
@@ -169,10 +122,14 @@ export default function EquiposPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {teams.map((team) => (
+            {teams.map((team, index) => {
+              // First 6 teams are likely above-the-fold and should load with priority
+              const isPriority = index < 6;
+              
+              return (
               <article
                 key={team.name}
-                className="group border-border bg-card hover:border-primary/50 hover:shadow-primary/20 focus-within:border-primary focus-within:outline-ring relative overflow-hidden rounded-2xl border transition-all duration-500 focus-within:outline focus-within:outline-2 hover:shadow-2xl"
+                className="group border-border bg-card hover:border-primary/50 hover:shadow-primary/20 focus-within:border-primary focus-within:outline-ring relative overflow-hidden rounded-2xl border transition-all duration-500 focus-within:outline-2 hover:shadow-2xl"
                 tabIndex={0}
                 role="button"
                 aria-label={`Perfil del equipo ${team.name}`}
@@ -216,8 +173,9 @@ export default function EquiposPage() {
                           src={team.logo}
                           alt={team.alt}
                           className="h-12 w-12 object-contain transition-transform duration-300 group-hover:scale-110"
-                          loading="lazy"
-                          sizes="48px"
+                          priority={isPriority}
+                          loading={isPriority ? undefined : "lazy"}
+                          sizes="(max-width: 768px) 48px, (max-width: 1024px) 48px, 48px"
                           width={48}
                           height={48}
                         />
@@ -249,7 +207,8 @@ export default function EquiposPage() {
                   }}
                 />
               </article>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

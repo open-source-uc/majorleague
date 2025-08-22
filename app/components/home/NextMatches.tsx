@@ -1,5 +1,12 @@
+import Image from "next/image";
+
 import { getNextMatches } from "@/actions/matches";
 import { NextMatch } from "@/lib/types";
+
+const teamNameToLogoUrl = (teamName: string) => {
+  const url = "/assets/teams/" + teamName.split(" ").join("") + "Logo.png";
+  return url;
+};
 
 export default async function NextMatches() {
   const nextMatches: NextMatch[] = await getNextMatches();
@@ -38,33 +45,53 @@ export default async function NextMatches() {
                   )}
 
                   {/* Teams section */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                       {/* Local team */}
-                      <div className="text-center">
-                        <div className="from-primary to-primary/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br">
-                          <span className="text-xs font-bold text-black">L</span>
+                      <div className="text-center flex-shrink-0">
+                        <div className="from-primary to-primary/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5 mx-auto">
+                          <div className="bg-white rounded-full h-full w-full flex items-center justify-center">
+                            <Image
+                              src={teamNameToLogoUrl(match.local_team_name)}
+                              alt={`Logo ${match.local_team_name}`}
+                              className="h-6 w-6 object-contain"
+                              width={24}
+                              height={24}
+                              loading="lazy"
+                              sizes="24px"
+                            />
+                          </div>
                         </div>
-                        <p className="max-w-[80px] truncate text-sm font-bold text-white">{match.local_team_name}</p>
+                        <p className="text-xs sm:text-sm font-bold text-white leading-tight min-w-0 break-words max-w-[100px] sm:max-w-[120px]">{match.local_team_name}</p>
                       </div>
 
                       {/* VS indicator */}
-                      <div className="flex flex-col items-center">
+                      <div className="flex flex-col items-center flex-shrink-0">
                         <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">vs</span>
-                        <div className="via-primary mt-1 h-px w-8 bg-gradient-to-r from-transparent to-transparent" />
+                        <div className="via-primary mt-1 h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-transparent" />
                       </div>
 
                       {/* Visitor team */}
-                      <div className="text-center">
-                        <div className="from-accent to-accent/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br">
-                          <span className="text-xs font-bold text-black">V</span>
+                      <div className="text-center flex-shrink-0">
+                        <div className="from-accent to-accent/70 mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br p-0.5 mx-auto">
+                          <div className="bg-white rounded-full h-full w-full flex items-center justify-center">
+                            <Image
+                              src={teamNameToLogoUrl(match.visitor_team_name)}
+                              alt={`Logo ${match.visitor_team_name}`}
+                              className="h-6 w-6 object-contain"
+                              width={24}
+                              height={24}
+                              loading="lazy"
+                              sizes="24px"
+                            />
+                          </div>
                         </div>
-                        <p className="max-w-[80px] truncate text-sm font-bold text-white">{match.visitor_team_name}</p>
+                        <p className="text-xs sm:text-sm font-bold text-white leading-tight min-w-0 break-words max-w-[100px] sm:max-w-[120px]">{match.visitor_team_name}</p>
                       </div>
                     </div>
 
                     {/* Match details */}
-                    <div className="space-y-1 text-right">
+                    <div className="space-y-1 text-right flex-shrink-0">
                       <p className="text-xs font-medium text-gray-300">{match.date}</p>
                       <p className="text-primary text-sm font-bold">{match.time}</p>
                     </div>

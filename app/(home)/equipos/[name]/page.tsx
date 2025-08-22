@@ -52,6 +52,8 @@ export default async function TeamPage({ params }: { params: Promise<{ name: str
                 width={96}
                 height={96}
                 className="h-full w-full object-contain"
+                priority
+                sizes="(max-width: 768px) 64px, (max-width: 1024px) 80px, 96px"
               />
             </div>
             <div className="min-w-0 flex-1 text-center md:text-left">
