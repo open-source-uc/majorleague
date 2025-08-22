@@ -75,7 +75,7 @@ export default function NavbarClient({ isAuthenticated }: NavbarClientProps) {
       <div
         ref={menuRef}
         id="mobile-menu"
-        className={`bg-background border-border fixed top-28 left-0 z-[9999] w-full transform flex-col items-center gap-6 border-b py-6 text-lg shadow-lg duration-300 ease-in-out lg:hidden ${
+        className={`bg-background border-border absolute top-28 left-0 z-[9999] w-full transform flex-col items-center gap-6 border-b py-6 text-lg shadow-lg duration-300 ease-in-out lg:hidden ${
           isMenuOpen ? "flex translate-y-0 opacity-100" : "hidden -translate-y-2 opacity-0"
         }`}
         role="menu"
