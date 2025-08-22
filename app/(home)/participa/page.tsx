@@ -1,12 +1,35 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import type { Metadata } from "next";
+
 import { hasParticipated } from "@/actions/participation";
 import { getTeams } from "@/actions/teams";
 import ParticipationForm from "@/components/forms/ParticipationForm";
 import { getAuthStatus } from "@/lib/services/auth";
 
 export const runtime = "edge";
+
+export const metadata: Metadata = {
+  title: "Participa en Major League UC",
+  description:
+    "¡Únete a la acción! Registra tu participación en Major League UC, elige tu equipo y forma parte del mejor fútbol universitario de la UC.",
+  keywords: "participar, registrarse, inscripción, equipos, jugadores, fútbol universitario, Major League UC",
+  openGraph: {
+    title: "Participa en Major League UC",
+    description:
+      "¡Únete a la acción! Registra tu participación en Major League UC y forma parte del mejor fútbol universitario.",
+    url: "https://majorleague.uc.cl/participa",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Participa en Major League UC",
+      },
+    ],
+  },
+};
 
 export default async function ParticipaPage() {
   const { isAuthenticated, userProfile } = await getAuthStatus();

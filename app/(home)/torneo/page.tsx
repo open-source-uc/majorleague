@@ -1,4 +1,27 @@
+import type { Metadata } from "next";
+
 export const runtime = "edge";
+
+export const metadata: Metadata = {
+  title: "Torneo Major League UC",
+  description:
+    "Descubre el formato, calendario y estructura del torneo de fútbol universitario más emocionante de la UC. Conoce las fases, grupos y sistema de clasificación.",
+  keywords: "torneo, calendario, formato, fútbol universitario, UC, Major League, fases, grupos, clasificación",
+  openGraph: {
+    title: "Torneo Major League UC",
+    description:
+      "Descubre el formato, calendario y estructura del torneo de fútbol universitario más emocionante de la UC.",
+    url: "https://majorleague.uc.cl/torneo",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Torneo Major League UC",
+      },
+    ],
+  },
+};
 
 export default function TorneoPage() {
   return (

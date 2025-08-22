@@ -1,8 +1,30 @@
 import Image from "next/image";
 
+import type { Metadata } from "next";
+
 import { getMainStream, getPastStreams } from "@/actions/streams";
 
 export const runtime = "edge";
+
+export const metadata: Metadata = {
+  title: "Transmisiones en Vivo - Major League UC",
+  description:
+    "Mira los partidos de Major League UC en vivo. Transmisiones de YouTube de los mejores encuentros de fútbol universitario en tiempo real.",
+  keywords: "transmisiones, en vivo, partidos, YouTube, streaming, fútbol universitario, Major League UC",
+  openGraph: {
+    title: "Transmisiones en Vivo - Major League UC",
+    description: "Mira los partidos de Major League UC en vivo. Transmisiones de YouTube de los mejores encuentros.",
+    url: "https://majorleague.uc.cl/transmisiones",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Transmisiones en Vivo - Major League UC",
+      },
+    ],
+  },
+};
 
 export default async function TransmisionPage() {
   const [main, past] = await Promise.all([getMainStream(), getPastStreams(12)]);

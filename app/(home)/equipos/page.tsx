@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
 import heroImage from "@/../public/assets/images/hero.webp";
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
@@ -12,6 +14,28 @@ import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
 import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const runtime = "edge";
+
+export const metadata: Metadata = {
+  title: "Equipos de Major League UC",
+  description:
+    "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United, descubre las carreras y departamentos que representan.",
+  keywords:
+    "equipos, carreras, departamentos, Atletico Byte, Industrial FC, Manchester Civil, fútbol universitario, UC",
+  openGraph: {
+    title: "Equipos de Major League UC",
+    description:
+      "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United.",
+    url: "https://majorleague.uc.cl/equipos",
+    images: [
+      {
+        url: "/assets/logo-horizontal.svg",
+        width: 1200,
+        height: 630,
+        alt: "Equipos de Major League UC",
+      },
+    ],
+  },
+};
 
 const teams = [
   {

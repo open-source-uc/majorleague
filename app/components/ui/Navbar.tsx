@@ -21,7 +21,7 @@ async function Navbar() {
   return (
     <header className="bg-background border-border z-40 flex h-28 items-center justify-between border-b p-10">
       <Link
-        className="border-foreground tablet:border-r focus:ring-ring focus:rounded-sm focus:ring-2 focus:outline-none"
+        className="border-foreground tablet:border-r focus:outline-none"
         href="/"
         aria-label="Ir a la página principal"
       >
