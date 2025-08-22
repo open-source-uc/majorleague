@@ -19,7 +19,7 @@ async function Navbar() {
   const semester = date.getMonth() < 7 ? 1 : 2;
 
   return (
-    <header className="bg-background border-border relative z-40 flex h-28 items-center justify-between border-b p-10">
+    <header className="relative bg-background border-border z-40 flex h-28 items-center justify-between border-b p-10">
       <Link
         className="border-foreground tablet:border-r focus:outline-none"
         href="/"
