@@ -154,7 +154,7 @@ export async function createEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in_review") {
+    if (match.status !== "live") {
       return {
         success: 0,
         errors: 1,
@@ -314,7 +314,7 @@ export async function updateEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in_review") {
+    if (match.status !== "live") {
       return {
         success: 0,
         errors: 1,
@@ -458,7 +458,7 @@ export async function deleteEvent(
       };
     }
 
-    if (match.status !== "live" && match.status !== "in_review") {
+    if (match.status !== "live") {
       return {
         success: 0,
         errors: 1,
@@ -536,7 +536,7 @@ export async function createEventWithPlayer(_prev: any, formData: FormData) {
       WHERE mp.match_id = ? 
         AND mp.profile_id = ?
         AND p.id = ?
-        AND m.status IN ('live', 'in_review', 'scheduled')
+        AND m.status IN ('live', 'scheduled')
         AND ma.status = 'present'
     `,
     )

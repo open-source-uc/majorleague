@@ -1,6 +1,6 @@
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { updateBulkAttendance } from "@/actions/planilleros";
+import { updateBulkAttendanceDraft } from "@/actions/planilleros";
 import { Player } from "@/lib/types";
 
 export interface Attendance {
@@ -23,7 +23,7 @@ export const useAttendanceManager = (matchId: number, attendance: Attendance[], 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [state, formAction] = useActionState(updateBulkAttendance, {
+  const [state, formAction] = useActionState(updateBulkAttendanceDraft, {
     success: 0,
     errors: 0,
     message: "",

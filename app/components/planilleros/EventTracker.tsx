@@ -2,16 +2,17 @@
 
 import { useActionState, useEffect, useMemo, useState, useRef } from "react";
 
-import { createEventWithPlayer } from "@/actions/planilleros";
+import { createDraftEventWithPlayer } from "@/actions/planilleros";
 
 interface EventTrackerProps {
   matchId: number;
   players: any[];
   initialEvents: any[];
+  teamId?: number; // Add optional teamId to make forms unique
 }
 
-export function EventTracker({ matchId, players, initialEvents }: EventTrackerProps) {
-  const [state, formAction] = useActionState(createEventWithPlayer, {
+export function EventTracker({ matchId, players, initialEvents, teamId }: EventTrackerProps) {
+  const [state, formAction] = useActionState(createDraftEventWithPlayer, {
     success: 0,
     errors: 0,
     message: "",
@@ -20,6 +21,7 @@ export function EventTracker({ matchId, players, initialEvents }: EventTrackerPr
   const [selectedPlayer, setSelectedPlayer] = useState<{ id: string; name: string } | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const defaultMinute = useMemo(() => {
     if (!initialEvents || initialEvents.length === 0) return 1;
@@ -58,17 +60,9 @@ export function EventTracker({ matchId, players, initialEvents }: EventTrackerPr
         <h3 className="text-foreground text-lg font-semibold">Eventos</h3>
       </div>
 
-      <form
-        id="event-form"
-        action={(formData: FormData) => {
-          if (!selectedPlayer?.id) {
-            alert("Por favor selecciona un jugador antes de registrar el evento");
-            return;
-          }
-          formAction(formData);
-        }}
-      >
+      <form ref={formRef} id={`event-form-${teamId || "default"}`} action={formAction}>
         <input type="hidden" name="match_id" value={matchId} />
+        <input type="hidden" name="event_type" value="" />
 
         <div className="bg-background-header border-border-header mb-6 rounded-lg border p-4">
           <label className="text-foreground mb-4 flex items-center gap-2 font-semibold">
@@ -180,9 +174,21 @@ export function EventTracker({ matchId, players, initialEvents }: EventTrackerPr
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <button
-            type="submit"
-            name="event_type"
-            value="goal"
+            type="button"
+            onClick={(e) => {
+              if (!selectedPlayer?.id) {
+                alert("Por favor selecciona un jugador antes de registrar el evento");
+                return;
+              }
+              const form = formRef.current;
+              if (form) {
+                const eventTypeInput = form.querySelector('input[name="event_type"]') as HTMLInputElement;
+                if (eventTypeInput) {
+                  eventTypeInput.value = "goal";
+                  form.requestSubmit();
+                }
+              }
+            }}
             className="bg-primary hover:bg-primary-darken text-background min-h-[80px] rounded-xl p-6 shadow-lg transition-all active:scale-95 sm:min-h-[120px]"
           >
             <div className="flex flex-col items-center gap-1 sm:gap-2">
@@ -191,9 +197,21 @@ export function EventTracker({ matchId, players, initialEvents }: EventTrackerPr
             </div>
           </button>
           <button
-            type="submit"
-            name="event_type"
-            value="yellow_card"
+            type="button"
+            onClick={(e) => {
+              if (!selectedPlayer?.id) {
+                alert("Por favor selecciona un jugador antes de registrar el evento");
+                return;
+              }
+              const form = formRef.current;
+              if (form) {
+                const eventTypeInput = form.querySelector('input[name="event_type"]') as HTMLInputElement;
+                if (eventTypeInput) {
+                  eventTypeInput.value = "yellow_card";
+                  form.requestSubmit();
+                }
+              }
+            }}
             className="bg-foreground hover:bg-foreground/80 text-background min-h-[80px] rounded-xl p-6 shadow-lg transition-all active:scale-95 sm:min-h-[120px]"
           >
             <div className="flex flex-col items-center gap-1 sm:gap-2">
@@ -202,9 +220,21 @@ export function EventTracker({ matchId, players, initialEvents }: EventTrackerPr
             </div>
           </button>
           <button
-            type="submit"
-            name="event_type"
-            value="red_card"
+            type="button"
+            onClick={(e) => {
+              if (!selectedPlayer?.id) {
+                alert("Por favor selecciona un jugador antes de registrar el evento");
+                return;
+              }
+              const form = formRef.current;
+              if (form) {
+                const eventTypeInput = form.querySelector('input[name="event_type"]') as HTMLInputElement;
+                if (eventTypeInput) {
+                  eventTypeInput.value = "red_card";
+                  form.requestSubmit();
+                }
+              }
+            }}
             className="bg-foreground/80 hover:bg-foreground/60 text-background min-h-[80px] rounded-xl p-6 shadow-lg transition-all active:scale-95 sm:min-h-[120px]"
           >
             <div className="flex flex-col items-center gap-1 sm:gap-2">

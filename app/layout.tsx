@@ -22,7 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning={true} className={albert_sans.className}>
-      <head />
+      <head>
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "84cbc39686f64c339872cc677134c118"}'
+        />
+      </head>
       <body className="relative grid min-h-screen grid-rows-[auto_1fr_auto]">
         <Navbar />
         <main>{children}</main>

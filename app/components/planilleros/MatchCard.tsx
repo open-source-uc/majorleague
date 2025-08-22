@@ -18,9 +18,10 @@ export function MatchCard({ match, prefetch, userProfile }: MatchCardProps) {
     assigned: "bg-yellow-100 text-yellow-800 border border-yellow-200",
     in_progress: "bg-blue-100 text-blue-800 border border-blue-200",
     completed: "bg-green-100 text-green-800 border border-green-200",
+    admin_review: "bg-purple-100 text-purple-800 border border-purple-200",
   };
 
-  const myTeamName = match.my_team_id === match.local_team_id ? match.local_team_name : match.visitor_team_name;
+  // Remove myTeamName logic since planilleros now work with both teams
 
   return (
     <div className="bg-background-header border-border-header hover:border-primary/30 rounded-lg border p-4 transition-all hover:shadow-lg">
@@ -54,12 +55,13 @@ export function MatchCard({ match, prefetch, userProfile }: MatchCardProps) {
           {match.planillero_status === "assigned" && "Asignado"}
           {match.planillero_status === "in_progress" && "En Progreso"}
           {match.planillero_status === "completed" && "Completado"}
+          {match.planillero_status === "admin_review" && "Revisión Admin"}
         </span>
       </div>
 
       <div className="flex items-center justify-between">
         <span className="text-foreground text-sm">
-          Mi equipo: <span className="text-primary font-medium">{myTeamName}</span>
+          Planillero para: <span className="text-primary font-medium">Ambos equipos</span>
         </span>
         <Link
           prefetch={prefetch}

@@ -72,13 +72,13 @@ export async function getAuthStatus(): Promise<{
       }
     }
 
-    // userProfile = {
-    //   id: "admin",
-    //   username: "admin",
-    //   email: "admin@admin.com",
-    //   created_at: new Date(),
-    //   updated_at: new Date(),
-    // };
+    userProfile = {
+      id: "admin",
+      username: "admin",
+      email: "admin@admin.com",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
 
     const isSuperAdmin = !!(
       userData?.permissions.includes(OsucPermissions.userIsRoot) || context.env.ADMIN_USER === "true"
