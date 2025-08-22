@@ -142,15 +142,18 @@ export default function ObjectManager({
               {field.label}
               {field.required ? <span className="text-primary ml-1">*</span> : null}
             </label>
-            <select
-              id={field.name}
-              name={field.name}
-              defaultValue={String(!!processedDefaultValue)}
-              className="border-border/50 bg-background/95 text-foreground focus:border-primary focus:ring-primary/20 w-full rounded-lg border p-3 focus:ring-2 focus:outline-none"
-            >
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
+            <div className="relative">
+              <select
+                id={field.name}
+                name={field.name}
+                defaultValue={String(!!processedDefaultValue)}
+                className="border-border-header bg-background-header text-foreground focus:border-primary focus:ring-primary/20 w-full appearance-none rounded-lg border-2 p-3 pr-10 focus:ring-2 focus:outline-hidden"
+              >
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+              <span className="text-ml-grey pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">▼</span>
+            </div>
           </div>
         );
       case "textarea":

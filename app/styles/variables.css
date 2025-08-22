@@ -22,6 +22,10 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	/* Aliases used throughout the app */
+	--color-background-header: var(--background-header);
+	--color-border-header: var(--border-header);
+	--color-ml-grey: var(--ml-grey);
 
 	/* Custom breakpoints */
 	--breakpoint-tablet: 768px;
@@ -48,4 +52,12 @@
     --success: oklch(0.852 0.1802 144.38);
     --warning: oklch(0.852 0.1802 50.38);
     --destructive: oklch(0.852 0.2502 20.38);
+
+	/* App-specific tokens (used by many components) */
+	/* Slightly lighter than background for headers/blocks */
+	--background-header: oklch(0.205 0 0);
+	/* Border color for header blocks */
+	--border-header: var(--border);
+	/* Neutral grey text color used across UI */
+	--ml-grey: oklch(0.70 0 0);
 }

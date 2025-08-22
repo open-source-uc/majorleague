@@ -23,21 +23,24 @@ export default function Select({
         {label}
         {required ? <span className="text-primary ml-1">*</span> : null}
       </label>
-      <select
-        id={name}
-        name={name}
-        defaultValue={defaultValue}
-        required={required}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="border-border-header bg-background-header text-foreground focus:border-primary focus:ring-primary w-full rounded-lg border-2 p-4 focus:ring-2 focus:outline-hidden"
-      >
-        <option value="">Seleccionar...</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id={name}
+          name={name}
+          defaultValue={defaultValue}
+          required={required}
+          onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+          className="border-border-header bg-background-header text-foreground focus:border-primary focus:ring-primary w-full appearance-none rounded-lg border-2 p-4 pr-10 focus:ring-2 focus:outline-hidden"
+        >
+          <option value="">Seleccionar...</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <span className="text-ml-grey pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">▼</span>
+      </div>
     </div>
   );
 }
