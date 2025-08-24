@@ -915,4 +915,47 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       },
     ],
   },
+  event_players: {
+    title: "Jugador de Evento",
+    description: "Vincular eventos con jugadores y roles",
+    displayField: "event_label",
+    displayColumns: [
+      { key: "event_label", label: "Evento", type: "text" },
+      { key: "player_label", label: "Jugador", type: "text" },
+      { key: "role", label: "Rol", type: "badge" },
+    ],
+    actions: [
+      { type: "create", label: "Crear Vinculación", variant: "primary" },
+      { type: "edit", label: "Editar", variant: "secondary" },
+      { type: "delete", label: "Eliminar", variant: "danger" },
+    ],
+    fields: [
+      {
+        name: "event_id",
+        label: "Evento",
+        type: "select",
+        required: true,
+        dataSource: "events",
+      },
+      {
+        name: "player_id",
+        label: "Jugador",
+        type: "select",
+        required: true,
+        dataSource: "players",
+      },
+      {
+        name: "role",
+        label: "Rol",
+        type: "select",
+        required: true,
+        options: [
+          { value: "main", label: "Principal" },
+          { value: "assist", label: "Asistencia" },
+          { value: "substituted_in", label: "Entra" },
+          { value: "substituted_out", label: "Sale" },
+        ],
+      },
+    ],
+  },
 };

@@ -154,7 +154,7 @@ export async function createEvent(
       };
     }
 
-    if (match.status !== "live") {
+    if (match.status !== "live" && match.status !== "admin_review") {
       return {
         success: 0,
         errors: 1,
@@ -314,7 +314,7 @@ export async function updateEvent(
       };
     }
 
-    if (match.status !== "live") {
+    if (match.status !== "live" && match.status !== "admin_review") {
       return {
         success: 0,
         errors: 1,
@@ -458,7 +458,7 @@ export async function deleteEvent(
       };
     }
 
-    if (match.status !== "live") {
+    if (match.status !== "live" && match.status !== "admin_review") {
       return {
         success: 0,
         errors: 1,

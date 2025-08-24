@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import type { TeamCompetition } from "@/lib/types";
 
@@ -6,6 +7,12 @@ const teamNameToLogoUrl = (teamName: string) => {
   const url = "/assets/teams/" + teamName.split(" ").join("") + "Logo.png";
   return url;
 };
+
+const toTeamSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
 
 export default function PositionsTable({
   year,
@@ -31,65 +38,71 @@ export default function PositionsTable({
           const isLeader = position === 1;
 
           return (
-            <div
+            <Link
               key={index}
-              className={`bg-card rounded-lg border p-4 transition-colors ${
-                isLeader ? "border-primary/30 bg-primary/5" : "border-border"
-              }`}
+              href={`/equipos/${toTeamSlug(team.name)}`}
+              aria-label={`Ir al equipo ${team.name}`}
+              className="focus:ring-primary/50 block rounded-lg focus:ring-2 focus:outline-none"
             >
-              {/* Team Header */}
-              <div className="mb-3 flex items-center gap-3">
-                <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
-                  {position}
-                </div>
-                <div className="bg-background flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
-                  <Image
-                    src={teamNameToLogoUrl(team.name)}
-                    alt={`Logo ${team.name}`}
-                    className="h-7 w-7 object-contain"
-                    width={28}
-                    height={28}
-                    loading="lazy"
-                    sizes="28px"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-foreground font-semibold">{team.name}</h3>
-                  {isLeader ? <p className="text-primary text-xs font-medium">Líder</p> : null}
-                </div>
-                <div className="text-right">
-                  <div className="text-foreground text-lg font-bold">{team.points}</div>
-                  <div className="text-muted-foreground text-xs">pts</div>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex justify-between text-sm">
-                <div className="text-center">
-                  <div className="text-foreground font-medium">{team.pj}</div>
-                  <div className="text-muted-foreground text-xs">PJ</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-green-600">{team.g}</div>
-                  <div className="text-muted-foreground text-xs">G</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-yellow-600">{team.e}</div>
-                  <div className="text-muted-foreground text-xs">E</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-red-600">{team.p}</div>
-                  <div className="text-muted-foreground text-xs">P</div>
-                </div>
-                <div className="text-center">
-                  <div className={`font-medium ${team.dg >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {team.dg >= 0 ? "+" : ""}
-                    {team.dg}
+              <div
+                className={`bg-card hover:bg-muted/20 cursor-pointer rounded-lg border p-4 transition-colors ${
+                  isLeader ? "border-primary/30 bg-primary/5" : "border-border"
+                }`}
+              >
+                {/* Team Header */}
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
+                    {position}
                   </div>
-                  <div className="text-muted-foreground text-xs">DG</div>
+                  <div className="bg-background flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
+                    <Image
+                      src={teamNameToLogoUrl(team.name)}
+                      alt={`Logo ${team.name}`}
+                      className="h-7 w-7 object-contain"
+                      width={28}
+                      height={28}
+                      loading="lazy"
+                      sizes="28px"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-foreground font-semibold">{team.name}</h3>
+                    {isLeader ? <p className="text-primary text-xs font-medium">Líder</p> : null}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-foreground text-lg font-bold">{team.points}</div>
+                    <div className="text-muted-foreground text-xs">pts</div>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="flex justify-between text-sm">
+                  <div className="text-center">
+                    <div className="text-foreground font-medium">{team.pj}</div>
+                    <div className="text-muted-foreground text-xs">PJ</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-green-600">{team.g}</div>
+                    <div className="text-muted-foreground text-xs">G</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-yellow-600">{team.e}</div>
+                    <div className="text-muted-foreground text-xs">E</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium text-red-600">{team.p}</div>
+                    <div className="text-muted-foreground text-xs">P</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`font-medium ${team.dg >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {team.dg >= 0 ? "+" : ""}
+                      {team.dg}
+                    </div>
+                    <div className="text-muted-foreground text-xs">DG</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -117,39 +130,45 @@ export default function PositionsTable({
               const isLeader = position === 1;
 
               return (
-                <div
+                <Link
                   key={index}
-                  className={`border-border/50 hover:bg-muted/20 grid grid-cols-9 gap-4 border-b px-6 py-4 transition-colors ${
-                    isLeader ? "bg-primary/5" : ""
-                  }`}
+                  href={`/equipos/${toTeamSlug(team.name)}`}
+                  aria-label={`Ir al equipo ${team.name}`}
+                  className="block"
                 >
-                  <div className="flex items-center justify-center">
-                    <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
-                      {position}
+                  <div
+                    className={`border-border/50 hover:bg-muted/20 grid cursor-pointer grid-cols-9 gap-4 border-b px-6 py-4 transition-colors ${
+                      isLeader ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
+                        {position}
+                      </div>
                     </div>
-                  </div>
-                  <div className="col-span-3 flex items-center gap-3">
-                    <div className="bg-background flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
-                      <Image
-                        src={teamNameToLogoUrl(team.name)}
-                        alt={`Logo ${team.name}`}
-                        className="h-7 w-7 object-contain"
-                        width={28}
-                        height={28}
-                        loading="lazy"
-                        sizes="28px"
-                      />
+                    <div className="col-span-3 flex items-center gap-3">
+                      <div className="bg-background flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
+                        <Image
+                          src={teamNameToLogoUrl(team.name)}
+                          alt={`Logo ${team.name}`}
+                          className="h-7 w-7 object-contain"
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                          sizes="28px"
+                        />
+                      </div>
+                      <span className="text-foreground font-medium">{team.name}</span>
                     </div>
-                    <span className="text-foreground font-medium">{team.name}</span>
+                    <div className="text-foreground flex items-center justify-center text-sm font-bold">
+                      {team.points}
+                    </div>
+                    <div className="text-muted-foreground flex items-center justify-center text-sm">{team.pj}</div>
+                    <div className="flex items-center justify-center text-sm text-green-600">{team.g}</div>
+                    <div className="flex items-center justify-center text-sm text-yellow-600">{team.e}</div>
+                    <div className="flex items-center justify-center text-sm text-red-600">{team.p}</div>
                   </div>
-                  <div className="text-foreground flex items-center justify-center text-sm font-bold">
-                    {team.points}
-                  </div>
-                  <div className="text-muted-foreground flex items-center justify-center text-sm">{team.pj}</div>
-                  <div className="flex items-center justify-center text-sm text-green-600">{team.g}</div>
-                  <div className="flex items-center justify-center text-sm text-yellow-600">{team.e}</div>
-                  <div className="flex items-center justify-center text-sm text-red-600">{team.p}</div>
-                </div>
+                </Link>
               );
             })}
           </div>

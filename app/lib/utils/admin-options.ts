@@ -98,6 +98,38 @@ export async function getPlayerOptions(): Promise<SelectOption[]> {
   );
 }
 
+export async function getEventOptions(): Promise<SelectOption[]> {
+  const { env } = getRequestContext();
+  const events = await env.DB.prepare(
+    `
+    SELECT e.id, e.type, e.minute, m.timestamp, lt.name as local_team, vt.name as visitor_team
+    FROM events e
+    JOIN matches m ON e.match_id = m.id
+    JOIN teams lt ON m.local_team_id = lt.id
+    JOIN teams vt ON m.visitor_team_id = vt.id
+    ORDER BY m.timestamp DESC, e.minute ASC
+  `,
+  ).all<{ id: number; type: string; minute: number; timestamp: string; local_team: string; visitor_team: string }>();
+
+  const typeLabel = (t: string) =>
+    t === "goal"
+      ? "Gol"
+      : t === "yellow_card"
+        ? "Amarilla"
+        : t === "red_card"
+          ? "Roja"
+          : t === "substitution"
+            ? "Cambio"
+            : "Otro";
+
+  return (
+    events.results?.map((ev) => ({
+      value: ev.id.toString(),
+      label: `${typeLabel(ev.type)} ${ev.minute}' — ${ev.local_team} vs ${ev.visitor_team} - ${ev.timestamp}`,
+    })) || []
+  );
+}
+
 // Helper function to get preferences for select options
 export async function getPreferenceOptions(): Promise<SelectOption[]> {
   const { env } = getRequestContext();
@@ -131,6 +163,8 @@ export async function getSelectOptions(dataSource: string): Promise<SelectOption
       return getMatchOptions();
     case "players":
       return getPlayerOptions();
+    case "events":
+      return getEventOptions();
     case "preferences":
       return getPreferenceOptions();
     default:
