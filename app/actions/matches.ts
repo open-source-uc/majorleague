@@ -37,17 +37,50 @@ const matchDeleteSchema = z.object({
 // Database operations
 export async function getNextMatches(): Promise<NextMatch[]> {
   const { env } = getRequestContext();
+  const formatNowInTz = (timeZone: string) => {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("es-CL", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).formatToParts(now);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+  };
+  const nowChile = formatNowInTz("America/Santiago");
+  await env.DB.prepare(
+    `
+    UPDATE matches
+    SET status = 'live', updated_at = CURRENT_TIMESTAMP
+    WHERE status = 'scheduled' 
+      AND timestamp <= ?
+      AND datetime(timestamp, '+120 minutes') > ?
+  `,
+  )
+    .bind(nowChile, nowChile)
+    .run();
+
   const matches = await env.DB.prepare(
     `
     SELECT lt.name as local_team_name, vt.name as visitor_team_name, m.status as status, m.timestamp as timestamp
     FROM matches m
     LEFT JOIN teams lt ON m.local_team_id = lt.id
     LEFT JOIN teams vt ON m.visitor_team_id = vt.id
-    WHERE m.status = 'scheduled' OR m.status = 'live'
+    WHERE (
+      (m.status = 'scheduled' AND m.timestamp >= ?)
+      OR (m.status = 'live' AND datetime(m.timestamp, '+120 minutes') > ?)
+    )
     ORDER BY m.timestamp ASC
     LIMIT 3
   `,
-  ).all<Match & { local_team_name: string; visitor_team_name: string }>();
+  )
+    .bind(nowChile, nowChile)
+    .all<Match & { local_team_name: string; visitor_team_name: string }>();
 
   const nextMatches = matches.results.map((match) => {
     const rawTs = String(match.timestamp);
@@ -355,7 +388,7 @@ export async function updateMatch(
       };
     }
 
-    if (parsed.data.status === "live" && existingMatch.status !== "scheduled") {
+    if (parsed.data.status === "live" && existingMatch.status !== "scheduled" && existingMatch.status !== "live") {
       return {
         success: 0,
         errors: 1,
