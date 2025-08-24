@@ -115,6 +115,7 @@ export default async function TeamPage({ params }: { params: Promise<{ name: str
   if (!teamData) {
     redirect("/equipos");
   }
+  console.log(teamData);
 
   // Get auth status for edit button
   const { isAdmin, userProfile } = await getAuthStatus();

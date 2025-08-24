@@ -85,17 +85,17 @@ export async function getTeamPlayers(teamId: number): Promise<TeamPlayer[]> {
       COUNT(DISTINCT CASE WHEN m.status = 'finished' AND m.local_score = m.visitor_score
         THEN ma.match_id END) as draws,
         
-      -- Goal statistics
-      COUNT(CASE WHEN e.type = 'goal' AND ep.role = 'main' THEN 1 END) as goals,
-      COUNT(CASE WHEN e.type = 'yellow_card' AND ep.role = 'main' THEN 1 END) as yellow_cards,
-      COUNT(CASE WHEN e.type = 'red_card' AND ep.role = 'main' THEN 1 END) as red_cards
+      -- Goal/Card statistics counted from event_players independently of attendance
+      COUNT(DISTINCT CASE WHEN e.type = 'goal' AND ep.role = 'main' THEN e.id END) as goals,
+      COUNT(DISTINCT CASE WHEN e.type = 'yellow_card' AND ep.role = 'main' THEN e.id END) as yellow_cards,
+      COUNT(DISTINCT CASE WHEN e.type = 'red_card' AND ep.role = 'main' THEN e.id END) as red_cards
       
     FROM players p
     LEFT JOIN profiles pr ON p.profile_id = pr.id
     LEFT JOIN match_attendance ma ON p.id = ma.player_id AND ma.status = 'present'
     LEFT JOIN matches m ON ma.match_id = m.id
-    LEFT JOIN events e ON e.match_id = m.id AND e.team_id = p.team_id
-    LEFT JOIN event_players ep ON e.id = ep.event_id AND ep.player_id = p.id
+    LEFT JOIN event_players ep ON ep.player_id = p.id
+    LEFT JOIN events e ON e.id = ep.event_id AND e.team_id = p.team_id
     
     WHERE p.team_id = ?
     GROUP BY p.id
@@ -104,6 +104,7 @@ export async function getTeamPlayers(teamId: number): Promise<TeamPlayer[]> {
   )
     .bind(teamId)
     .all<any>();
+  console.log("Players", players.results);
 
   return (players.results || []).map((player) => ({
     id: player.id,
@@ -209,7 +210,7 @@ export async function getTeamUpcomingMatches(teamId: number, limit: number = 5):
       opponent: match.opponent || "TBD",
       date: datePart,
       time: timePart,
-      venue: match.location || "Por definir",
+      venue: match.location || "UC",
       type: match.type as "home" | "away",
       status: match.status as "scheduled" | "live" | "finished" | "cancelled",
       local_score: match.local_score,
@@ -306,7 +307,7 @@ export async function getAllTeamMatches(teamId: number): Promise<{ upcoming: Tea
       opponent: match.opponent || "TBD",
       date: datePart,
       time: timePart,
-      venue: match.location || "Por definir",
+      venue: match.location || "UC",
       type: match.type as "home" | "away",
       status: match.status as "scheduled" | "live" | "finished" | "cancelled",
       local_score: match.local_score,

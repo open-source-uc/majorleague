@@ -33,8 +33,8 @@ export const teams = [
     name: "Mathchester Science",
     logo: MathchesterScienceLogo,
     departments: "Química - Física - Matemática Biomédica - Biología",
-    alt: "Logo de Manchester Science",
-    slug: "manchester-science",
+    alt: "Logo de Mathchester Science",
+    slug: "mathchester-science",
   },
   {
     name: "Minerham Forest",

@@ -52,6 +52,12 @@ export default async function Dashboard() {
       items: [
         { name: "Streams", href: "/dashboard/streams", description: "Gestionar transmisiones en vivo", icon: "📡" },
         { name: "Eventos", href: "/dashboard/events", description: "Administrar eventos del partido", icon: "⚡" },
+        {
+          name: "Jugadores de Eventos",
+          href: "/dashboard/event-players",
+          description: "Administrar jugadores de eventos",
+          icon: "👤",
+        },
         { name: "Lineups", href: "/dashboard/lineups", description: "Configurar alineaciones de equipos", icon: "📋" },
       ],
     },
