@@ -82,7 +82,7 @@ export async function getNextMatches(): Promise<NextMatch[]> {
     .bind(nowChile, nowChile)
     .all<Match & { local_team_name: string; visitor_team_name: string }>();
 
-  const nextMatches = matches.results.map((match) => {
+  const nextMatches = matches.results.map((match: Match & { local_team_name: string; visitor_team_name: string }) => {
     const rawTs = String(match.timestamp);
     const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
     const [y, m, d] = (parts[0] || "").split("-");

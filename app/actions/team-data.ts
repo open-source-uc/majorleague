@@ -105,7 +105,7 @@ export async function getTeamPlayers(teamId: number): Promise<TeamPlayer[]> {
     .bind(teamId)
     .all<any>();
 
-  return (players.results || []).map((player) => ({
+  return (players.results || []).map((player: any) => ({
     id: player.id,
     team_id: player.team_id,
     profile_id: player.profile_id,
@@ -198,7 +198,7 @@ export async function getTeamUpcomingMatches(teamId: number, limit: number = 5):
     .bind(teamId, teamId, teamId, teamId, limit)
     .all<any>();
 
-  return (matches.results || []).map((match) => {
+  return (matches.results || []).map((match: any) => {
     const rawTs = String(match.timestamp);
     const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
     const datePart = parts[0];
@@ -295,7 +295,7 @@ export async function getAllTeamMatches(teamId: number): Promise<{ upcoming: Tea
     .bind(teamId, teamId, teamId, teamId)
     .all<any>();
 
-  const allMatches = (matches.results || []).map((match) => {
+  const allMatches = (matches.results || []).map((match: any) => {
     const rawTs = String(match.timestamp);
     const parts = rawTs.includes("T") ? rawTs.split("T") : rawTs.split(" ");
     const datePart = parts[0];
@@ -315,9 +315,11 @@ export async function getAllTeamMatches(teamId: number): Promise<{ upcoming: Tea
   });
 
   // Separate upcoming and finished matches
-  const upcoming = allMatches.filter((match) => match.status === "scheduled" || match.status === "live").slice(0, 5); // Limit to 5 upcoming matches
+  const upcoming = allMatches
+    .filter((match: TeamMatch) => match.status === "scheduled" || match.status === "live")
+    .slice(0, 5); // Limit to 5 upcoming matches
 
-  const finished = allMatches.filter((match) => match.status === "finished").slice(-5); // Get last 5 finished matches
+  const finished = allMatches.filter((match: TeamMatch) => match.status === "finished").slice(-5); // Get last 5 finished matches
 
   return { upcoming, finished };
 }
@@ -406,7 +408,7 @@ export async function getTeamBySlug(slug: string): Promise<Team | null> {
   ).all<Team & { captain_username?: string }>();
 
   const team = (teams.results || []).find(
-    (team) =>
+    (team: Team & { captain_username?: string }) =>
       team.name
         .toLowerCase()
         .replace(/\s+/g, "-")

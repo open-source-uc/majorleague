@@ -13,16 +13,26 @@ export default async function Dashboard() {
 
   const adminSections = [
     {
-      title: "Gestión de Usuarios",
-      icon: "👥",
+      title: "Gestión de Jornadas",
+      icon: "📅",
       items: [
-        { name: "Perfiles", href: "/dashboard/profiles", description: "Gestionar perfiles de usuarios", icon: "👤" },
-        { name: "Jugadores", href: "/dashboard/players", description: "Administrar jugadores registrados", icon: "⚽" },
         {
-          name: "Solicitudes de Unión",
-          href: "/dashboard/join-requests",
-          description: "Revisar solicitudes de unión a equipos",
-          icon: "📝",
+          name: "Jornadas de Partidos",
+          href: "/dashboard/match-days",
+          description: "Gestiona jornadas completas",
+          icon: "🏟️",
+        },
+        {
+          name: "Vista Individual de Partidos",
+          href: "/dashboard/matches",
+          description: "Gestión tradicional de partidos individuales",
+          icon: "⚽",
+        },
+        {
+          name: "Planilleros",
+          href: "/dashboard/planilleros",
+          description: "Asignar y gestionar planilleros para partidos",
+          icon: "📋",
         },
       ],
     },
@@ -37,13 +47,6 @@ export default async function Dashboard() {
           description: "Gestionar competiciones y torneos",
           icon: "🏆",
         },
-        { name: "Partidos", href: "/dashboard/matches", description: "Programar y gestionar partidos", icon: "📅" },
-        {
-          name: "Planilleros",
-          href: "/dashboard/planilleros",
-          description: "Gestionar planilleros de partidos",
-          icon: "📋",
-        },
       ],
     },
     {
@@ -51,7 +54,7 @@ export default async function Dashboard() {
       icon: "📺",
       items: [
         { name: "Streams", href: "/dashboard/streams", description: "Gestionar transmisiones en vivo", icon: "📡" },
-        { name: "Eventos", href: "/dashboard/events", description: "Administrar eventos del partido", icon: "⚡" },
+        { name: "Eventos", href: "/dashboard/events", description: "Administrar eventos individuales", icon: "⚡" },
         {
           name: "Jugadores de Eventos",
           href: "/dashboard/event-players",
@@ -62,8 +65,22 @@ export default async function Dashboard() {
       ],
     },
     {
-      title: "Comunicaciones",
-      icon: "💬",
+      title: "Gestión de Usuarios",
+      icon: "👥",
+      items: [
+        { name: "Perfiles", href: "/dashboard/profiles", description: "Gestionar perfiles de usuarios", icon: "👤" },
+        { name: "Jugadores", href: "/dashboard/players", description: "Administrar jugadores registrados", icon: "⚽" },
+        {
+          name: "Solicitudes de Unión",
+          href: "/dashboard/join-requests",
+          description: "Revisar solicitudes de unión a equipos",
+          icon: "📝",
+        },
+      ],
+    },
+    {
+      title: "Configuración",
+      icon: "⚙️",
       items: [
         {
           name: "Notificaciones",

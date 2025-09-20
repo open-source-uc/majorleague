@@ -516,7 +516,6 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       { key: "title", label: "Título", type: "text" },
       { key: "youtube_video_id", label: "Video ID", type: "text" },
       { key: "is_live_stream", label: "Es Live", type: "boolean" },
-      { key: "is_featured", label: "Destacado", type: "boolean" },
       { key: "start_time", label: "Inicio", type: "date" },
     ],
     actions: [
@@ -549,16 +548,6 @@ export const OBJECT_CONFIGS: Record<string, ObjectConfig> = {
       {
         name: "is_live_stream",
         label: "Es transmisión en vivo",
-        type: "select",
-        required: true,
-        options: [
-          { value: "true", label: "Sí" },
-          { value: "false", label: "No" },
-        ],
-      },
-      {
-        name: "is_featured",
-        label: "Destacado",
         type: "select",
         required: true,
         options: [

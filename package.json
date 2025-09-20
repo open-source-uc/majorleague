@@ -39,6 +39,7 @@
     "eslint-plugin-next-on-pages": "^1.13.16",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier-plugin-tailwindcss": "^0.6.8",
     "postcss": "^8",
     "prettier": "^3.3.3",
     "tailwindcss": "^4.1.7",

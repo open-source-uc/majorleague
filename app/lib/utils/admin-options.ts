@@ -15,7 +15,7 @@ export async function getTeamOptions(): Promise<SelectOption[]> {
   ).all<{ id: number; name: string }>();
 
   return (
-    teams.results?.map((team) => ({
+    teams.results?.map((team: { id: number; name: string }) => ({
       value: team.id.toString(),
       label: team.name,
     })) || []
@@ -32,7 +32,7 @@ export async function getCompetitionOptions(): Promise<SelectOption[]> {
   ).all<{ id: number; name: string }>();
 
   return (
-    competitions.results?.map((competition) => ({
+    competitions.results?.map((competition: { id: number; name: string }) => ({
       value: competition.id.toString(),
       label: competition.name,
     })) || []
@@ -49,7 +49,7 @@ export async function getProfileOptions(): Promise<SelectOption[]> {
   ).all<{ id: string; username: string }>();
 
   return (
-    profiles.results?.map((profile) => ({
+    profiles.results?.map((profile: { id: string; username: string }) => ({
       value: profile.id,
       label: profile.username,
     })) || []
@@ -71,10 +71,12 @@ export async function getMatchOptions(): Promise<SelectOption[]> {
   ).all<{ id: number; timestamp: string; local_team: string; visitor_team: string; competition: string }>();
 
   return (
-    matches.results?.map((match) => ({
-      value: match.id.toString(),
-      label: `${match.local_team} vs ${match.visitor_team} - ${match.timestamp} (${match.competition})`,
-    })) || []
+    matches.results?.map(
+      (match: { id: number; timestamp: string; local_team: string; visitor_team: string; competition: string }) => ({
+        value: match.id.toString(),
+        label: `${match.local_team} vs ${match.visitor_team} - ${match.timestamp} (${match.competition})`,
+      }),
+    ) || []
   );
 }
 
@@ -91,7 +93,7 @@ export async function getPlayerOptions(): Promise<SelectOption[]> {
   ).all<{ id: number; first_name: string; last_name: string; team_name: string }>();
 
   return (
-    players.results?.map((player) => ({
+    players.results?.map((player: { id: number; first_name: string; last_name: string; team_name: string }) => ({
       value: player.id.toString(),
       label: `${player.first_name} ${player.last_name}${player.team_name ? ` (${player.team_name})` : ""}`,
     })) || []
@@ -123,10 +125,19 @@ export async function getEventOptions(): Promise<SelectOption[]> {
             : "Otro";
 
   return (
-    events.results?.map((ev) => ({
-      value: ev.id.toString(),
-      label: `${typeLabel(ev.type)} ${ev.minute}' — ${ev.local_team} vs ${ev.visitor_team} - ${ev.timestamp}`,
-    })) || []
+    events.results?.map(
+      (ev: {
+        id: number;
+        type: string;
+        minute: number;
+        timestamp: string;
+        local_team: string;
+        visitor_team: string;
+      }) => ({
+        value: ev.id.toString(),
+        label: `${typeLabel(ev.type)} ${ev.minute}' — ${ev.local_team} vs ${ev.visitor_team} - ${ev.timestamp}`,
+      }),
+    ) || []
   );
 }
 
@@ -143,7 +154,7 @@ export async function getPreferenceOptions(): Promise<SelectOption[]> {
   ).all<{ id: number; type: string; channel: string; username: string }>();
 
   return (
-    preferences.results?.map((preference) => ({
+    preferences.results?.map((preference: { id: number; type: string; channel: string; username: string }) => ({
       value: preference.id.toString(),
       label: `${preference.username} - ${preference.type} (${preference.channel})`,
     })) || []

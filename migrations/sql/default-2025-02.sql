@@ -3,6 +3,8 @@
 -- Base data (competitions and teams)
 DELETE FROM competitions;
 DELETE FROM teams;
+DELETE FROM matches;
+DELETE FROM events;
 
 INSERT INTO competitions (name, year, semester, start_timestamp, end_timestamp) VALUES 
 ('Segundo Semestre 2025', 2025, 2, '2025-08-01 00:00:00', '2025-12-31 23:59:59');

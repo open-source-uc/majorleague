@@ -9,9 +9,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    ppr: true,
+    ppr: false,
     // dynamicIO: true,
   },
+  outputFileTracingRoot: __dirname,
   // Performance optimizations
   compress: true,
   poweredByHeader: false,

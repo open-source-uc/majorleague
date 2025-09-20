@@ -201,9 +201,9 @@ export async function getPlanilleroMatchesGroupedByStatus(profile_id: string): P
     const results = matches.results || [];
 
     const grouped = {
-      live: results.filter((m) => m.match_status === "live"),
-      admin_review: results.filter((m) => m.match_status === "admin_review"),
-      scheduled: results.filter((m) => m.match_status === "scheduled"),
+      live: results.filter((m: MatchPlanilleroExtended) => m.match_status === "live"),
+      admin_review: results.filter((m: MatchPlanilleroExtended) => m.match_status === "admin_review"),
+      scheduled: results.filter((m: MatchPlanilleroExtended) => m.match_status === "scheduled"),
     };
 
     return grouped;
