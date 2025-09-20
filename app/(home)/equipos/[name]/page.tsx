@@ -115,7 +115,6 @@ export default async function TeamPage({ params }: { params: Promise<{ name: str
   if (!teamData) {
     redirect("/equipos");
   }
-  console.log(teamData);
 
   // Get auth status for edit button
   const { isAdmin, userProfile } = await getAuthStatus();
@@ -212,6 +211,17 @@ export default async function TeamPage({ params }: { params: Promise<{ name: str
             {/* Upcoming Matches */}
             <UpcomingMatches
               matches={teamData.upcomingMatches.map((match) => ({
+                id: match.id,
+                opponent: match.opponent,
+                date: match.date,
+                time: match.time,
+                venue: match.venue,
+                type: match.type,
+                status: match.status,
+              }))}
+            />
+            <FinishedMatches
+              matches={teamData.finishedMatches.map((match) => ({
                 id: match.id,
                 opponent: match.opponent,
                 date: match.date,

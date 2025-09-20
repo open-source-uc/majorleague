@@ -1,3 +1,4 @@
+import ACRobovoltLogo from "@/../public/assets/teams/ACRobovoltLogo.png";
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
 import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
@@ -5,7 +6,6 @@ import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceL
 import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
 import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
 import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
-import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const teams = [
   {
@@ -58,10 +58,10 @@ export const teams = [
     slug: "new-boys",
   },
   {
-    name: "Robovolt United",
-    logo: RobovoltUnitedLogo,
+    name: "AC Robovolt",
+    logo: ACRobovoltLogo,
     departments: "Eléctrica - Robótica",
-    alt: "Logo de Robovolt United",
-    slug: "robovolt-united",
+    alt: "Logo de AC Robovolt",
+    slug: "ac-robovolt",
   },
 ];

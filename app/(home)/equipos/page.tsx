@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import heroImage from "@/../public/assets/images/hero.webp";
+import ACRobovoltLogo from "@/../public/assets/teams/ACRobovoltLogo.png";
 import AtleticoByteLogo from "@/../public/assets/teams/AtleticoByteLogo.png";
 import IndustrialFCLogo from "@/../public/assets/teams/IndustrialFCLogo.png";
 import ManchesterCivilLogo from "@/../public/assets/teams/ManchesterCivilLogo.png";
@@ -11,20 +12,18 @@ import MathchesterScienceLogo from "@/../public/assets/teams/MathchesterScienceL
 import MinerhamForestLogo from "@/../public/assets/teams/MinerhamForestLogo.png";
 import NaranjaMecanicaLogo from "@/../public/assets/teams/NaranjaMecanicaLogo.png";
 import NewBoysLogo from "@/../public/assets/teams/NewBoysLogo.png";
-import RobovoltUnitedLogo from "@/../public/assets/teams/RobovoltUnitedLogo.png";
 
 export const runtime = "edge";
 
 export const metadata: Metadata = {
   title: "Equipos de Major League UC",
   description:
-    "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United, descubre las carreras y departamentos que representan.",
+    "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta AC Robovolt, descubre las carreras y departamentos que representan.",
   keywords:
     "equipos, carreras, departamentos, Atletico Byte, Industrial FC, Manchester Civil, fútbol universitario, UC",
   openGraph: {
     title: "Equipos de Major League UC",
-    description:
-      "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta Robovolt United.",
+    description: "Conoce todos los equipos que participan en Major League UC. Desde Atletico Byte hasta AC Robovolt.",
     url: "https://majorleague.uc.cl/equipos",
     images: [
       {
@@ -102,11 +101,11 @@ const teams = [
     founded: "2024",
   },
   {
-    name: "Robovolt United",
-    logo: RobovoltUnitedLogo,
+    name: "AC Robovolt",
+    logo: ACRobovoltLogo,
     departments: "Eléctrica - Robótica",
-    alt: "Logo de Robovolt United",
-    slug: "robovolt-united",
+    alt: "Logo de AC Robovolt",
+    slug: "ac-robovolt",
     colors: ["#030000", "#F53D57"],
     founded: "2024",
   },

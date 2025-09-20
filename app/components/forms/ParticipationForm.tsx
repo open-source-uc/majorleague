@@ -87,8 +87,8 @@ export default function ParticipationForm({ teams }: { teams: Team[] }) {
     Geociencias: ["Minerham Forest"],
     Mecánica: ["Naranja Mecanica"],
     "Diseño e Innovación": ["Naranja Mecanica"],
-    Eléctrica: ["Robovolt United"],
-    Robótica: ["Robovolt United"],
+    Eléctrica: ["AC Robovolt"],
+    Robótica: ["AC Robovolt"],
     Otra: [],
   };
 

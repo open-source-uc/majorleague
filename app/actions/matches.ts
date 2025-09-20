@@ -76,7 +76,7 @@ export async function getNextMatches(): Promise<NextMatch[]> {
       OR (m.status = 'live' AND datetime(m.timestamp, '+120 minutes') > ?)
     )
     ORDER BY m.timestamp ASC
-    LIMIT 3
+    LIMIT 4
   `,
   )
     .bind(nowChile, nowChile)

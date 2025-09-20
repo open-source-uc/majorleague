@@ -23,7 +23,7 @@ export default async function NextMatches() {
       {/* Matches container */}
       <div className="space-y-4">
         {nextMatches.length > 0 ? (
-          nextMatches.slice(0, 3).map((match, index) => (
+          nextMatches.slice(0, 4).map((match, index) => (
             <div key={index} className="group relative">
               {/* Match card */}
               <div className="hover:border-primary/30 relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-black/80 to-gray-900/80 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02]">

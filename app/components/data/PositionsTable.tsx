@@ -23,6 +23,10 @@ export default function PositionsTable({
   semester: string;
   teamCompetitions: (TeamCompetition & { name: string })[];
 }) {
+  const sortedTeams = [...teamCompetitions].sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    return b.dg - a.dg;
+  });
   return (
     <div className="w-full px-4 py-8">
       {/* Simple Header */}
@@ -33,7 +37,7 @@ export default function PositionsTable({
 
       {/* Mobile-First Cards */}
       <div className="tablet:hidden mx-auto max-w-md space-y-3">
-        {teamCompetitions.map((team: TeamCompetition & { name: string }, index: number) => {
+        {sortedTeams.map((team: TeamCompetition & { name: string }, index: number) => {
           const position = index + 1;
           const isLeader = position === 1;
 
@@ -75,7 +79,6 @@ export default function PositionsTable({
                   </div>
                 </div>
 
-                {/* Stats */}
                 <div className="flex justify-between text-sm">
                   <div className="text-center">
                     <div className="text-foreground font-medium">{team.pj}</div>
@@ -92,6 +95,14 @@ export default function PositionsTable({
                   <div className="text-center">
                     <div className="font-medium text-red-600">{team.p}</div>
                     <div className="text-muted-foreground text-xs">P</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-foreground font-medium">{team.gf}</div>
+                    <div className="text-muted-foreground text-xs">GF</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-foreground font-medium">{team.gc}</div>
+                    <div className="text-muted-foreground text-xs">GC</div>
                   </div>
                   <div className="text-center">
                     <div className={`font-medium ${team.dg >= 0 ? "text-green-600" : "text-red-600"}`}>
@@ -112,7 +123,7 @@ export default function PositionsTable({
         <div className="border-border bg-card mx-auto max-w-6xl overflow-hidden rounded-lg border">
           {/* Table Header */}
           <div className="border-border bg-muted/30 border-b px-6 py-3">
-            <div className="text-muted-foreground grid grid-cols-9 gap-4 text-sm font-medium">
+            <div className="text-muted-foreground grid grid-cols-12 gap-4 text-sm font-medium">
               <div className="text-center">Pos</div>
               <div className="col-span-3">Equipo</div>
               <div className="text-center">Pts</div>
@@ -120,12 +131,15 @@ export default function PositionsTable({
               <div className="text-center">G</div>
               <div className="text-center">E</div>
               <div className="text-center">P</div>
+              <div className="text-center">GF</div>
+              <div className="text-center">GC</div>
+              <div className="text-center">DG</div>
             </div>
           </div>
 
           {/* Table Body */}
           <div>
-            {teamCompetitions.map((team: TeamCompetition & { name: string }, index: number) => {
+            {sortedTeams.map((team: TeamCompetition & { name: string }, index: number) => {
               const position = index + 1;
               const isLeader = position === 1;
 
@@ -137,7 +151,7 @@ export default function PositionsTable({
                   className="block"
                 >
                   <div
-                    className={`border-border/50 hover:bg-muted/20 grid cursor-pointer grid-cols-9 gap-4 border-b px-6 py-4 transition-colors ${
+                    className={`border-border/50 hover:bg-muted/20 grid cursor-pointer grid-cols-12 gap-4 border-b px-6 py-4 transition-colors ${
                       isLeader ? "bg-primary/5" : ""
                     }`}
                   >
@@ -167,6 +181,14 @@ export default function PositionsTable({
                     <div className="flex items-center justify-center text-sm text-green-600">{team.g}</div>
                     <div className="flex items-center justify-center text-sm text-yellow-600">{team.e}</div>
                     <div className="flex items-center justify-center text-sm text-red-600">{team.p}</div>
+                    <div className="text-foreground flex items-center justify-center text-sm">{team.gf}</div>
+                    <div className="text-foreground flex items-center justify-center text-sm">{team.gc}</div>
+                    <div className="flex items-center justify-center text-sm">
+                      <span className={`${team.dg >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {team.dg >= 0 ? "+" : ""}
+                        {team.dg}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               );

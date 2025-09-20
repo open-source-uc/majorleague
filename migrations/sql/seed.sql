@@ -152,7 +152,7 @@ INSERT INTO profiles (id, username, email) VALUES
 ('nb_player18', 'nb_player18', 'nb_player18@uc.cl'),
 ('nb_player19', 'nb_player19', 'nb_player19@uc.cl'),
 ('nb_player20', 'nb_player20', 'nb_player20@uc.cl'),
--- Robovolt United players (20)
+-- AC Robovolt players (20)
 ('ru_player1', 'ru_player1', 'ru_player1@uc.cl'),
 ('ru_player2', 'ru_player2', 'ru_player2@uc.cl'),
 ('ru_player3', 'ru_player3', 'ru_player3@uc.cl'),
@@ -323,27 +323,27 @@ INSERT INTO join_team_requests (team_id, profile_id, timestamp, first_name, last
 (7, 'nb_player18', '2025-08-01 23:25:00', 'Gabriel', 'Rodríguez', '2001-06-09', 'FWD', 'pending', 'Jugador novato de Gabriel', 18),
 (7, 'nb_player19', '2025-08-01 23:30:00', 'Emilio', 'Flores', '2002-02-06', 'GK', 'pending', 'Jugador novato de Emilio', 19),
 (7, 'nb_player20', '2025-08-01 23:35:00', 'Martín', 'Campos', '2001-08-08', 'DEF', 'pending', 'Jugador novato de Martín', 20),
--- Robovolt United (Team 8) - 20 players
-(8, 'ru_player1', '2025-08-01 26:00:00', 'Fernando', 'Fernández', '2002-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 1),
-(8, 'ru_player2', '2025-08-01 26:05:00', 'Tomás', 'Navarro', '2001-07-07', 'GK', 'pending', 'Jugador de Robovolt United', 2),
-(8, 'ru_player3', '2025-08-01 26:10:00', 'Claudia', 'Martín', '2001-05-11', 'FWD', 'pending', 'Jugador de Robovolt United', 3),
-(8, 'ru_player4', '2025-08-01 26:15:00', 'Rodrigo', 'Rojas', '2002-08-09', 'GK', 'pending', 'Jugador de Robovolt United', 4),
-(8, 'ru_player5', '2025-08-01 26:20:00', 'Nicolás', 'Fuentes', '2002-04-22', 'GK', 'pending', 'Jugador de Robovolt United', 5),
-(8, 'ru_player6', '2025-08-01 26:25:00', 'Diego', 'Martín', '2001-06-20', 'FWD', 'pending', 'Jugador de Robovolt United', 6),
-(8, 'ru_player7', '2025-08-01 26:30:00', 'Diego', 'Sánchez', '2001-05-10', 'FWD', 'pending', 'Jugador de Robovolt United', 7),
-(8, 'ru_player8', '2025-08-01 26:35:00', 'Vicente', 'Vega', '2001-09-06', 'FWD', 'pending', 'Jugador de Robovolt United', 8),
-(8, 'ru_player9', '2025-08-01 26:40:00', 'Joaquín', 'Guerrero', '2001-02-24', 'DEF', 'pending', 'Jugador de Robovolt United', 9),
-(8, 'ru_player10', '2025-08-01 26:45:00', 'Joaquín', 'Torres', '2001-11-15', 'GK', 'pending', 'Jugador de Robovolt United', 10),
-(8, 'ru_player11', '2025-08-01 26:50:00', 'Ignacio', 'López', '2002-11-07', 'GK', 'pending', 'Jugador de Robovolt United', 11),
-(8, 'ru_player12', '2025-08-01 26:55:00', 'Gabriel', 'González', '2002-05-06', 'MID', 'pending', 'Jugador de Robovolt United', 12),
-(8, 'ru_player13', '2025-08-01 27:00:00', 'Gabriel', 'Cortés', '2001-04-12', 'MID', 'pending', 'Jugador de Robovolt United', 13),
-(8, 'ru_player14', '2025-08-01 27:05:00', 'Cristóbal', 'Jiménez', '2001-08-27', 'GK', 'pending', 'Jugador de Robovolt United', 14),
-(8, 'ru_player15', '2025-08-01 27:10:00', 'Claudio', 'González', '2001-10-23', 'GK', 'pending', 'Jugador de Robovolt United', 15),
-(8, 'ru_player16', '2025-08-01 27:15:00', 'Claudia', 'Guerrero', '2002-10-13', 'FWD', 'pending', 'Jugador de Robovolt United', 16),
-(8, 'ru_player17', '2025-08-01 27:20:00', 'Vicente', 'Vargas', '2002-10-02', 'FWD', 'pending', 'Jugador de Robovolt United', 17),
-(8, 'ru_player18', '2025-08-01 27:25:00', 'Isabel', 'García', '2002-03-15', 'GK', 'pending', 'Jugador de Robovolt United', 18),
-(8, 'ru_player19', '2025-08-01 27:30:00', 'Daniel', 'Torres', '2002-05-27', 'MID', 'pending', 'Jugador de Robovolt United', 19),
-(8, 'ru_player20', '2025-08-01 27:35:00', 'Gonzalo', 'Morales', '2002-07-06', 'FWD', 'pending', 'Jugador de Robovolt United', 20);
+-- AC Robovolt (Team 8) - 20 players
+(8, 'ru_player1', '2025-08-01 26:00:00', 'Fernando', 'Fernández', '2002-05-11', 'FWD', 'pending', 'Jugador de AC Robovolt', 1),
+(8, 'ru_player2', '2025-08-01 26:05:00', 'Tomás', 'Navarro', '2001-07-07', 'GK', 'pending', 'Jugador de AC Robovolt', 2),
+(8, 'ru_player3', '2025-08-01 26:10:00', 'Claudia', 'Martín', '2001-05-11', 'FWD', 'pending', 'Jugador de AC Robovolt', 3),
+(8, 'ru_player4', '2025-08-01 26:15:00', 'Rodrigo', 'Rojas', '2002-08-09', 'GK', 'pending', 'Jugador de AC Robovolt', 4),
+(8, 'ru_player5', '2025-08-01 26:20:00', 'Nicolás', 'Fuentes', '2002-04-22', 'GK', 'pending', 'Jugador de AC Robovolt', 5),
+(8, 'ru_player6', '2025-08-01 26:25:00', 'Diego', 'Martín', '2001-06-20', 'FWD', 'pending', 'Jugador de AC Robovolt', 6),
+(8, 'ru_player7', '2025-08-01 26:30:00', 'Diego', 'Sánchez', '2001-05-10', 'FWD', 'pending', 'Jugador de AC Robovolt', 7),
+(8, 'ru_player8', '2025-08-01 26:35:00', 'Vicente', 'Vega', '2001-09-06', 'FWD', 'pending', 'Jugador de AC Robovolt', 8),
+(8, 'ru_player9', '2025-08-01 26:40:00', 'Joaquín', 'Guerrero', '2001-02-24', 'DEF', 'pending', 'Jugador de AC Robovolt', 9),
+(8, 'ru_player10', '2025-08-01 26:45:00', 'Joaquín', 'Torres', '2001-11-15', 'GK', 'pending', 'Jugador de AC Robovolt', 10),
+(8, 'ru_player11', '2025-08-01 26:50:00', 'Ignacio', 'López', '2002-11-07', 'GK', 'pending', 'Jugador de AC Robovolt', 11),
+(8, 'ru_player12', '2025-08-01 26:55:00', 'Gabriel', 'González', '2002-05-06', 'MID', 'pending', 'Jugador de AC Robovolt', 12),
+(8, 'ru_player13', '2025-08-01 27:00:00', 'Gabriel', 'Cortés', '2001-04-12', 'MID', 'pending', 'Jugador de AC Robovolt', 13),
+(8, 'ru_player14', '2025-08-01 27:05:00', 'Cristóbal', 'Jiménez', '2001-08-27', 'GK', 'pending', 'Jugador de AC Robovolt', 14),
+(8, 'ru_player15', '2025-08-01 27:10:00', 'Claudio', 'González', '2001-10-23', 'GK', 'pending', 'Jugador de AC Robovolt', 15),
+(8, 'ru_player16', '2025-08-01 27:15:00', 'Claudia', 'Guerrero', '2002-10-13', 'FWD', 'pending', 'Jugador de AC Robovolt', 16),
+(8, 'ru_player17', '2025-08-01 27:20:00', 'Vicente', 'Vargas', '2002-10-02', 'FWD', 'pending', 'Jugador de AC Robovolt', 17),
+(8, 'ru_player18', '2025-08-01 27:25:00', 'Isabel', 'García', '2002-03-15', 'GK', 'pending', 'Jugador de AC Robovolt', 18),
+(8, 'ru_player19', '2025-08-01 27:30:00', 'Daniel', 'Torres', '2002-05-27', 'MID', 'pending', 'Jugador de AC Robovolt', 19),
+(8, 'ru_player20', '2025-08-01 27:35:00', 'Gonzalo', 'Morales', '2002-07-06', 'FWD', 'pending', 'Jugador de AC Robovolt', 20);
 
 -- 5. APPROVE REQUESTS - Natural workflow: approve requests
 -- TRIGGER: create_player_on_approval will auto-create players records

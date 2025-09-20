@@ -104,7 +104,6 @@ export async function getTeamPlayers(teamId: number): Promise<TeamPlayer[]> {
   )
     .bind(teamId)
     .all<any>();
-  console.log("Players", players.results);
 
   return (players.results || []).map((player) => ({
     id: player.id,
